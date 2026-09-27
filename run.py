@@ -118,11 +118,12 @@ def main(arguments=None) -> int:
                                               dataset=selections[(product, fixture.snapshot_limit, False)],
                                               recovery_enabled=fixture.corrupt_repair)
                 result = runners[label].run_lane(product, lane, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit)
-                result.metadata["status"] = "PASS"
+                result.metadata.setdefault("status", "PASS")
                 result.metadata["operations"] = {
                     "capture": "PASS", "clean_restore": "PASS",
-                    "in_place_repair": "PASS" if fixture.corrupt_repair and lane.tool == "gutch" else "NOT_RUN",
-                    "full_restore_recovery": "PASS" if fixture.corrupt_repair and lane.tool != "gutch" else "NOT_RUN",
+                    "in_place_repair": ("FAIL" if result.metadata.get("recovery_error") else "PASS")
+                        if fixture.corrupt_repair and lane.tool != "filesystem" else "NOT_RUN",
+                    "full_restore_recovery": "PASS" if fixture.corrupt_repair and lane.tool == "filesystem" else "NOT_RUN",
                     "update": "NOT_RUN", "rollback": "NOT_RUN", "no_op_restore": "NOT_RUN",
                 }
                 return result

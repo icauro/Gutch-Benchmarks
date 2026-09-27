@@ -50,7 +50,7 @@ every run. Earlier results using tool defaults are not directly comparable.
 | Kopia | `--compression=zstd`: standard preset | `--splitter=DYNAMIC-1M-BUZHASH`: 512 KiB minimum / 1 MiB target / 2 MiB maximum | Named codec/presets and splitter profiles are selectable; no numeric Zstd level in this policy. |
 | Borg | `--compression zstd,3` | `--chunker-params buzhash,19,23,20,4095`: 512 KiB minimum / 1 MiB mask target / 8 MiB maximum | Both codec/level and chunker parameters are selectable. Explicit Buzhash avoids different default chunkers across Borg versions. |
 | Plakar | LZ4, tool-managed level | Default FastCDC: 512 KiB minimum / 1 MiB target / 8 MiB maximum | Tested 1.1.5 CLI exposes compression on/off, but no codec, level, or chunk-size selector. Retained as a documented exception; no claim of Zstd-equivalent effort. |
-| BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Local restore and full recovery are independently validated. |
+| BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Local restore and restore-over-existing are independently validated. |
 | Filesystem | None | None | Copy baseline; no deduplication or compression. |
 
 Chunk targets are nominal parameters, not measured means. File boundaries,
@@ -126,8 +126,10 @@ path under `.artifacts/runs/`. Each run contains:
 - `lanes/`: command logs, validation records, and optional diagnostic traces.
 
 Correct outputs are checked before corruption/repair, then checked again after
-recovery. Corruption plans are deterministic and saved. Gutch in-place repair
-and external full-restore recovery have separate metric names. Update, rollback,
+recovery. Corruption plans are deterministic and saved. Tool recovery preserves
+the damaged installation and is reported as `Repair`; the filesystem baseline
+still deletes and recopies output, reported as `Recovery`. Restore-over-existing
+does not imply that a tool reuses healthy bytes. Update, rollback,
 and no-op restore are marked `NOT_RUN` in this initial fixture; they are not
 silently approximated by clean restore. Compression settings and verification
 work differ between tools, so this is an end-to-end workflow comparison.
@@ -155,6 +157,27 @@ provide operation spans, not internal worker traces. Its measurement overhead ma
 from the default `off` mode. The existing runtime modules also serve Gutch's
 optional developer diagnostics; the simple command does not require those tools.
 
+## Native recovery and extra files
+
+Recovery changes bytes and permissions, deletes a file when possible, and adds
+an unexpected file. The installation is retained for the tool to repair. The
+harness does not chmod damaged files or remove extras on the tool's behalf.
+
+| Tool | Recovery command options | Extra files and tested Windows outcome |
+|---|---|---|
+| Gutch | Existing installation repair | Existing native repair path; independent validation remains required. |
+| Restic | `restore --overwrite always --delete --verify` | Native extra deletion. Real small-fixture and Blender recovery passed. Individual restores retain `--include <build>` to protect other builds. |
+| Kopia | `snapshot restore --delete-extra` | Native extra deletion requested. Installed 0.23.1 failed replacing a read-only damaged file; atomic writes also failed in a separate probe. |
+| Borg | `extract --continue` on Borg 2; regular extract on Borg 1 | No native extra deletion option. Installed Windows Borg 2 failed on the read-only file. Resume skips based on metadata, so it is not a content-integrity guarantee. |
+| Plakar | `restore` into the existing destination | No native extra deletion option established. Installed 1.1.5 left an extra file and a content mismatch in the probe. |
+| BuildPatchTool | `InstallManifest -PrevManifest=...` | No native extra deletion option advertised. Installed 1.8.8 left the unexpected file. |
+
+These are outcomes for this corruption fixture and installed versions, not claims
+about every platform. Recovery errors retain successful capture/restore metrics,
+mark the run `ERROR`, omit a successful repair timing, and preserve evidence.
+No full-rebuild fallback masks a native recovery failure. Independent validation
+must match content, supported metadata and the exact tree, including no extras.
+
 ## BuildPatchTool
 
 Download the executable from [Epic](https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip),
@@ -165,9 +188,11 @@ interfaces are reported as `UNSUPPORTED`; no upload or authentication is attempt
 Each build gets an explicit manifest in a shared cloud directory. The adapter
 restores each build with `InstallManifest` into a fresh destination, then checks
 its contents against the frozen source inventory. With `corrupt_repair: true`,
-it applies the same corruption plan as the other tools, removes the damaged
-output, reinstalls, and validates again. This is **full-restore recovery**, not
-in-place repair. Only independently validated runs receive `PASS`.
+it applies the same corruption plan as the other tools and calls `InstallManifest`
+with `PrevManifest` against the damaged output. It does not delete the installation.
+Only independently validated runs receive `PASS`. BPT 1.8.8 has no advertised
+extra-file deletion option: in the tested fixture, content was repaired but the
+extra file remained, so recovery fails exact-tree validation.
 Update, rollback and no-op restore remain `NOT_RUN`, as in the other lanes.
 BPT must preserve the fixture's files and supported metadata; unsupported content
 such as an unpreserved empty directory fails validation rather than being silently

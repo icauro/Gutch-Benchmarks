@@ -5,7 +5,7 @@ import time
 
 from ..scheduling.dataset import DatasetSelection
 from ..support.command import CommandError
-from ..support.filesystem import file_sha256, scan_tree, remove_tree
+from ..support.filesystem import file_sha256, scan_tree
 from ..support.recovery import build_corruption_plan, apply_corruption_plan
 from .models import LaneResult
 
@@ -60,13 +60,14 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
 
     def restore(record_snapshots):
         total = 0.0
-        operation = "restore" if record_snapshots else "full recovery"
+        operation = "restore" if record_snapshots else "in-place recovery"
         for source in reversed(dataset.sources):
             destination = output / source.name
             result = commands.run([
                 executable, "-mode=InstallManifest",
                 f"-Manifest={manifests[source.name].as_posix()}",
                 f"-CloudDirs={cloud.as_posix()}", f"-OutputDir={destination.as_posix()}",
+                *([] if record_snapshots else [f"-PrevManifest={manifests[source.name].as_posix()}"]),
             ], description=f"BuildPatchTool {operation} {source.name}", cwd=lane.root)
             total += result.elapsed_seconds
             if record_snapshots:
@@ -77,6 +78,7 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
     for source in dataset.sources:
         dataset.validate(source, output / source.name, lane.stats / f"validate-restored-{source.name}.json")
     recovery = {}
+    recovery_error = None
     if recovery_enabled:
         plans = [(output / source.name, build_corruption_plan(
             output / source.name, lane.stats / f"corruption-{index:03d}.json", index,
@@ -85,17 +87,22 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
         for destination, plan in plans:
             apply_corruption_plan(destination, plan)
         recovery["corrupt"] = time.perf_counter() - started
-        # Match the other external lanes: full recovery, not in-place repair.
-        remove_tree(output)
-        recovery["full_restore_recovery"] = restore(False)
-        for source in dataset.sources:
-            dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
+        try:
+            repair_seconds = restore(False)
+            for source in dataset.sources:
+                dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
+            recovery["repair"] = repair_seconds
+        except (CommandError, RuntimeError) as error:
+            recovery_error = str(error)
     return LaneResult(specification.label, specification.kind,
                       metrics={"backup": elapsed, "restore": restored, "repo_size": stored.total_bytes,
                                "repo_files": stored.file_count, **recovery},
-                      metadata={**dataset.metadata(), "status": "PASS",
+                      metadata={**dataset.metadata(), "status": "ERROR" if recovery_error else "PASS",
+                                "reason": recovery_error, "recovery_error": recovery_error,
+                                "recovery_mode": "restore_existing",
+                                "extra_file_policy": "no_native_delete_option",
                                 "snapshot_metrics": snapshots, "binary_sha256": file_sha256(executable),
                                 "operations": {"capture": "PASS", "clean_restore": "PASS",
-                                               "full_restore_recovery": "PASS" if recovery_enabled else "NOT_RUN",
-                                               "in_place_repair": "NOT_RUN", "update": "NOT_RUN",
+                                               "full_restore_recovery": "NOT_RUN",
+                                               "in_place_repair": ("FAIL" if recovery_error else "PASS") if recovery_enabled else "NOT_RUN", "update": "NOT_RUN",
                                                "rollback": "NOT_RUN", "no_op_restore": "NOT_RUN"}})

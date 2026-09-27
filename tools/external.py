@@ -10,7 +10,7 @@ import tempfile
 import shutil
 import time
 
-from comparison_benchmark_suite.support.command import CommandRunner
+from comparison_benchmark_suite.support.command import CommandRunner, CommandError
 from comparison_benchmark_suite.support.filesystem import remove_tree, scan_tree
 from comparison_benchmark_suite.support.recovery import apply_corruption_plan, build_corruption_plan
 from comparison_benchmark_suite.scheduling.dataset import DatasetSelection
@@ -262,17 +262,20 @@ def run_external(
 
     def restore_output(record_snapshots: bool = False) -> float:
         restore_started = len(elapsed_commands)
-        operation = "restore" if record_snapshots else "full recovery"
+        operation = "restore" if record_snapshots else "in-place recovery"
+        restic_options = [] if record_snapshots else ["--overwrite", "always", "--delete"]
+        kopia_options = [] if record_snapshots else ["--delete-extra"]
+        borg_options = [] if record_snapshots or borg_major == 1 else ["--continue"]
         output.mkdir(parents=True, exist_ok=True)
         if bulk and kind == "restic":
             execute(
-                [executable, "restore", "latest", "--verify", "--repo", repo, "--target", output],
+                [executable, "restore", "latest", *restic_options, "--verify", "--repo", repo, "--target", output],
                 description=f"{lane_spec.label} {operation}",
                 env=env,
             )
         elif bulk and kind == "kopia":
             execute(
-                [executable, "snapshot", "restore", product, output, "--snapshot-time=latest", "--no-progress"],
+                [executable, "snapshot", "restore", product, output, "--snapshot-time=latest", "--no-progress", *kopia_options],
                 description=f"{lane_spec.label} {operation}",
                 env=env,
             )
@@ -284,7 +287,7 @@ def run_external(
             )
         elif bulk:
             execute(
-                [executable, "extract", f"{repo}::{identifiers['bulk']}"],
+                [executable, "extract", *borg_options, f"{repo}::{identifiers['bulk']}"],
                 description=f"{lane_spec.label} {operation}",
                 cwd=output,
                 env=env,
@@ -293,13 +296,13 @@ def run_external(
             for source in reversed(sources):
                 if kind == "restic":
                     execute(
-                        [executable, "restore", identifiers[source.name], "--verify", "--repo", repo, "--target", output, "--include", source.name],
+                        [executable, "restore", identifiers[source.name], *restic_options, "--verify", "--repo", repo, "--target", output, "--include", source.name],
                         description=f"{lane_spec.label} {operation} {source.name}",
                         env=env,
                     )
                 elif kind == "kopia":
                     execute(
-                        [executable, "snapshot", "restore", source, output / source.name, "--snapshot-time=latest", "--no-progress"],
+                        [executable, "snapshot", "restore", source, output / source.name, "--snapshot-time=latest", "--no-progress", *kopia_options],
                         description=f"{lane_spec.label} {operation} {source.name}",
                         env=env,
                     )
@@ -313,7 +316,7 @@ def run_external(
                     )
                 else:
                     execute(
-                        [executable, "extract", f"{repo}::{identifiers[source.name]}"],
+                        [executable, "extract", *borg_options, f"{repo}::{identifiers[source.name]}"],
                         description=f"{lane_spec.label} {operation} {source.name}",
                         cwd=output,
                         env=env,
@@ -330,6 +333,7 @@ def run_external(
         dataset.validate(source, output if bulk else output / source.name, lane.stats / f"validate-restored-{source.name}.json")
     corrupt_seconds = 0.0
     repair_seconds = 0.0
+    recovery_error = None
     if recovery_enabled:
         recovery_destinations = [output] if bulk else [output / source.name for source in reversed(sources)]
         plans = [
@@ -344,8 +348,10 @@ def run_external(
         for destination, plan in zip(recovery_destinations, plans, strict=True):
             apply_corruption_plan(destination, plan)
         corrupt_seconds = time.perf_counter() - corrupt_started
-        remove_tree(output)
-        repair_seconds = restore_output()
+        try:
+            repair_seconds = restore_output()
+        except CommandError as error:
+            recovery_error = str(error)
 
     verify_started = len(elapsed_commands)
     if kind == "restic":
@@ -367,9 +373,12 @@ def run_external(
     else:
         execute([executable, "check", "--verify-data", repo], description=f"{lane_spec.label} check", env=env)
     verify = sum(elapsed_commands[verify_started:])
-    for source in sources:
-        dataset.validate(source, output if bulk else output / source.name, lane.stats / f"validate-final-{source.name}.json")
-    differences = []
+    if recovery_error is None:
+        try:
+            for source in sources:
+                dataset.validate(source, output if bulk else output / source.name, lane.stats / f"validate-final-{source.name}.json")
+        except RuntimeError as error:
+            recovery_error = str(error)
     return LaneResult(
         lane_spec.label,
         lane_spec.kind,
@@ -377,20 +386,25 @@ def run_external(
             "backup": backup,
             "restore": restore,
             "repository_check": verify,
-            "compare": 0.0 if not differences else 1.0,
+            **({"compare": 0.0} if recovery_error is None else {}),
             "corrupt": corrupt_seconds,
-            "full_restore_recovery": repair_seconds,
+            **({"repair": repair_seconds} if recovery_enabled and recovery_error is None else {}),
             "repo_size": repo_stats.total_bytes,
             "repo_files": repo_stats.file_count,
         },
         {},
         {
+            "status": "ERROR" if recovery_error else "PASS",
+            "reason": recovery_error,
+            "recovery_error": recovery_error,
+            "recovery_mode": "restore_existing",
+            "extra_file_policy": "native_delete" if kind in {"restic", "kopia"} else "no_native_delete_option",
             "snapshot_metrics": snapshot_metrics,
             "tool_version": tool_version,
             "binary_sha256": file_sha256(executable) if executable.is_file() else None,
             "verify_invocations": 1 if bulk or kind != "kopia" else len(sources),
             "verify_position": "after_recovery",
             "corrupt_repair_after_reconstruct": recovery_enabled,
-            "differences": differences,
+            **({"differences": []} if recovery_error is None else {}),
         },
     )

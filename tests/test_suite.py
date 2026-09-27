@@ -215,7 +215,7 @@ class SuiteTests(unittest.TestCase):
         result = run_buildpatchtool(binary, Commands(), None, None, LaneSpec("bpt", "buildpatchtool"))
         self.assertEqual(result.metadata["status"], "UNSUPPORTED")
 
-    def test_buildpatch_restores_and_recovers_before_claiming_pass(self):
+    def test_buildpatch_recovery_preserves_target_and_rejects_extra_files(self):
         class Commands:
             def run(self, command, **options):
                 assert not options.get("expected_failure", False)
@@ -224,7 +224,11 @@ class SuiteTests(unittest.TestCase):
                 elif "-mode=InstallManifest" in command:
                     value = lambda flag: next(x.split("=", 1)[1] for x in command if str(x).startswith(flag + "="))
                     source = Path(value("-Manifest")).read_text()
-                    shutil.copytree(source, value("-OutputDir"))
+                    destination = Path(value("-OutputDir"))
+                    if any(str(arg).startswith("-PrevManifest=") for arg in command):
+                        assert list(destination.glob(".gutch-benchmark-extra-*"))
+                        (destination / "file").chmod(0o600)
+                    shutil.copytree(source, destination, dirs_exist_ok=True)
                     output = ""
                 else:
                     assert "-ChunkWindowSize=1048576" in command
@@ -243,10 +247,12 @@ class SuiteTests(unittest.TestCase):
         result = run_buildpatchtool(binary, Commands(), RunLayout(self.root / "run").lane("bpt"),
                                    product, LaneSpec("bpt", "buildpatchtool", arguments=("-ChunkWindowSize=1048576",)),
                                    recovery_enabled=True)
-        self.assertEqual(result.metadata["status"], "PASS")
+        self.assertEqual(result.metadata["status"], "ERROR")
         self.assertAlmostEqual(result.metrics["restore"], 0.2)
-        self.assertAlmostEqual(result.metrics["full_restore_recovery"], 0.2)
-        self.assertEqual(result.metadata["operations"]["in_place_repair"], "NOT_RUN")
+        self.assertNotIn("repair", result.metrics)
+        self.assertNotIn("full_restore_recovery", result.metrics)
+        self.assertEqual(result.metadata["operations"]["in_place_repair"], "FAIL")
+        self.assertIn("unexpected", result.metadata["reason"])
 
     def test_buildpatch_success_exit_without_restored_files_fails_validation(self):
         class Commands:
