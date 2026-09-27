@@ -101,8 +101,10 @@ def main(arguments=None) -> int:
         commands = CommandRunner(memory_profile=fixture.profile_mode == "detailed")
         runners = {}
         for lane in fixture.lanes:
+            if lane.label in runners:
+                continue
             binary = resolved.get(lane.label, Path("unavailable"))
-            external = ExternalTools(ROOT, commands, **({lane.tool: binary} if lane.tool in {"restic", "kopia", "borg", "plakar"} else {}))
+            external = ExternalTools(ROOT, commands, **({lane.tool: binary} if lane.tool in {"restic", "kopia", "borg", "plakar"} and lane.label not in unavailable else {}))
             runners[lane.label] = LocalFixtureRunner(GutchCli(binary, profile_mode=fixture.profile_mode), commands, layout, external)
             runners[lane.label].selections = selections
 

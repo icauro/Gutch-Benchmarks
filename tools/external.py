@@ -26,6 +26,22 @@ class ExternalTools:
     kopia: Path | None = None
     borg: Path | None = None
     plakar: Path | None = None
+    borg_version: str | None = None
+
+    def __post_init__(self):
+        if self.borg is not None:
+            self.check_borg_version()
+
+    def check_borg_version(self):
+        if self.borg_version is None:
+            self.borg = self.executable("borg")
+            # Preflight happens when configuring the runner, before lane clocks
+            # and measurement slices begin. Reuse the result for every repeat.
+            self.borg_version = self.commands.run(
+                [self.borg, "--version"], description="Borg version preflight",
+            ).stdout.strip()
+            if re.search(r"\bborg(?:\.exe)?\s+2\.", self.borg_version) is None:
+                raise ValueError(f"Borg 2 is required; found: {self.borg_version}")
 
     def executable(self, kind: str) -> Path:
         explicit = {
@@ -126,12 +142,9 @@ def run_external(
     sources = list(dataset.sources)
     if not sources:
         raise ValueError(f"product has no target directories: {product}")
-    tool_version = None
-    if kind == "borg":
-        tool_version = tools.commands.run([executable, "--version"], description=f"{lane_spec.label} version").stdout.strip()
-        match = re.search(r"\bborg(?:\.exe)?\s+2\.", tool_version)
-        if match is None:
-            raise ValueError(f"Borg 2 is required; found: {tool_version}")
+    if kind == "borg" and tools.borg_version is None:
+        raise ValueError("Borg version preflight must run before benchmark lanes")
+    tool_version = tools.borg_version if kind == "borg" else None
     elapsed_commands: list[float] = []
     def execute(command, **kwargs):
         if kind == "borg":

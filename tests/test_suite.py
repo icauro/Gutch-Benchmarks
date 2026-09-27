@@ -251,6 +251,21 @@ class SuiteTests(unittest.TestCase):
         dataset.validate(source, output, evidence)
         self.assertEqual(json.loads(evidence.read_text())["extra_files"], ["extra"])
 
+    def test_borg_preflight_reuses_version_for_repeated_lanes(self):
+        from comparison_benchmark_suite.tools.external import ExternalTools
+        calls = []
+        class Commands:
+            def run(self, command, **options):
+                calls.append(command)
+                return CommandResult(tuple(map(str, command)), 0.1, 0, "borg 2.0.0b23", "")
+        binary = self.root / "borg.exe"
+        binary.write_bytes(b"test")
+        tools = ExternalTools(self.root, Commands(), borg=binary)
+        tools.check_borg_version()
+        tools.check_borg_version()
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(tools.borg_version, "borg 2.0.0b23")
+
     def test_borg_one_is_rejected_before_repository_creation(self):
         from comparison_benchmark_suite.tools.external import ExternalTools, run_external
         calls = []
@@ -263,10 +278,8 @@ class SuiteTests(unittest.TestCase):
         (source / "file").write_bytes(b"data")
         binary = self.root / "borg.exe"
         binary.write_bytes(b"test")
-        tools = ExternalTools(self.root, Commands(), borg=binary)
         with self.assertRaisesRegex(ValueError, "Borg 2 is required"):
-            run_external(tools, RunLayout(self.root / "run").lane("borg"), source.parent,
-                         LaneSpec("borg", "borg"))
+            ExternalTools(self.root, Commands(), borg=binary)
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0][-1], "--version")
 

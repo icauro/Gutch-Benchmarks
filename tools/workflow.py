@@ -430,9 +430,11 @@ def run_fixture(
             commands,
             restic=external_binary_root / "restic",
             kopia=external_binary_root / "kopia",
-            borg=external_binary_root / "borg",
+            borg=external_binary_root / "borg" if any(lane.tool == "borg" for lane in fixture.lanes) else None,
             plakar=external_binary_root / "plakar",
         )
+    if any(lane.tool == "borg" for lane in fixture.lanes):
+        external.check_borg_version()
     cli = GutchCli(cli.executable, profile_mode=fixture.profile_mode)
     runner = LocalFixtureRunner(
         cli,

@@ -225,3 +225,6 @@ its children or helpers. The in-process filesystem baseline is intentionally `-`
 Plakar backup uses its default cache policy; the suite no longer passes `-cache no`.
 Caches remain isolated per lane. Earlier Borg Buzhash / cache-disabled Plakar
 measurements should not be mixed with these settings.
+
+Borg version validation runs once during runner preflight, before scheduled lanes.
+Its command is excluded from benchmark timings, utilization and Perfetto tracks.
