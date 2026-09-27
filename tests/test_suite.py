@@ -206,6 +206,22 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(attempts[0], attempts[1])
         sleep.assert_called_once_with(0.25)
 
+    def test_corruption_plan_preserves_permissions(self):
+        from comparison_benchmark_suite.support.recovery import build_corruption_plan, apply_corruption_plan
+        destination = self.root / "installation"
+        destination.mkdir()
+        target = destination / "a.bin"
+        target.write_bytes(b"original")
+        (destination / "b.bin").write_bytes(b"delete me")
+        mode = target.stat().st_mode
+        plan = build_corruption_plan(destination, self.root / "corruption.json", 1)
+        operations = json.loads(plan.read_text())["operations"]
+        self.assertEqual({item["kind"] for item in operations}, {"flipByte", "delete", "addFile"})
+        apply_corruption_plan(destination, plan)
+        self.assertEqual(target.stat().st_mode, mode)
+        self.assertNotEqual(target.read_bytes(), b"original")
+        self.assertFalse((destination / "b.bin").exists())
+
     def test_buildpatch_store_uploader_is_not_used_as_local_generator(self):
         class Commands:
             def run(self, command, **options):

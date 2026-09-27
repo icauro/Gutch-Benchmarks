@@ -18,7 +18,6 @@ def build_corruption_plan(destination: Path, plan_path: Path, sequence: int) -> 
     writable = [path for path in files if path.stat().st_mode & stat.S_IWRITE]
     non_empty = [path for path in writable if path.stat().st_size > 0]
     flip_target = non_empty[0] if non_empty else None
-    permission_target = non_empty[0] if non_empty else (writable[0] if writable else files[0])
     operations: list[dict[str, object]] = []
     if flip_target:
         operations.append(
@@ -29,14 +28,7 @@ def build_corruption_plan(destination: Path, plan_path: Path, sequence: int) -> 
                 "mask": 255,
             }
         )
-    operations.append(
-        {
-            "kind": "setReadOnly",
-            "path": permission_target.relative_to(destination).as_posix(),
-            "read_only": bool(permission_target.stat().st_mode & stat.S_IWRITE),
-        }
-    )
-    delete_candidates = [path for path in writable if path not in {flip_target, permission_target}]
+    delete_candidates = [path for path in writable if path != flip_target]
     if delete_candidates:
         operations.append({"kind": "delete", "path": delete_candidates[0].relative_to(destination).as_posix()})
     extra = destination / f".gutch-benchmark-extra-{sequence:03d}.bin"

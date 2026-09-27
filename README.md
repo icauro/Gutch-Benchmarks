@@ -159,7 +159,8 @@ optional developer diagnostics; the simple command does not require those tools.
 
 ## Native recovery and extra files
 
-Recovery changes bytes and permissions, deletes a file when possible, and adds
+Recovery changes bytes, leaves permissions unchanged, deletes a writable file
+when possible, and adds
 an unexpected file. The installation is retained for the tool to repair. The
 harness does not chmod damaged files or remove extras on the tool's behalf.
 
@@ -172,7 +173,9 @@ harness does not chmod damaged files or remove extras on the tool's behalf.
 | Plakar | `restore` into the existing destination | No native extra deletion option established. Installed 1.1.5 left an extra file and a content mismatch in the probe. |
 | BuildPatchTool | `InstallManifest -PrevManifest=...` | No native extra deletion option advertised. Installed 1.8.8 left the unexpected file. |
 
-These are outcomes for this corruption fixture and installed versions, not claims
+The outcomes above are from the earlier probe that also changed read-only
+attributes. Current corruption plans no longer change permissions; those results
+need a new run before comparison. They are not claims
 about every platform. Recovery errors retain successful capture/restore metrics,
 mark the run `ERROR`, omit a successful repair timing, and preserve evidence.
 No full-rebuild fallback masks a native recovery failure. Independent validation
