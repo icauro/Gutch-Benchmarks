@@ -1,0 +1,4 @@
+# Preserve upstream distributions exactly, including their original whitespace.
+bin/** -text -whitespace
+bin/README.md text eol=lf
+bin/manifest.json text eol=lf

@@ -38,8 +38,9 @@ The fixture runs one warm-up and three measured repetitions, rotating tool order
 Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
 
-The filesystem-copy baseline works without another executable. Other tools must
-be on PATH, or configured in `fixtures/blender/fixture.yaml`:
+The tracked `bin/` directory includes the comparison executables for Windows and
+Linux x86-64. No tool downloads or builds are needed. Override a bundled executable
+in `fixtures/blender/fixture.yaml` when testing another version:
 
 ```yaml
 executables:
@@ -48,15 +49,17 @@ executables:
   buildpatchtool: C:/tools/BuildPatchTool.exe
 ```
 
-Bundled tools are discovered automatically under `.artifacts/tools/windows-x64/`
-or `.artifacts/tools/linux-x64/`, before searching PATH. Each tool has its own
+Bundled tools are discovered automatically under `bin/windows-x64/`
+or `bin/linux-x64/`, before searching PATH. Each tool has its own
 folder: `restic/restic.exe` on Windows or `restic/restic` on Linux, likewise for
 Borg, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
 BuildPatchTool keeps its Engine layout under `buildpatchtool/Engine/Binaries/`,
 with `Win64/BuildPatchTool.exe` or `Linux/BuildPatchTool`. Preserve its accompanying
 Engine files. Explicit fixture paths and `GUTCH_EXECUTABLE` still take precedence.
-Only x86-64 hosts use these bundles. Older retained binaries may be kept in a
-`previous/` folder, which is never searched. Refresh the bundled Gutch executable
+Only x86-64 hosts use these bundles. The shipped Linux Borg 2 binary requires
+glibc 2.43 or newer (for example the tested Debian unstable image); this is the
+minimum Linux requirement for running every bundled lane. Older binaries and download archives belong under `.artifacts/`, outside the
+shipped `bin/` directory. Refresh the bundled Gutch executable
 after rebuilding it; the suite never reads a sibling project's build directory.
 
 Missing tools are clearly reported as `UNAVAILABLE`; available tools still run.

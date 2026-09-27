@@ -94,7 +94,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         configured = executables.get(lane.label, executables.get(lane.tool, lane.tool))
         if lane.tool == "gutch" and configured in {"gutch", "gutch-cli"}:
             configured = os.environ.get("GUTCH_EXECUTABLE", configured)
-        executable = resolve_executable(configured, fixture_path, root / ".artifacts/tools")
+        executable = resolve_executable(configured, fixture_path, root / "bin")
         if executable is None:
             unavailable[lane.label] = f"Cannot find {configured!r}; set executables.{lane.label} in {fixture_path} or add it to PATH."
             print(f"UNAVAILABLE {lane.label}: {unavailable[lane.label]}", flush=True)

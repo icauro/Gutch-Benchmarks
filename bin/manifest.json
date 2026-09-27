@@ -1,0 +1,89 @@
+{
+  "gutch_source_commit": "2e37eca67f6b2dc315e212bc8ae6bfeba844b4ab",
+  "executables": [
+    {
+      "platform": "windows-x64",
+      "tool": "gutch",
+      "version": "0.2.0",
+      "path": "windows-x64/gutch/gutch-cli.exe",
+      "sha256": "76a5b896b2b21b2fdf3a33f1581ace8b72fd1e09c729a56478fa22d40a0d79a8"
+    },
+    {
+      "platform": "windows-x64",
+      "tool": "borg",
+      "version": "2.0.0b24.dev0+g116435fa4.d20260823",
+      "path": "windows-x64/borg/borg.exe",
+      "sha256": "27a6bea13ccddd8c52b746febd4937f3ab315adfa012d27a099bdc1aebd2df87"
+    },
+    {
+      "platform": "windows-x64",
+      "tool": "restic",
+      "version": "0.19.0",
+      "path": "windows-x64/restic/restic.exe",
+      "sha256": "40576f77c1d40245a9f4af92a0b37b0d2514e6be0dffbf16ca8855820c13693e"
+    },
+    {
+      "platform": "windows-x64",
+      "tool": "kopia",
+      "version": "0.23.1",
+      "path": "windows-x64/kopia/kopia.exe",
+      "sha256": "96c0946314b50dcc7c5ae9d3ec7e3763e742fcebf7d5cbebdaac3ceee5fb3bd7"
+    },
+    {
+      "platform": "windows-x64",
+      "tool": "plakar",
+      "version": "1.1.7",
+      "path": "windows-x64/plakar/plakar.exe",
+      "sha256": "67076ca82af44ca9863378052e7691c150803c6fc64427555a490cdd246ed02e"
+    },
+    {
+      "platform": "windows-x64",
+      "tool": "buildpatchtool",
+      "version": "1.8.8",
+      "path": "windows-x64/buildpatchtool/Engine/Binaries/Win64/BuildPatchTool.exe",
+      "sha256": "1a9dd65666c6eaea27b554d90a9aedd961eff40df2ec4dc5193a6a825cdc9253"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "gutch",
+      "version": "0.2.0",
+      "path": "linux-x64/gutch/gutch-cli",
+      "sha256": "b9672951feae13a0ce0c93909301772bd94e1cdd69eeff5b201cd4ec565a2542"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "borg",
+      "version": "2.0.0b24",
+      "path": "linux-x64/borg/borg",
+      "sha256": "5fa90f4eac2b6ea4847848c24f3f812926cae117a7a444ee10a2301b9ec6aba7"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "restic",
+      "version": "0.19.1",
+      "path": "linux-x64/restic/restic",
+      "sha256": "20d4142678d0d95ec11a4759def1b73fd9190abc9ca19e4b62d067c0b387e639"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "kopia",
+      "version": "0.23.1",
+      "path": "linux-x64/kopia/kopia",
+      "sha256": "e306c3d48b47756912928738241baffe68d1a8a16ab804ab3fbabd725a61df7f"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "plakar",
+      "version": "1.1.5",
+      "path": "linux-x64/plakar/plakar",
+      "sha256": "9c3d2c5068f16f49d1e282f5e5983bde6c2b4f1d2d71f65bce799b3e1ed6d086"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "buildpatchtool",
+      "version": "1.8.8",
+      "path": "linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a"
+    }
+  ]
+}
