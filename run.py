@@ -115,7 +115,8 @@ def main(arguments=None) -> int:
                 if lane.tool == "buildpatchtool":
                     from .tools.buildpatchtool import run_buildpatchtool
                     return run_buildpatchtool(resolved[label], commands, layout.lane(lane.label), product, lane,
-                                              dataset=selections[(product, fixture.snapshot_limit, False)])
+                                              dataset=selections[(product, fixture.snapshot_limit, False)],
+                                              recovery_enabled=fixture.corrupt_repair)
                 result = runners[label].run_lane(product, lane, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit)
                 result.metadata["status"] = "PASS"
                 result.metadata["operations"] = {

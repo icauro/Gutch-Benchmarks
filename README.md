@@ -50,7 +50,7 @@ every run. Earlier results using tool defaults are not directly comparable.
 | Kopia | `--compression=zstd`: standard preset | `--splitter=DYNAMIC-1M-BUZHASH`: 512 KiB minimum / 1 MiB target / 2 MiB maximum | Named codec/presets and splitter profiles are selectable; no numeric Zstd level in this policy. |
 | Borg | `--compression zstd,3` | `--chunker-params buzhash,19,23,20,4095`: 512 KiB minimum / 1 MiB mask target / 8 MiB maximum | Both codec/level and chunker parameters are selectable. Explicit Buzhash avoids different default chunkers across Borg versions. |
 | Plakar | LZ4, tool-managed level | Default FastCDC: 512 KiB minimum / 1 MiB target / 8 MiB maximum | Tested 1.1.5 CLI exposes compression on/off, but no codec, level, or chunk-size selector. Retained as a documented exception; no claim of Zstd-equivalent effort. |
-| BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Capture only in this suite. |
+| BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Local restore and full recovery are independently validated. |
 | Filesystem | None | None | Copy baseline; no deduplication or compression. |
 
 Chunk targets are nominal parameters, not measured means. File boundaries,
@@ -162,9 +162,16 @@ extract it with its accompanying Engine files, and set `executables.buildpatchto
 The adapter probes `-mode=ChunkBuildDirectory -help` and
 runs only the supported local generation interface. Epic Store upload-only
 interfaces are reported as `UNSUPPORTED`; no upload or authentication is attempted.
-Successful local generation is `CAPTURE_ONLY`, not validated restore. This
-adapter does not implement installation, update, or repair, and never claims
-that a successful generation exit code establishes restored-content correctness.
+Each build gets an explicit manifest in a shared cloud directory. The adapter
+restores each build with `InstallManifest` into a fresh destination, then checks
+its contents against the frozen source inventory. With `corrupt_repair: true`,
+it applies the same corruption plan as the other tools, removes the damaged
+output, reinstalls, and validates again. This is **full-restore recovery**, not
+in-place repair. Only independently validated runs receive `PASS`.
+Update, rollback and no-op restore remain `NOT_RUN`, as in the other lanes.
+BPT must preserve the fixture's files and supported metadata; unsupported content
+such as an unpreserved empty directory fails validation rather than being silently
+recreated by the harness. No publishing credentials are needed.
 
 Run the suite's own tests with:
 

@@ -215,17 +215,22 @@ class SuiteTests(unittest.TestCase):
         result = run_buildpatchtool(binary, Commands(), None, None, LaneSpec("bpt", "buildpatchtool"))
         self.assertEqual(result.metadata["status"], "UNSUPPORTED")
 
-    def test_buildpatch_local_capture_does_not_claim_restore_validation(self):
+    def test_buildpatch_restores_and_recovers_before_claiming_pass(self):
         class Commands:
             def run(self, command, **options):
                 assert not options.get("expected_failure", False)
-                assert "-mode=ChunkBuildDirectory" in command
                 if "-help" in command:
                     output = "BuildRoot CloudDir ArtifactId FeatureLevel ChunkWindowSize BuildVersion AppLaunch AppArgs"
+                elif "-mode=InstallManifest" in command:
+                    value = lambda flag: next(x.split("=", 1)[1] for x in command if str(x).startswith(flag + "="))
+                    source = Path(value("-Manifest")).read_text()
+                    shutil.copytree(source, value("-OutputDir"))
+                    output = ""
                 else:
                     assert "-ChunkWindowSize=1048576" in command
                     cloud = Path(next(x.split("=", 1)[1] for x in command if str(x).startswith("-CloudDir=")))
-                    (cloud / "data").write_bytes(b"generated")
+                    value = lambda flag: next(x.split("=", 1)[1] for x in command if str(x).startswith(flag + "="))
+                    (cloud / value("-OutputFilename")).write_text(value("-BuildRoot"))
                     output = ""
                 return CommandResult(tuple(map(str, command)), 0.1, 0, output, "")
         product = self.root / "product"
@@ -236,9 +241,31 @@ class SuiteTests(unittest.TestCase):
         binary = self.root / "tool"
         binary.write_bytes(b"example")
         result = run_buildpatchtool(binary, Commands(), RunLayout(self.root / "run").lane("bpt"),
-                                   product, LaneSpec("bpt", "buildpatchtool", arguments=("-ChunkWindowSize=1048576",)))
-        self.assertEqual(result.metadata["status"], "CAPTURE_ONLY")
-        self.assertNotIn("restore", result.metrics)
+                                   product, LaneSpec("bpt", "buildpatchtool", arguments=("-ChunkWindowSize=1048576",)),
+                                   recovery_enabled=True)
+        self.assertEqual(result.metadata["status"], "PASS")
+        self.assertAlmostEqual(result.metrics["restore"], 0.2)
+        self.assertAlmostEqual(result.metrics["full_restore_recovery"], 0.2)
+        self.assertEqual(result.metadata["operations"]["in_place_repair"], "NOT_RUN")
+
+    def test_buildpatch_success_exit_without_restored_files_fails_validation(self):
+        class Commands:
+            def run(self, command, **options):
+                output = "BuildRoot CloudDir ArtifactId FeatureLevel ChunkWindowSize BuildVersion AppLaunch AppArgs"
+                if "-mode=ChunkBuildDirectory" in command and "-help" not in command:
+                    value = lambda flag: next(x.split("=", 1)[1] for x in command if str(x).startswith(flag + "="))
+                    (Path(value("-CloudDir")) / value("-OutputFilename")).write_text("manifest")
+                return CommandResult(tuple(map(str, command)), 0.1, 0, output, "")
+
+        product = self.root / "product"
+        source = product / "v1"
+        source.mkdir(parents=True)
+        (source / "file").write_bytes(b"expected")
+        binary = self.root / "tool"
+        binary.write_bytes(b"example")
+        with self.assertRaises((RuntimeError, FileNotFoundError, ValueError)):
+            run_buildpatchtool(binary, Commands(), RunLayout(self.root / "run").lane("bpt"),
+                               product, LaneSpec("bpt", "buildpatchtool"))
 
 
 if __name__ == "__main__":

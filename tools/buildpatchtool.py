@@ -1,14 +1,16 @@
-"""Local BuildPatchTool generation; never upload or emulate installation."""
+"""Local BuildPatchTool capture, installation, and independently verified recovery."""
 
 from pathlib import Path
+import time
 
 from ..scheduling.dataset import DatasetSelection
 from ..support.command import CommandError
-from ..support.filesystem import file_sha256, scan_tree
+from ..support.filesystem import file_sha256, scan_tree, remove_tree
+from ..support.recovery import build_corruption_plan, apply_corruption_plan
 from .models import LaneResult
 
 
-def run_buildpatchtool(executable, commands, lane, product, specification, *, dataset=None):
+def run_buildpatchtool(executable, commands, lane, product, specification, *, dataset=None, recovery_enabled=False):
     try:
         probe = commands.run(
             [executable, "-mode=ChunkBuildDirectory", "-help"],
@@ -31,7 +33,8 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
     dataset = dataset or DatasetSelection.resolve(product)
     cloud = lane.payload / "cloud"
     cloud.mkdir(parents=True, exist_ok=True)
-    snapshots = {}
+    snapshots = dataset.snapshot_metrics()
+    manifests = {}
     elapsed = 0.0
     for source in dataset.sources:
         files = [name for name, item in dataset.inventories[source.name].items() if item["kind"] == "file"]
@@ -43,15 +46,56 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
             executable, "-mode=ChunkBuildDirectory", f"-BuildRoot={source.as_posix()}",
             f"-CloudDir={cloud.as_posix()}", "-ArtifactId=ComparisonBenchmark", "-FeatureLevel=Latest",
             f"-BuildVersion={source.name}", f"-AppLaunch={launch}", "-AppArgs=",
-            *specification.arguments,
+            *specification.arguments, f"-OutputFilename={source.name}.manifest",
         ], description=f"BuildPatchTool generate {source.name}", cwd=lane.root)
         elapsed += result.elapsed_seconds
         after = scan_tree(cloud).total_bytes
-        if not scan_tree(cloud).file_count:
-            raise RuntimeError("BuildPatchTool returned success without generating any files.")
-        snapshots[source.name] = {"backup": result.elapsed_seconds, "repo_growth_bytes": after - before}
+        manifest = cloud / f"{source.name}.manifest"
+        if not manifest.is_file():
+            raise RuntimeError(f"BuildPatchTool returned success without generating {manifest.name}.")
+        manifests[source.name] = manifest
+        snapshots[source.name].update(backup=result.elapsed_seconds, repo_growth_bytes=after - before)
+    stored = scan_tree(cloud)
+    output = lane.payload / "installation"
+
+    def restore(record_snapshots):
+        total = 0.0
+        operation = "restore" if record_snapshots else "full recovery"
+        for source in reversed(dataset.sources):
+            destination = output / source.name
+            result = commands.run([
+                executable, "-mode=InstallManifest",
+                f"-Manifest={manifests[source.name].as_posix()}",
+                f"-CloudDirs={cloud.as_posix()}", f"-OutputDir={destination.as_posix()}",
+            ], description=f"BuildPatchTool {operation} {source.name}", cwd=lane.root)
+            total += result.elapsed_seconds
+            if record_snapshots:
+                snapshots[source.name]["restore"] = result.elapsed_seconds
+        return total
+
+    restored = restore(True)
+    for source in dataset.sources:
+        dataset.validate(source, output / source.name, lane.stats / f"validate-restored-{source.name}.json")
+    recovery = {}
+    if recovery_enabled:
+        plans = [(output / source.name, build_corruption_plan(
+            output / source.name, lane.stats / f"corruption-{index:03d}.json", index,
+        )) for index, source in enumerate(reversed(dataset.sources), 1)]
+        started = time.perf_counter()
+        for destination, plan in plans:
+            apply_corruption_plan(destination, plan)
+        recovery["corrupt"] = time.perf_counter() - started
+        # Match the other external lanes: full recovery, not in-place repair.
+        remove_tree(output)
+        recovery["full_restore_recovery"] = restore(False)
+        for source in dataset.sources:
+            dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
     return LaneResult(specification.label, specification.kind,
-                      metrics={"backup": elapsed, "repo_size": scan_tree(cloud).total_bytes},
-                      metadata={**dataset.metadata(), "status": "CAPTURE_ONLY",
+                      metrics={"backup": elapsed, "restore": restored, "repo_size": stored.total_bytes,
+                               "repo_files": stored.file_count, **recovery},
+                      metadata={**dataset.metadata(), "status": "PASS",
                                 "snapshot_metrics": snapshots, "binary_sha256": file_sha256(executable),
-                                "reason": "Local generation completed. Restore, update, repair, and restored-content validation are UNSUPPORTED by this adapter; capture correctness is not established by an exit code."})
+                                "operations": {"capture": "PASS", "clean_restore": "PASS",
+                                               "full_restore_recovery": "PASS" if recovery_enabled else "NOT_RUN",
+                                               "in_place_repair": "NOT_RUN", "update": "NOT_RUN",
+                                               "rollback": "NOT_RUN", "no_op_restore": "NOT_RUN"}})
