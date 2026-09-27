@@ -95,12 +95,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
     artifacts = root / ".artifacts"
     print("Preparing and validating input builds...", flush=True)
     product, dataset_metadata = prepare_dataset(values, fixture_path, artifacts)
-    selections = {
-        (product, fixture.snapshot_limit, whole): DatasetSelection.resolve(
-            product, fixture.snapshot_limit, whole_product=whole,
-        )
-        for whole in {lane.workload in {"product-bulk", "exact-bulk"} for lane in fixture.lanes}
-    }
+    dataset = DatasetSelection.resolve(product, fixture.snapshot_limit)
     if warmups:
         fixture = replace(fixture, lanes=tuple(replace(lane, warmup=True) for lane in fixture.lanes) + fixture.lanes)
     layout = RunLayout(create_run_dir(artifacts / "runs", fixture.name, "comparison"), retain_evidence=True)
@@ -117,9 +112,8 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
             continue
         binary = resolved.get(lane.label, Path("unavailable"))
         external_paths = {lane.tool: binary} if lane.tool in {"restic", "kopia", "borg", "plakar"} else {}
-        external = ExternalTools(root, commands, **external_paths)
+        external = ExternalTools(commands, **external_paths)
         runners[lane.label] = LocalFixtureRunner(GutchCli(binary, profile_mode=fixture.profile_mode), commands, layout, external)
-        runners[lane.label].selections = selections
 
     def execute(lane):
         # Scheduled labels include repetition suffixes; configuration labels do not.
@@ -130,9 +124,9 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
             if lane.tool == "buildpatchtool":
                 from .tools.buildpatchtool import run_buildpatchtool
                 return run_buildpatchtool(resolved[label], commands, layout.lane(lane.label), product, lane,
-                                          dataset=selections[(product, fixture.snapshot_limit, False)],
+                                          dataset=dataset,
                                           recovery_enabled=fixture.corrupt_repair)
-            result = runners[label].run_lane(product, lane, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit)
+            result = runners[label].run_lane(product, lane, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit, dataset=dataset)
             result.metadata.setdefault("status", "PASS")
             result.metadata["operations"] = operation_statuses(
                 lane.tool, fixture.corrupt_repair, bool(result.metadata.get("recovery_error")),

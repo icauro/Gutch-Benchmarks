@@ -4,12 +4,11 @@ import math
 from pathlib import Path
 from typing import Any
 
-from comparison_benchmark_suite.scheduling.config import ScenarioCatalog, load_scenario
+from comparison_benchmark_suite.scheduling.config import load_scenario
 from comparison_benchmark_suite.support.artifacts import safe_component
 from comparison_benchmark_suite.tools.models import FixtureSpec, GutchProfile, LaneSpec
 
 
-FIXTURE_ROOT = Path(__file__).resolve().parents[1] / "fixtures"
 CHUNK_PROFILES = {
     "chunk_512B", "chunk_2KiB", "chunk_8KiB", "chunk_2MiB", "chunk_4MiB",
     "chunk_1KiB",
@@ -73,20 +72,7 @@ def _snapshot_limit(values: dict[str, Any], path: Path) -> int | None:
 
 
 def _profile(values: dict[str, Any], name: str) -> GutchProfile:
-    legacy_fields = {
-        "chunk_profile",
-        "bundle_profile",
-        "compression_profile",
-        "storage_mode",
-    } & values.keys()
-    if legacy_fields:
-        fields = ", ".join(sorted(legacy_fields))
-        raise ValueError(f"{name} uses unsupported legacy profile fields: {fields}")
     raw = values.get("profile")
-    if isinstance(raw, str):
-        if raw != "default":
-            raise ValueError(f"unknown {name} profile {raw!r}")
-        raw = {}
     if raw is None:
         raw = {}
     if not isinstance(raw, dict):
@@ -136,12 +122,10 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
     )
 
 
-def load_fixture(path: Path) -> FixtureSpec:
+def load_fixture(path: Path, *, gutch_workloads=("individual",)) -> FixtureSpec:
     document = load_scenario(path)
     values = document.values
     lanes_value = values.get("lanes", [])
-    if isinstance(lanes_value, dict):
-        lanes_value = [dict(lane, label=label) for label, lane in lanes_value.items()]
     if not isinstance(lanes_value, list) or not lanes_value:
         raise ValueError(f"fixture must define at least one lane: {path}")
     lanes: list[LaneSpec] = []
@@ -149,32 +133,24 @@ def load_fixture(path: Path) -> FixtureSpec:
     for raw in lanes_value:
         if not isinstance(raw, dict):
             raise ValueError(f"fixture lane must be a mapping: {path}")
-        lane_phase_options = {
-            key
-            for key in ("verify_reconstruct", "corrupt_reconstruct", "repair_reconstruct", "corrupt_repair")
-            if key in raw
-        }
-        if lane_phase_options:
-            names = ", ".join(sorted(lane_phase_options))
-            raise ValueError(f"{names} must be configured at fixture level, not per lane: {path}")
+        unknown = set(raw) - {"label", "tool", "workload", "profile", "warmup", "arguments"}
+        if unknown:
+            raise ValueError(f"unsupported lane fields: {sorted(unknown)}")
         label = raw.get("label")
         tool = raw.get("tool", "gutch")
         workload = raw.get("workload", "copy" if tool == "filesystem" else "individual")
         kind = "filesystem-copy" if tool == "filesystem" else f"{tool}-{workload}"
         if tool == "filesystem" and workload != "copy":
             raise ValueError("filesystem cases only support the copy workload")
-        if "kind" in raw:
-            raise ValueError(f"{path}: lane {label!r}: configure tool and workload separately instead of kind")
         if not isinstance(label, str) or not label.strip() or label in labels:
             raise ValueError(f"fixture lane labels must be unique non-empty strings: {path}")
-        if not isinstance(kind, str):
-            raise ValueError(f"fixture lane kind must be a string: {path}")
         normalized_label = safe_component(label)
         if normalized_label in labels:
             raise ValueError(f"lane labels collide as artifact names: {label}")
         labels.add(normalized_label)
-        if kind not in {"gutch-individual", "gutch-batch", "gutch-product-bulk", "filesystem-copy", "buildpatchtool-individual",
-                       *(f"{tool}-{mode}" for tool in ("restic", "kopia", "borg", "plakar") for mode in ("individual", "exact-bulk"))}:
+        allowed = {"gutch": gutch_workloads, "filesystem": ("copy",),
+                   **dict.fromkeys(("restic", "kopia", "borg", "plakar", "buildpatchtool"), ("individual",))}
+        if workload not in allowed.get(tool, ()):
             raise ValueError(f"unsupported lane kind: {kind}")
         if tool != "gutch" and "profile" in raw:
             raise ValueError("Gutch profiles only apply to Gutch cases")
@@ -197,8 +173,6 @@ def load_fixture(path: Path) -> FixtureSpec:
         raise ValueError("profile_mode must be off, summary, or detailed")
     if all(lane.warmup for lane in lanes):
         raise ValueError("fixture must contain a measured lane")
-    if "memory_profile" in values or "measurement_mode" in values:
-        raise ValueError("use profile_mode: off, summary, or detailed")
     return FixtureSpec(
         name=document.name,
         runner=str(values.get("runner", "gutch-fixture")),
@@ -214,21 +188,3 @@ def load_fixture(path: Path) -> FixtureSpec:
         repetitions=repetitions,
         profile_mode=mode,
     )
-
-
-class FixtureCatalog:
-    def __init__(self, root: Path = FIXTURE_ROOT):
-        self.root = root
-
-    def list(self) -> list[FixtureSpec]:
-        return [
-            load_fixture(document.source_path)
-            for document in ScenarioCatalog(self.root).list()
-            if document.values.get("runner", "gutch-fixture") == "gutch-fixture"
-        ]
-
-    def resolve(self, name: str) -> FixtureSpec:
-        document = ScenarioCatalog(self.root).resolve(name)
-        if document.values.get("runner", "gutch-fixture") != "gutch-fixture":
-            raise ValueError(f"fixture {name!r} is not a local Gutch fixture")
-        return load_fixture(document.source_path)

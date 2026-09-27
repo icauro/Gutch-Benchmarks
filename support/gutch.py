@@ -87,36 +87,6 @@ class GutchOperations:
         )
         return result.elapsed_seconds, read_stats(stats_path)
 
-    def capture_many(
-        self,
-        repo: Path,
-        source_root: Path,
-        profile: GutchProfile,
-        stats_path: Path,
-        trace_path: Path,
-        tag: str,
-        label: str,
-    ) -> tuple[float, dict[str, Any]]:
-        result = self.commands.run(
-            self.cli.command(
-                "snapshot",
-                "capture",
-                "--discover-from",
-                source_root,
-                "--repo",
-                repo,
-                "--yes",
-                "--tag",
-                f"benchmark={tag.replace('-', '_')}",
-                *GutchCli.profile_args(profile),
-                "--json", "--output",
-                stats_path,
-                "--profile-dir",
-                trace_path.parent,
-            ),
-            description=f"capture-many {label}",
-        )
-        return result.elapsed_seconds, read_stats(stats_path)
 
     def reconstruct(
         self,

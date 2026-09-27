@@ -313,11 +313,18 @@ comparison run. `interactive.py` launches the same CLI and displays its progress
 
 Tool workflows live in `tools/`; scheduling and aggregate measurements live in
 `scheduling/`; process execution, validation, and traces live in `support/`.
-Individual and batch Gutch captures share the same restore/validation/repair
-phase. The diagnostic entrypoints remain used by the separately installed
-Gutch benchmark harness.
+The suite compares individual snapshots through capture, clean restore, and
+optional repair. Batch/whole-product Gutch workflows, diagnostic reports, and
+the internal fixture catalog belong to the Gutch harness, which imports shared
+measurement and validation helpers from this package.
 
 Run the six core tests with `python -m unittest discover -s tests` from this
 folder. They cover portable execution, failure isolation, output validation,
 archive path boundaries, the interactive run flow, and cancellation.
 Tool-specific mock tests and narrow configuration checks are intentionally omitted.
+
+Fixtures use a `lanes` list with explicit labels and a `profile` mapping for
+Gutch options. Alternate lane mappings, string profiles, and external bulk
+workloads are not supported. Plain-terminal progress uses start/completion
+lines; the interactive screen owns live progress. Borg commands use Borg 2
+syntax directly. Executables resolve only from explicit paths or PATH.

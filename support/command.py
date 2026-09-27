@@ -1,7 +1,6 @@
 """One command execution boundary for all benchmark workflows."""
 
 from dataclasses import dataclass
-import itertools
 import json
 import os
 from pathlib import Path
@@ -36,45 +35,6 @@ class CommandError(RuntimeError):
         )
 
 
-class _CommandProgress:
-    """Small terminal spinner that does not pollute redirected benchmark output."""
-
-    def __init__(self, description: str, stream: TextIO, enabled: bool | None):
-        self.description = description
-        self.stream = stream
-        self.enabled = stream.isatty() if enabled is None else enabled
-        self._stop = threading.Event()
-        self._thread: threading.Thread | None = None
-        self._finished = False
-
-    def start(self) -> None:
-        if not self.enabled:
-            return
-        self._write("|", end="")
-        self._thread = threading.Thread(target=self._spin, daemon=True)
-        self._thread.start()
-
-    def _spin(self) -> None:
-        for frame in itertools.cycle(("/", "-", "\\", "|")):
-            if self._stop.wait(0.12):
-                return
-            self._write(frame, end="")
-
-    def _write(self, frame: str, *, end: str) -> None:
-        print(f"\r[{frame}] {self.description}", end=end, file=self.stream, flush=True)
-
-    def finish(self, success: bool) -> None:
-        if self._finished:
-            return
-        self._finished = True
-        if not self.enabled:
-            return
-        self._stop.set()
-        if self._thread is not None:
-            self._thread.join()
-        self._write("done" if success else "FAIL", end="\n")
-
-
 def _redact(value: str) -> str:
     try:
         parsed = urlsplit(value)
@@ -105,7 +65,7 @@ class CommandRunner:
         if not 0 < self.timeout_seconds < float("inf"):
             raise ValueError("benchmark command timeout must be finite and positive")
         self.memory_profile = memory_profile
-        self.progress = progress
+        self.progress = (stream or sys.stderr).isatty() if progress is None else progress
         self.stream = stream or sys.stderr
         self.step_wait_seconds = step_wait_seconds
         self.on_step = on_step
@@ -113,6 +73,10 @@ class CommandRunner:
         self.evidence_directory: Path | None = None
         self.measurements: list[dict] = []
         self.lane_started = time.perf_counter()
+
+    def _print_progress(self, status: str, description: str) -> None:
+        if self.progress:
+            print(f"[{status}] {description}", file=self.stream, flush=True)
 
     def begin_lane(self) -> None:
         """Reset the step boundary before starting a new benchmark lane."""
@@ -153,8 +117,7 @@ class CommandRunner:
         self._wait_for_step(description)
         if self.on_step is not None:
             self.on_step(description)
-        progress = _CommandProgress(description, self.stream, self.progress)
-        progress.start()
+        self._print_progress("run", description)
         started = time.perf_counter()
         memory = {} if self.memory_profile else None
         memory_options = {}
@@ -168,7 +131,7 @@ class CommandRunner:
                 on_output=on_output or (lambda line, is_stderr: None),
             )
         except BaseException as error:
-            progress.finish(False)
+            self._print_progress("FAIL", description)
             if self.evidence_directory is not None:
                 self.evidence_directory.mkdir(parents=True, exist_ok=True)
                 (self.evidence_directory / "command-failure.json").write_text(json.dumps({
@@ -201,7 +164,7 @@ class CommandRunner:
             (self.evidence_directory / f"{sequence:04d}.stdout.log").write_text(redact_output(stdout), encoding="utf-8")
             (self.evidence_directory / f"{sequence:04d}.stderr.log").write_text(redact_output(stderr), encoding="utf-8")
         success = (result.returncode == 0) != expected_failure
-        progress.finish(success)
+        self._print_progress("done" if success else "FAIL", description)
         self._has_completed_step = True
         if not success:
             raise CommandError(result, description)

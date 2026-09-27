@@ -48,40 +48,6 @@ class _TraceHandler(http.server.SimpleHTTPRequestHandler):
         del format, args
 
 
-def combine_traces(inputs: Iterable[Path], output: Path) -> None:
-    events: list[dict] = []
-    pid_offset = 0
-    tid_offset = 0
-    timestamp_offset = 0.0
-    for source in inputs:
-        if not source.exists():
-            continue
-        document = json.loads(source.read_text(encoding="utf-8"))
-        local_events = document.get("traceEvents", [])
-        if not local_events:
-            continue
-        pids = [event.get("pid", 0) for event in local_events if isinstance(event.get("pid", 0), int)]
-        tids = [event.get("tid", 0) for event in local_events if isinstance(event.get("tid", 0), int)]
-        minimum_ts = min((event.get("ts", 0.0) for event in local_events), default=0.0)
-        for event in local_events:
-            copied = dict(event)
-            if isinstance(copied.get("pid"), int):
-                copied["pid"] += pid_offset
-            if isinstance(copied.get("tid"), int):
-                copied["tid"] += tid_offset
-            if isinstance(copied.get("ts"), (int, float)):
-                copied["ts"] = copied["ts"] - minimum_ts + timestamp_offset
-            events.append(copied)
-        pid_offset += max(pids, default=0) + 1
-        tid_offset += max(tids, default=0) + 1
-        timestamp_offset = max((event.get("ts", 0.0) + event.get("dur", 0.0) for event in events), default=0.0) + 1.0
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps({"traceEvents": events, "displayTimeUnit": "ms"}, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
-
 def combine_labeled_traces(inputs: Iterable[tuple[str, Path]], output: Path,
                            *, source_offsets: dict[Path, float] | None = None) -> None:
     """Combine phase traces while keeping every benchmark lane in one process."""
