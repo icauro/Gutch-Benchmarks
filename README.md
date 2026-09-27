@@ -147,6 +147,8 @@ Operations appear back-to-back with their measured durations preserved; this
 is not an elapsed run clock and rows do not imply concurrent execution.
 Warm-ups are excluded. Operation spans use wall-clock duration and
 include setup/probes as well as capture, restore, checking and recovery commands.
+Trace timestamps and durations share integer-microsecond precision to prevent
+rounding overlaps; raw benchmark measurements retain their original precision.
 Harness validation, preparation, cleanup and waits between operations are omitted
 from the timeline. Raw command timestamps and performance metrics are unchanged.
 

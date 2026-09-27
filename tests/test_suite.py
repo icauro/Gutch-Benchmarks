@@ -104,6 +104,21 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(spans["verify"]["dur"], 500_000)
         self.assertEqual(spans["verify"]["args"]["returncode"], 1)
 
+    def test_compacted_fractional_durations_do_not_overlap_after_combining(self):
+        from comparison_benchmark_suite.support.traces import write_lane_timeline, combine_labeled_traces
+        lane = self.root / "timeline.json"
+        measurements = [{"operation": str(index), "boundary": "process_elapsed",
+                         "elapsed_seconds": duration} for index, duration in enumerate(
+                             [0.3980697, 2.1202831, 5.7358942, 0.0000007])]
+        write_lane_timeline("tool", measurements, {}, lane)
+        output = self.root / "combined.json"
+        combine_labeled_traces([("tool", lane)], output)
+        spans = [e for e in json.loads(output.read_text())["traceEvents"] if e["ph"] == "X"]
+        for left, right in zip(spans, spans[1:]):
+            self.assertEqual(left["ts"] + left["dur"], right["ts"])
+        for span, measurement in zip(spans, measurements):
+            self.assertLessEqual(abs(span["dur"] - measurement["elapsed_seconds"] * 1e6), 0.5)
+
     def test_failed_candidate_retains_evidence_and_does_not_stop_copy(self):
         from comparison_benchmark_suite import run
         from unittest.mock import patch

@@ -240,9 +240,11 @@ def write_lane_timeline(label: str, measurements: list[dict], traces: dict,
     events = [{"ph": "M", "name": "thread_name", "pid": 1, "tid": 1,
                "args": {"name": "Compacted tool time"}}]
     offsets = {command_trace: 0.0}
-    start = 0.0
+    start = 0
     for measurement in measurements:
-        duration = measurement["elapsed_seconds"] * 1_000_000
+        # The combiner emits integer microsecond timestamps. Quantize durations
+        # on the same grid so adjacent envelopes cannot overlap after import.
+        duration = round(measurement["elapsed_seconds"] * 1_000_000)
         events.append({"ph": "X", "name": measurement["operation"], "pid": 1, "tid": 1,
                        "ts": start, "dur": duration,
                        "cat": measurement["boundary"],
