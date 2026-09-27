@@ -82,7 +82,7 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
         fields = ", ".join(sorted(unknown_fields))
         raise ValueError(f"{name} profile contains unsupported fields: {fields}")
     chunker = raw.get("chunker", "fastcdc")
-    if chunker not in ("fastcdc", "jc"):
+    if chunker not in ("fastcdc", "jc", "vram256"):
         raise ValueError(f"invalid Gutch chunker for {name}")
     chunk = raw.get("chunk", "chunk_128KiB")
     bundle = raw.get("bundle", "bundle_8MiB")
