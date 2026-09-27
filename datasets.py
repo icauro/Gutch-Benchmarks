@@ -9,6 +9,7 @@ import shutil
 import tarfile
 from urllib.request import urlopen
 import zipfile
+import yaml
 
 from .support.filesystem import file_sha256, inventory
 from .support.retention import remove_owned
@@ -33,6 +34,16 @@ def extract_archive(archive: Path, destination: Path) -> None:
 
 
 def prepare_dataset(values: dict, fixture: Path, artifacts: Path) -> tuple[Path, dict]:
+    if "dataset" in values:
+        if "builds" in values:
+            raise ValueError("Use either dataset or builds, not both.")
+        reference = values["dataset"]
+        if not isinstance(reference, str) or not reference.strip():
+            raise ValueError("dataset must name a YAML file containing builds.")
+        fixture = (fixture.parent / reference).resolve()
+        values = yaml.safe_load(fixture.read_text(encoding="utf-8"))
+        if not isinstance(values, dict) or "dataset" in values:
+            raise ValueError("Shared dataset must directly define builds; nested references are unsupported.")
     builds = values.get("builds")
     if not isinstance(builds, list) or len(builds) < 2:
         raise ValueError("The fixture needs at least two builds, ordered oldest to newest.")

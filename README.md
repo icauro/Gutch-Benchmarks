@@ -34,6 +34,48 @@ Paths in a fixture are relative to that fixture's folder. No tool is downloaded
 or built automatically. To compare two Gutch binaries, give their lanes distinct
 labels and put each executable under its label in `executables`.
 
+## Pairwise comparisons
+
+Run one pair with the same shared Blender inputs:
+
+```text
+python run.py --fixture gutch_vs_kopia
+python run.py --fixture gutch_vs_restic
+python run.py --fixture gutch_vs_borg
+python run.py --fixture gutch_vs_plakar
+python run.py --fixture gutch_vs_bpt
+```
+
+These fixtures use one warm-up, three measured repetitions, rotating order and
+profiling off. Each references `blender/fixture.yaml` for inputs, reusing its
+cache rather than copying the Blender download definitions. Set executable paths
+in the selected fixture as needed. Custom fixtures may use `dataset: file.yaml`
+instead of `builds`; build paths are relative to the shared definition file.
+Nested dataset references are not supported.
+
+| Pair | Other tool's performance defaults | Gutch profile |
+|---|---|---|
+| Kopia 0.23.1 | Buzhash 4 MiB target; file compression off | `chunk_4MiB`, compression `none`, `bundle_16MiB` |
+| Restic 0.19.1 | Rabin approximately 1 MiB; Zstd `auto` | `chunk_1MiB`, Zstd 3 |
+| Borg 2.0.0b24 | FastCDC approximately 2 MiB, normalization 2; LZ4 | `chunk_2MiB`, LZ4 0 |
+| Plakar 1.1.7 | FastCDC approximately 1 MiB; default LZ4 stream writer | `chunk_1MiB`, LZ4 0 |
+| BPT 1.8.8 | 1 MiB window; internal compression | `chunk_1MiB`, Zstd 3 (codec unmatched) |
+
+Gutch keeps automatic workers and its native FastCDC algorithm. Bundles use the
+8 MiB profile except the Kopia pair, which requires the 16 MiB profile because
+its 4 MiB chunk profile allows chunks up to 16 MiB.
+Chunk bounds, normalization, codec implementations, metadata compression and
+storage layouts are not identical. Plakar's stream writer does not apply the
+stored compression level; its default LZ4 behavior is matched approximately,
+not treated as equivalent to Gutch LZ4 high compression level 9.
+
+Existing operational choices remain: isolated repositories/caches, no encryption
+for Borg/Plakar, encryption for Kopia/Restic, independent validation, and native
+recovery options. Thus these preserve performance defaults where practical;
+they are not unmodified default invocations. Extra files remain nonfatal.
+Use detailed profiling only in a separate diagnostic run.
+The all-tools `blender` fixture remains the explicitly normalized overview below.
+
 ## Comparison settings
 
 The Blender fixture explicitly targets **1 MiB chunks** and **Zstd level 3 or

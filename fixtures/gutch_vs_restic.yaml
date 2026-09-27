@@ -1,0 +1,22 @@
+name: gutch_vs_restic
+description: Compare Gutch against restic performance defaults on Blender.
+dataset: blender/fixture.yaml
+repetitions: 3
+warmups: 1
+profile_mode: 'off'
+corrupt_repair: true
+lane_wait_seconds: 0
+step_wait_seconds: 0
+executables:
+  gutch: gutch-cli
+  restic: restic
+lanes:
+- label: gutch
+  tool: gutch
+  profile:
+    chunk: chunk_1MiB
+    compression:
+      algorithm: zstd
+      level: 3
+- label: restic
+  tool: restic

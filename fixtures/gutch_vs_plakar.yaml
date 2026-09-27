@@ -1,0 +1,22 @@
+name: gutch_vs_plakar
+description: Compare Gutch against plakar performance defaults on Blender.
+dataset: blender/fixture.yaml
+repetitions: 3
+warmups: 1
+profile_mode: 'off'
+corrupt_repair: true
+lane_wait_seconds: 0
+step_wait_seconds: 0
+executables:
+  gutch: gutch-cli
+  plakar: plakar
+lanes:
+- label: gutch
+  tool: gutch
+  profile:
+    chunk: chunk_1MiB
+    compression:
+      algorithm: lz4
+      level: 0
+- label: plakar
+  tool: plakar

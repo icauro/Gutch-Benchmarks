@@ -51,6 +51,8 @@ def main(arguments=None) -> int:
         fixture_path = Path(args.fixture).expanduser()
         if not fixture_path.exists():
             fixture_path = ROOT / "fixtures" / args.fixture
+            if not fixture_path.exists() and fixture_path.suffix == "":
+                fixture_path = fixture_path.with_suffix(".yaml")
         if fixture_path.is_dir():
             fixture_path /= "fixture.yaml"
         fixture_path = fixture_path.resolve()

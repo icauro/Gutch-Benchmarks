@@ -283,6 +283,28 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0][-1], "--version")
 
+    def test_pairwise_fixtures_leave_external_performance_defaults_untouched(self):
+        from comparison_benchmark_suite.tools.config import load_fixture
+        for name, tool in [("kopia", "kopia"), ("restic", "restic"), ("borg", "borg"),
+                           ("plakar", "plakar"), ("bpt", "buildpatchtool")]:
+            path = ROOT / "fixtures" / f"gutch_vs_{name}.yaml"
+            fixture = load_fixture(path)
+            self.assertEqual([lane.tool for lane in fixture.lanes], ["gutch", tool])
+            self.assertEqual(fixture.lanes[1].arguments, ())
+            self.assertEqual(fixture.profile_mode, "off")
+            self.assertEqual(fixture.repetitions, 3)
+
+    def test_shared_dataset_reuses_cache_and_resolves_paths_from_definition(self):
+        builds = self.inputs()
+        definition = self.root / "shared.yaml"
+        definition.write_text(yaml.safe_dump({"builds": builds}))
+        values = {"dataset": "shared.yaml"}
+        first, _ = prepare_dataset(values, self.root / "first.yaml", self.root / ".artifacts")
+        second, _ = prepare_dataset(values, self.root / "second.yaml", self.root / ".artifacts")
+        self.assertEqual(first, second)
+        with self.assertRaisesRegex(ValueError, "either dataset or builds"):
+            prepare_dataset({**values, "builds": builds}, self.root / "third.yaml", self.root / ".artifacts")
+
     def test_corruption_plan_preserves_permissions(self):
         from comparison_benchmark_suite.support.recovery import build_corruption_plan, apply_corruption_plan
         destination = self.root / "installation"
