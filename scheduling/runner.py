@@ -6,12 +6,13 @@ import subprocess
 import time
 import statistics
 from comparison_benchmark_suite.support.filesystem import file_sha256
-from comparison_benchmark_suite.support.traces import combine_labeled_traces, open_trace_in_perfetto
+from comparison_benchmark_suite.support.traces import combine_labeled_traces, open_trace_in_perfetto, write_lane_timeline
 
 
 def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifacts=False,
                   on_lane_complete=None, on_run_complete=None):
     results = []
+    timelines = []
     failed_cases = []
     schedule = []
     for lane in fixture.lanes:
@@ -41,6 +42,7 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
             layout.write_manifest('running', current_case=label)
             commands.begin_lane()
             commands.evidence_directory = layout.lane(label).root / 'commands'
+            measurement_start = len(commands.measurements)
             result = execute(case)
             if result.metadata.get('status') == 'ERROR':
                 failed_cases.append(label)
@@ -52,12 +54,14 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
             layout.write_json(layout.lane(label).root / 'result.json', result.as_json())
             if not specification.warmup:
                 results.append(result)
+                timeline = layout.lane(label).traces / "timeline.json"
+                write_lane_timeline(label, commands.measurements[measurement_start:], result.traces, timeline)
+                timelines.append((label, timeline))
                 layout.write_results([item.as_json() for item in results])
                 if on_lane_complete: on_lane_complete(result)
             if index + 1 < len(schedule) and fixture.lane_wait_seconds:
                 time.sleep(fixture.lane_wait_seconds)
-        combine_labeled_traces([(result.label, Path(trace)) for result in results
-            for paths in result.traces.values() for trace in paths], layout.root / 'trace.json')
+        combine_labeled_traces(timelines, layout.root / 'trace.json')
         summary = {}
         for case in measured:
             samples = [result for result in results if result.metadata['case'] == case.label]
@@ -81,6 +85,6 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
         layout.write_manifest('cancelled' if isinstance(error, KeyboardInterrupt) else 'failed', error=str(error))
         raise
     print(f"Wrote benchmark results: {layout.root / 'results.json'}")
-    if fixture.open_perfetto and fixture.profile_mode == 'detailed':
+    if fixture.open_perfetto:
         open_trace_in_perfetto(layout.root / 'trace.json', print)
     return results

@@ -65,8 +65,37 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual({r["metadata"]["status"] for r in results}, {"PASS", "UNAVAILABLE"})
         self.assertFalse(any((run / "lanes").glob("*/payload")))
         self.assertTrue((run / "summary.md").exists())
+        events = json.loads((run / "trace.json").read_text())["traceEvents"]
+        spans = [event for event in events if event["ph"] == "X"]
+        self.assertEqual(len(spans), 12)  # Capture, restore, recovery x two builds x two measured runs.
+        self.assertTrue(all(event["dur"] > 0 for event in spans))
+        self.assertFalse(any("warmup" in event.get("args", {}).get("name", "") for event in events))
         for index, build in enumerate(builds, 1):
             self.assertEqual((Path(build["path"]) / "file.txt").read_text(), f"version {index}")
+
+    def test_timeline_aligns_commands_and_keeps_engine_threads(self):
+        from comparison_benchmark_suite.support.traces import write_lane_timeline
+        profile = self.root / "profile"
+        profile.mkdir()
+        trace = profile / "trace.json"
+        trace.write_text(json.dumps({"traceEvents": [
+            {"ph": "M", "name": "thread_name", "pid": 7, "tid": 8, "args": {"name": "Worker #1"}},
+            {"ph": "X", "name": "hash", "pid": 7, "tid": 8, "ts": 100, "dur": 50},
+        ]}))
+        output = self.root / "timeline.json"
+        write_lane_timeline("gutch", [
+            {"operation": "capture", "boundary": "process_elapsed", "start_seconds": 2,
+             "elapsed_seconds": 1, "returncode": 0, "command": ["tool", "--profile-dir", str(profile)]},
+            {"operation": "verify", "boundary": "process_elapsed", "start_seconds": 4,
+             "elapsed_seconds": 0.5, "returncode": 1},
+        ], {"capture": [str(trace)]}, output)
+        events = json.loads(output.read_text())["traceEvents"]
+        spans = {event["name"]: event for event in events if event["ph"] == "X"}
+        self.assertEqual(spans["capture"]["ts"], 2_000_000)
+        self.assertEqual(spans["capture"]["dur"], 1_000_000)
+        self.assertEqual(spans["hash"]["ts"], 2_000_100)
+        self.assertNotEqual(spans["hash"]["tid"], spans["capture"]["tid"])
+        self.assertEqual(spans["verify"]["args"]["returncode"], 1)
 
     def test_failed_candidate_retains_evidence_and_does_not_stop_copy(self):
         from comparison_benchmark_suite import run

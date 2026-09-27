@@ -119,6 +119,7 @@ The command prints the report path under `.artifacts/runs/`. Each run contains:
 - `summary.json`: per-candidate medians and ranges.
 - `results.json`: measured samples, operation semantics, and validation outcomes.
 - `run.json`: fixture, input provenance, executable hashes, and environment.
+- `trace.json`: all measured tools together in Perfetto, including command durations and filesystem copies.
 - `lanes/`: command logs, validation records, and optional diagnostic traces.
 
 Correct outputs are checked before corruption/repair, then checked again after
@@ -134,8 +135,17 @@ The command exits nonzero if a measured candidate fails. The newest 20 unpinned
 successful reports are retained. Plakar uses a short OS temporary socket/cache
 path where needed; successful cleanup removes that run-owned path too.
 
-Set `profile_mode: detailed` in the fixture only for diagnostic tracing and
-sampled process memory. Its measurement overhead makes it a separate comparison
+Open `trace.json` in Perfetto, or set `open_perfetto: true` in the fixture to
+open it after the run. The shared overview works with `profile_mode: off`.
+Each tool/repetition starts at zero for comparison; rows do not imply concurrent
+execution. Warm-ups are excluded. Operation spans use wall-clock duration and
+include setup/probes as well as capture, restore, checking and recovery commands.
+Independent validation and waits appear as gaps, not command execution.
+
+Set `profile_mode: detailed` in the fixture only for Gutch internal tracing and
+sampled process memory. Engine spans are approximately aligned to their command
+start; process startup is not synchronized with the engine clock. External tools
+provide operation spans, not internal worker traces. Its measurement overhead makes it a separate comparison
 from the default `off` mode. The existing runtime modules also serve Gutch's
 optional developer diagnostics; the simple command does not require those tools.
 

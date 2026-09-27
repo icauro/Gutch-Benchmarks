@@ -82,7 +82,8 @@ def combine_traces(inputs: Iterable[Path], output: Path) -> None:
     )
 
 
-def combine_labeled_traces(inputs: Iterable[tuple[str, Path]], output: Path) -> None:
+def combine_labeled_traces(inputs: Iterable[tuple[str, Path]], output: Path,
+                           *, source_offsets: dict[Path, float] | None = None) -> None:
     """Combine phase traces while keeping every benchmark lane in one process."""
     events: list[dict] = []
     lane_process_ids: dict[str, int] = {}
@@ -119,7 +120,7 @@ def combine_labeled_traces(inputs: Iterable[tuple[str, Path]], output: Path) -> 
 
         process_id = lane_process_ids[label]
         thread_ids = lane_thread_ids[label]
-        offset = lane_offsets[label]
+        offset = source_offsets.get(source, lane_offsets[label]) if source_offsets else lane_offsets[label]
         source_duration = 0
         # Inputs are deliberately concatenated, so unique role names can reuse
         # a row across commands. Ambiguous/unnamed threads stay source-local.
@@ -230,3 +231,28 @@ def open_trace_in_perfetto(trace_path: Path, log: Callable[[str], None]) -> bool
     except OSError as error:
         log(f"Could not start the local Perfetto trace server: {error}")
         return False
+
+
+def write_lane_timeline(label: str, measurements: list[dict], traces: dict,
+                        output: Path) -> None:
+    """Place command envelopes and available engine spans on one lane clock."""
+    command_trace = output.with_name("commands.json")
+    events = [{"ph": "M", "name": "thread_name", "pid": 1, "tid": 1,
+               "args": {"name": "Operations (wall time)"}}]
+    offsets = {command_trace: 0.0}
+    for measurement in measurements:
+        start = measurement["start_seconds"] * 1_000_000
+        events.append({"ph": "X", "name": measurement["operation"], "pid": 1, "tid": 1,
+                       "ts": start, "dur": measurement["elapsed_seconds"] * 1_000_000,
+                       "cat": measurement["boundary"],
+                       "args": {"returncode": measurement.get("returncode", 0)}})
+        command = measurement.get("command", ())
+        if "--profile-dir" in command:
+            path = Path(command[command.index("--profile-dir") + 1]) / "trace.json"
+            # Engine clocks start after process launch. Align to the envelope's
+            # start as an approximation; do not imply cross-process clock sync.
+            offsets[path] = start
+    command_trace.parent.mkdir(parents=True, exist_ok=True)
+    command_trace.write_text(json.dumps({"traceEvents": events}), encoding="utf-8")
+    sources = [command_trace, *dict.fromkeys(Path(path) for paths in traces.values() for path in paths)]
+    combine_labeled_traces([(label, path) for path in sources], output, source_offsets=offsets)

@@ -289,6 +289,7 @@ class LocalFixtureRunner:
             started = time.perf_counter()
             shutil.copytree(source, repo / source.name, symlinks=True)
             snapshot_metrics[source.name]["backup"] = time.perf_counter() - started
+            self.commands.record_operation(f"capture {source.name}", started, snapshot_metrics[source.name]["backup"])
         repo_stats = scan_tree(repo)
 
         def restore_output(record_snapshots: bool) -> float:
@@ -297,6 +298,8 @@ class LocalFixtureRunner:
                 started = time.perf_counter()
                 shutil.copytree(repo / source.name, output / source.name, symlinks=True)
                 elapsed = time.perf_counter() - started
+                operation = "restore" if record_snapshots else "full recovery"
+                self.commands.record_operation(f"{operation} {source.name}", started, elapsed)
                 total += elapsed
                 if record_snapshots:
                     snapshot_metrics[source.name]["restore"] = elapsed

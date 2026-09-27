@@ -262,29 +262,30 @@ def run_external(
 
     def restore_output(record_snapshots: bool = False) -> float:
         restore_started = len(elapsed_commands)
+        operation = "restore" if record_snapshots else "full recovery"
         output.mkdir(parents=True, exist_ok=True)
         if bulk and kind == "restic":
             execute(
                 [executable, "restore", "latest", "--verify", "--repo", repo, "--target", output],
-                description=f"{lane_spec.label} restore",
+                description=f"{lane_spec.label} {operation}",
                 env=env,
             )
         elif bulk and kind == "kopia":
             execute(
                 [executable, "snapshot", "restore", product, output, "--snapshot-time=latest", "--no-progress"],
-                description=f"{lane_spec.label} restore",
+                description=f"{lane_spec.label} {operation}",
                 env=env,
             )
         elif bulk and kind == "plakar":
             execute(
                 _plakar_command(executable, repo, plakar_cache_directory, "restore", "-to", output),
-                description=f"{lane_spec.label} restore",
+                description=f"{lane_spec.label} {operation}",
                 env=env,
             )
         elif bulk:
             execute(
                 [executable, "extract", f"{repo}::{identifiers['bulk']}"],
-                description=f"{lane_spec.label} extract",
+                description=f"{lane_spec.label} {operation}",
                 cwd=output,
                 env=env,
             )
@@ -293,13 +294,13 @@ def run_external(
                 if kind == "restic":
                     execute(
                         [executable, "restore", identifiers[source.name], "--verify", "--repo", repo, "--target", output, "--include", source.name],
-                        description=f"{lane_spec.label} restore {source.name}",
+                        description=f"{lane_spec.label} {operation} {source.name}",
                         env=env,
                     )
                 elif kind == "kopia":
                     execute(
                         [executable, "snapshot", "restore", source, output / source.name, "--snapshot-time=latest", "--no-progress"],
-                        description=f"{lane_spec.label} restore {source.name}",
+                        description=f"{lane_spec.label} {operation} {source.name}",
                         env=env,
                     )
                 elif kind == "plakar":
@@ -307,13 +308,13 @@ def run_external(
                     destination.mkdir(parents=True, exist_ok=True)
                     execute(
                         _plakar_command(executable, repo, plakar_cache_directory, "restore", "-to", destination, "-tag", identifiers[source.name]),
-                        description=f"{lane_spec.label} restore {source.name}",
+                        description=f"{lane_spec.label} {operation} {source.name}",
                         env=env,
                     )
                 else:
                     execute(
                         [executable, "extract", f"{repo}::{identifiers[source.name]}"],
-                        description=f"{lane_spec.label} extract {source.name}",
+                        description=f"{lane_spec.label} {operation} {source.name}",
                         cwd=output,
                         env=env,
                     )

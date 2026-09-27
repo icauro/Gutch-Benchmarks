@@ -112,10 +112,18 @@ class CommandRunner:
         self._has_completed_step = False
         self.evidence_directory: Path | None = None
         self.measurements: list[dict] = []
+        self.lane_started = time.perf_counter()
 
     def begin_lane(self) -> None:
         """Reset the step boundary before starting a new benchmark lane."""
         self._has_completed_step = False
+        self.lane_started = time.perf_counter()
+
+    def record_operation(self, description: str, started: float, elapsed: float) -> None:
+        """Record an in-process operation on the same clock as subprocesses."""
+        self.measurements.append({"operation": description, "boundary": "in_process_elapsed",
+                                  "start_seconds": started - self.lane_started,
+                                  "elapsed_seconds": elapsed})
 
     def _wait_for_step(self, description: str) -> None:
         if not self._has_completed_step or self.step_wait_seconds <= 0:
@@ -175,6 +183,7 @@ class CommandRunner:
             stderr=stderr,
         )
         measurement = {"operation": description, "boundary": "process_elapsed",
+            "start_seconds": started - self.lane_started,
             "elapsed_seconds": result.elapsed_seconds, "command": result.command,
             "returncode": result.returncode}
         if memory is not None:
