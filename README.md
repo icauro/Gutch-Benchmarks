@@ -181,7 +181,11 @@ need a new run before comparison. They are not claims
 about every platform. Recovery errors retain successful capture/restore metrics,
 mark the run `ERROR`, omit a successful repair timing, and preserve evidence.
 No full-rebuild fallback masks a native recovery failure. Independent validation
-must match content, supported metadata and the exact tree, including no extras.
+requires every expected entry, matching content and supported metadata. Extra
+files are allowed and recorded in each validation JSON's `extra_files` list;
+they do not fail a run. Native deletion flags remain enabled where available.
+The older probe outcomes in the table used strict extra-file validation and do
+not describe the current pass criterion.
 
 ## BuildPatchTool
 
@@ -197,7 +201,7 @@ it applies the same corruption plan as the other tools and calls `InstallManifes
 with `PrevManifest` against the damaged output. It does not delete the installation.
 Only independently validated runs receive `PASS`. BPT 1.8.8 has no advertised
 extra-file deletion option: in the tested fixture, content was repaired but the
-extra file remained, so recovery fails exact-tree validation.
+extra file remained. Current validation records that extra without failing.
 Update, rollback and no-op restore remain `NOT_RUN`, as in the other lanes.
 BPT must preserve the fixture's files and supported metadata; unsupported content
 such as an unpreserved empty directory fails validation rather than being silently

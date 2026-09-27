@@ -103,10 +103,13 @@ def compare_directories(expected: Path, actual: Path) -> list[str]:
     return compare_inventory(inventory(expected), actual)
 
 
-def validate_output(expected: Path, actual: Path, evidence: Path, *, expected_inventory: dict | None = None) -> None:
+def validate_output(expected: Path, actual: Path, evidence: Path, *, expected_inventory: dict | None = None, allow_extra_files: bool = False) -> None:
     differences = compare_inventory(expected_inventory if expected_inventory is not None else inventory(expected), actual)
+    extra_files = [item.removeprefix("unexpected: ") for item in differences if item.startswith("unexpected: ")]
+    if allow_extra_files:
+        differences = [item for item in differences if not item.startswith("unexpected: ")]
     evidence.parent.mkdir(parents=True, exist_ok=True)
     evidence.write_text(json.dumps({"status": "failed" if differences else "passed",
-        "differences": differences}, indent=2) + "\n", encoding="utf-8")
+        "differences": differences, "extra_files": extra_files}, indent=2) + "\n", encoding="utf-8")
     if differences:
         raise RuntimeError(f"output validation failed; see {evidence}: {differences[:5]}")

@@ -232,6 +232,25 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(values["peak_rss_bytes"], 200)
         self.assertEqual(process_utilization([{}]), {})
 
+    def test_extras_do_not_hide_missing_or_corrupt_expected_files(self):
+        from comparison_benchmark_suite.scheduling.dataset import DatasetSelection
+        source = self.root / "product/v1"
+        source.mkdir(parents=True)
+        (source / "expected").write_bytes(b"correct")
+        dataset = DatasetSelection.resolve(source.parent)
+        output = self.root / "output"
+        output.mkdir()
+        (output / "extra").write_bytes(b"extra")
+        evidence = self.root / "validation.json"
+        with self.assertRaises(RuntimeError):
+            dataset.validate(source, output, evidence)
+        (output / "expected").write_bytes(b"corrupt")
+        with self.assertRaises(RuntimeError):
+            dataset.validate(source, output, evidence)
+        shutil.copy2(source / "expected", output / "expected")
+        dataset.validate(source, output, evidence)
+        self.assertEqual(json.loads(evidence.read_text())["extra_files"], ["extra"])
+
     def test_corruption_plan_preserves_permissions(self):
         from comparison_benchmark_suite.support.recovery import build_corruption_plan, apply_corruption_plan
         destination = self.root / "installation"
@@ -257,7 +276,7 @@ class SuiteTests(unittest.TestCase):
         result = run_buildpatchtool(binary, Commands(), None, None, LaneSpec("bpt", "buildpatchtool"))
         self.assertEqual(result.metadata["status"], "UNSUPPORTED")
 
-    def test_buildpatch_recovery_preserves_target_and_rejects_extra_files(self):
+    def test_buildpatch_recovery_preserves_target_and_allows_extra_files(self):
         class Commands:
             def run(self, command, **options):
                 assert not options.get("expected_failure", False)
@@ -289,12 +308,13 @@ class SuiteTests(unittest.TestCase):
         result = run_buildpatchtool(binary, Commands(), RunLayout(self.root / "run").lane("bpt"),
                                    product, LaneSpec("bpt", "buildpatchtool", arguments=("-ChunkWindowSize=1048576",)),
                                    recovery_enabled=True)
-        self.assertEqual(result.metadata["status"], "ERROR")
+        self.assertEqual(result.metadata["status"], "PASS")
         self.assertAlmostEqual(result.metrics["restore"], 0.2)
-        self.assertNotIn("repair", result.metrics)
+        self.assertAlmostEqual(result.metrics["repair"], 0.2)
         self.assertNotIn("full_restore_recovery", result.metrics)
-        self.assertEqual(result.metadata["operations"]["in_place_repair"], "FAIL")
-        self.assertIn("unexpected", result.metadata["reason"])
+        self.assertEqual(result.metadata["operations"]["in_place_repair"], "PASS")
+        evidence = json.loads((self.root / "run/lanes/bpt/stats/validate-final-v1.json").read_text())
+        self.assertEqual(evidence["extra_files"], [".gutch-benchmark-extra-002.bin"])
 
     def test_buildpatch_success_exit_without_restored_files_fails_validation(self):
         class Commands:

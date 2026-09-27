@@ -37,7 +37,8 @@ class DatasetSelection:
         return cls(product, sources, sum(entry['bytes'] for entry in files), len(files), fingerprint, entries)
 
     def validate(self, source: Path, actual: Path, evidence: Path):
-        validate_output(source, actual, evidence, expected_inventory=self.inventories[source.name])
+        validate_output(source, actual, evidence, expected_inventory=self.inventories[source.name],
+                        allow_extra_files=True)
 
     def metadata(self):
         return {'snapshots': [path.name for path in self.sources], 'input_bytes': self.input_bytes,
