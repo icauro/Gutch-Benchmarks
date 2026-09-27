@@ -11,7 +11,13 @@ import sys
 
 ROOT = Path(__file__).resolve().parent
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(ROOT.parent))
+    # Load this checkout directly, even when its containing folder was renamed.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("comparison_benchmark_suite", ROOT / "__init__.py",
+                                                submodule_search_locations=[str(ROOT)])
+    package = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = package
+    spec.loader.exec_module(package)
     __package__ = "comparison_benchmark_suite"
 
 

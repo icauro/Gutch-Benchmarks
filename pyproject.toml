@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comparison-benchmark-suite"
+version = "0.1.0"
+description = "Portable storage tool comparison benchmarks"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools]
+packages = ["comparison_benchmark_suite", "comparison_benchmark_suite.support", "comparison_benchmark_suite.scheduling", "comparison_benchmark_suite.tools"]
+package-dir = {comparison_benchmark_suite = "."}
+include-package-data = false
+
+[tool.setuptools.package-data]
+comparison_benchmark_suite = ["fixtures/*.yaml", "fixtures/blender/fixture.yaml", "requirements.txt"]

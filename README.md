@@ -1,7 +1,7 @@
 # Comparison benchmark suite
 
 Compare storage tools using the same builds and independent SHA-256 checks.
-This folder works on its own: copy it anywhere. It does not need the Gutch
+This root project works on its own: copy it anywhere, with any folder name. It does not need the Gutch
 repository, Rust, Docker, or cloud credentials.
 
 ## Run
@@ -295,3 +295,12 @@ measurements should not be mixed with these settings.
 
 Borg version validation runs once during runner preflight, before scheduled lanes.
 Its command is excluded from benchmark timings, utilization and Perfetto tracks.
+
+## Use as a Python dependency
+
+Other benchmark harnesses can install this checkout with
+`python -m pip install -e <suite-checkout>` and import
+`comparison_benchmark_suite`. This is optional for `python run.py`. The package
+contains the same runtime and bundled fixtures; it has no parent-repository
+imports, build steps, or configuration. Tool binaries remain explicit inputs or
+are resolved from PATH. Downloads, fixtures, and reports belong to this project.
