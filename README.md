@@ -32,8 +32,10 @@ The `--fixture` form runs once and exits. `--no-open-perfetto` suppresses automa
 browser opening; the interactive screen uses this and opens Perfetto only when
 requested. Install updated requirements to get the Textual terminal dependency.
 
-The Blender fixture downloads two pinned Blender releases for Windows x64 or
-Linux x64. Downloads and extracted builds are cached in `.artifacts/`.
+The Blender fixture reads the bundled 5.0.0 and 5.1.0 Windows x64 builds from
+`fixtures/blender/builds/`; it does not download inputs. Both host platforms
+benchmark these same files as data. Local build folders stay outside Git history;
+include them when copying or distributing the ready-to-run suite folder.
 The fixture runs one warm-up and three measured repetitions, rotating tool order.
 Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
@@ -81,7 +83,7 @@ python run.py --fixture gutch_vs_bpt
 
 These fixtures use one warm-up, three measured repetitions, rotating order and
 profiling off. Each references `blender/fixture.yaml` for inputs, reusing its
-cache rather than copying the Blender download definitions. Set executable paths
+cache rather than duplicating the Blender input definitions. Set executable paths
 in the selected fixture as needed. Custom fixtures may use `dataset: file.yaml`
 instead of `builds`; build paths are relative to the shared definition file.
 Nested dataset references are not supported.

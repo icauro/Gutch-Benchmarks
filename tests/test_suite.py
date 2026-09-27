@@ -60,7 +60,7 @@ class SuiteTests(unittest.TestCase):
 
     def test_copied_suite_runs_without_repository_and_preserves_inputs(self):
         standalone = self.root / "exported-suite"
-        shutil.copytree(ROOT, standalone, ignore=shutil.ignore_patterns(".artifacts", "__pycache__", ".venv", "bin"))
+        shutil.copytree(ROOT, standalone, ignore=shutil.ignore_patterns(".artifacts", "__pycache__", ".venv", "bin", "builds"))
         builds = self.inputs()
         fixture = standalone / "fixtures" / "custom" / "fixture.yaml"
         fixture.parent.mkdir()
