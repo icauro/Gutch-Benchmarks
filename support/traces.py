@@ -194,6 +194,18 @@ def open_trace_in_perfetto(trace_path: Path, log: Callable[[str], None]) -> bool
         log(f"Perfetto trace does not exist: {trace_path}")
         return False
 
+    try:
+        document = json.loads(trace_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        log(f"Cannot read Perfetto trace {trace_path}: {error}")
+        return False
+    events = document.get("traceEvents", []) if isinstance(document, dict) else document
+    if not isinstance(events, list) or not any(
+        isinstance(event, dict) and event.get("ph") not in (None, "M") for event in events
+    ):
+        log(f"Perfetto trace has no recorded events; browser not opened: {trace_path}")
+        return False
+
     handler = partial(_TraceHandler, directory=str(trace_path.parent))
     try:
         with _TraceServer(("127.0.0.1", PERFETTO_PORT), handler) as server:
