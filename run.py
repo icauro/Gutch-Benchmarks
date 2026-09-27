@@ -42,6 +42,7 @@ def main(arguments=None) -> int:
         from .tools.config import load_fixture
         from .tools.external import ExternalTools
         from .tools.models import LaneResult
+        from .tools.report import ascii_comparison_table
         from .tools.workflow import LocalFixtureRunner
     except ImportError as error:
         print(f"Missing dependency: {error}. Run: python -m pip install -r requirements.txt", file=sys.stderr)
@@ -132,17 +133,28 @@ def main(arguments=None) -> int:
             lines = ["# Comparison benchmark", "", "OS cache state: uncontrolled. Times are median seconds.", "",
                      "| Candidate | Status | Capture | Restore | In-place repair | Full recovery | Stored MiB |",
                      "|---|---|---:|---:|---:|---:|---:|"]
+            rows = []
             for label, metrics in summary.items():
                 samples = [result for result in results if result.metadata["case"] == label]
                 statuses = ", ".join(sorted({result.metadata["status"] for result in samples}))
                 def value(key, divisor=1):
                     median = metrics.get(key, {}).get("median") if isinstance(metrics.get(key), dict) else None
                     return "-" if median is None else f"{median / divisor:.3f}"
-                lines.append(f"| {label} | {statuses} | {value('backup')} | {value('restore')} | {value('repair')} | {value('full_restore_recovery')} | {value('repo_size', 1048576)} |")
+                row = [label, statuses, value('backup'), value('restore'), value('repair'),
+                       value('full_restore_recovery'), value('repo_size', 1048576)]
+                rows.append(row)
+                lines.append("| " + " | ".join(row) + " |")
             reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
             lines.extend(["", *reasons, "", "Restore includes the tool's own verification. Independent SHA-256 validation is outside command timing.",
                           "", "Raw samples and operation semantics: results.json. Aggregate medians and ranges: summary.json. Perfetto overview: trace.json (compacted tool time; harness gaps omitted, not concurrent execution)."])
             (layout.root / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+            print("\nComparison: median seconds across measured runs; warm-ups excluded.")
+            print(ascii_comparison_table(rows))
+            print("Repair = in-place; recovery = full restore. '-' = not measured.")
+            print("Independent validation is outside timings. OS cache is uncontrolled.")
+            for reason in reasons:
+                print(reason)
+
 
         print(f"Running {fixture.name}. Results: {layout.root}", flush=True)
         results = execute_cases(fixture, layout, commands, execute, executable=resolved.get("gutch", Path("unavailable")),

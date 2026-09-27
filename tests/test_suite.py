@@ -59,6 +59,11 @@ class SuiteTests(unittest.TestCase):
         result = subprocess.run([sys.executable, standalone / "run.py", "--fixture", "custom"],
                                 cwd=self.root, env=env, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("| Tool", result.stdout)
+        self.assertIn("Stored MiB", result.stdout)
+        self.assertIn("not-installed", result.stdout)
+        self.assertIn("UNAVAILABLE", result.stdout)
+        self.assertIn("'-' = not measured", result.stdout)
         run = next((standalone / ".artifacts/runs").iterdir())
         results = json.loads((run / "results.json").read_text())
         self.assertEqual(len(results), 4)

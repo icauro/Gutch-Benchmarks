@@ -273,3 +273,19 @@ def print_gutch_profile_table(results: list[LaneResult]) -> None:
 def print_fixture_report(fixture: FixtureSpec, product: Path, results: list[LaneResult]) -> None:
     print_comparison_table(fixture, product, results)
     print_gutch_profile_table(results)
+
+
+def ascii_comparison_table(rows: list[list[str]]) -> str:
+    """Render the same comparison cells used by the Markdown report."""
+    headers = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB"]
+    widths = [max(len(row[index]) for row in [headers, *rows]) for index in range(len(headers))]
+    border = "+-" + "-+-".join("-" * width for width in widths) + "-+"
+
+    def line(cells, *, numeric=False):
+        return "| " + " | ".join(
+            cell.rjust(width) if numeric and index >= 2 else cell.ljust(width)
+            for index, (cell, width) in enumerate(zip(cells, widths, strict=True))
+        ) + " |"
+
+    return "\n".join([border, line(headers), border,
+                       *(line(row, numeric=True) for row in rows), border])

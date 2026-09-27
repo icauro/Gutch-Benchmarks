@@ -113,7 +113,10 @@ without a built-in Blender download.
 
 ## Results
 
-The command prints the report path under `.artifacts/runs/`. Each run contains:
+The command prints an ASCII comparison table with status, median capture/restore
+and repair/recovery seconds, and stored MiB. Missing measurements show `-`;
+failure and capability reasons appear below the table. It also prints the report
+path under `.artifacts/runs/`. Each run contains:
 
 - `summary.md`: readable outcomes.
 - `summary.json`: per-candidate medians and ranges.
