@@ -48,6 +48,17 @@ executables:
   buildpatchtool: C:/tools/BuildPatchTool.exe
 ```
 
+Bundled tools are discovered automatically under `.artifacts/tools/windows-x64/`
+or `.artifacts/tools/linux-x64/`, before searching PATH. Each tool has its own
+folder: `restic/restic.exe` on Windows or `restic/restic` on Linux, likewise for
+Borg, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
+BuildPatchTool keeps its Engine layout under `buildpatchtool/Engine/Binaries/`,
+with `Win64/BuildPatchTool.exe` or `Linux/BuildPatchTool`. Preserve its accompanying
+Engine files. Explicit fixture paths and `GUTCH_EXECUTABLE` still take precedence.
+Only x86-64 hosts use these bundles. Older retained binaries may be kept in a
+`previous/` folder, which is never searched. Refresh the bundled Gutch executable
+after rebuilding it; the suite never reads a sibling project's build directory.
+
 Missing tools are clearly reported as `UNAVAILABLE`; available tools still run.
 Paths in a fixture are relative to that fixture's folder. No tool is downloaded
 or built automatically. To compare two Gutch binaries, give their lanes distinct

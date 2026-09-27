@@ -5,6 +5,7 @@ from functools import partial
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import shutil
 
@@ -24,13 +25,25 @@ from .tools.report import write_comparison_report
 from .tools.workflow import LocalFixtureRunner
 
 
-def resolve_executable(value: str, fixture: Path) -> Path | None:
+def resolve_executable(value: str, fixture: Path, tools_root: Path) -> Path | None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError("Executable names must be nonempty strings.")
     candidate = Path(value).expanduser()
     if candidate.is_absolute() or candidate.parent != Path("."):
         candidate = (fixture.parent / candidate).resolve()
         return candidate if candidate.is_file() else None
+    host = {"Windows": "windows-x64", "Linux": "linux-x64"}.get(platform.system())
+    if host and platform.machine().lower() in {"amd64", "x86_64"}:
+        tool = "gutch" if value in {"gutch", "gutch-cli"} else value.lower()
+        executable = "gutch-cli" if tool == "gutch" else value
+        folder = tools_root / host / tool
+        if tool == "buildpatchtool":
+            target = "Win64/BuildPatchTool.exe" if host == "windows-x64" else "Linux/BuildPatchTool"
+            bundled = folder / "Engine/Binaries" / target
+        else:
+            bundled = folder / (executable + (".exe" if host == "windows-x64" else ""))
+        if bundled.is_file():
+            return bundled.resolve()
     found = shutil.which(value)
     return Path(found).resolve() if found else None
 
@@ -81,7 +94,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         configured = executables.get(lane.label, executables.get(lane.tool, lane.tool))
         if lane.tool == "gutch" and configured in {"gutch", "gutch-cli"}:
             configured = os.environ.get("GUTCH_EXECUTABLE", configured)
-        executable = resolve_executable(configured, fixture_path)
+        executable = resolve_executable(configured, fixture_path, root / ".artifacts/tools")
         if executable is None:
             unavailable[lane.label] = f"Cannot find {configured!r}; set executables.{lane.label} in {fixture_path} or add it to PATH."
             print(f"UNAVAILABLE {lane.label}: {unavailable[lane.label]}", flush=True)

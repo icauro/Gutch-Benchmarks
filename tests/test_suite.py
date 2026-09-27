@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 import yaml
@@ -25,6 +26,27 @@ class SuiteTests(unittest.TestCase):
         self.root = Path(self.temporary.name).resolve()
         assert self.root.is_relative_to(owner.resolve())
         self.addCleanup(self.temporary.cleanup)
+
+    def test_platform_tools_and_explicit_paths(self):
+        from comparison_benchmark_suite.benchmark import resolve_executable
+        tools = self.root / "tools"
+        fixture = self.root / "fixture.yaml"
+        for system, platform_folder, relative in [
+            ("Windows", "windows-x64", "restic/restic.exe"),
+            ("Linux", "linux-x64", "restic/restic"),
+        ]:
+            binary = tools / platform_folder / relative
+            binary.parent.mkdir(parents=True)
+            binary.touch()
+            with patch("platform.system", return_value=system), patch("platform.machine", return_value="AMD64"), patch("shutil.which", return_value=None):
+                self.assertEqual(resolve_executable("restic", fixture, tools), binary)
+                self.assertIsNone(resolve_executable("./missing", fixture, tools))
+                self.assertEqual(resolve_executable(str(binary), fixture, tools), binary)
+                target = "Win64/BuildPatchTool.exe" if system == "Windows" else "Linux/BuildPatchTool"
+                bpt = tools / platform_folder / "buildpatchtool/Engine/Binaries" / target
+                bpt.parent.mkdir(parents=True)
+                bpt.touch()
+                self.assertEqual(resolve_executable("BuildPatchTool", fixture, tools), bpt)
 
     def inputs(self):
         builds = []
