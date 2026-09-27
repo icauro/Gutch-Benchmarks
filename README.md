@@ -137,10 +137,13 @@ path where needed; successful cleanup removes that run-owned path too.
 
 Open `trace.json` in Perfetto, or set `open_perfetto: true` in the fixture to
 open it after the run. The shared overview works with `profile_mode: off`.
-Each tool/repetition starts at zero for comparison; rows do not imply concurrent
-execution. Warm-ups are excluded. Operation spans use wall-clock duration and
+Each tool/repetition starts at zero on a **Compacted tool time** track.
+Operations appear back-to-back with their measured durations preserved; this
+is not an elapsed run clock and rows do not imply concurrent execution.
+Warm-ups are excluded. Operation spans use wall-clock duration and
 include setup/probes as well as capture, restore, checking and recovery commands.
-Independent validation and waits appear as gaps, not command execution.
+Harness validation, preparation, cleanup and waits between operations are omitted
+from the timeline. Raw command timestamps and performance metrics are unchanged.
 
 Set `profile_mode: detailed` in the fixture only for Gutch internal tracing and
 sampled process memory. Engine spans are approximately aligned to their command

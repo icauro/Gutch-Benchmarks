@@ -141,7 +141,7 @@ def main(arguments=None) -> int:
                 lines.append(f"| {label} | {statuses} | {value('backup')} | {value('restore')} | {value('repair')} | {value('full_restore_recovery')} | {value('repo_size', 1048576)} |")
             reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
             lines.extend(["", *reasons, "", "Restore includes the tool's own verification. Independent SHA-256 validation is outside command timing.",
-                          "", "Raw samples and operation semantics: results.json. Aggregate medians and ranges: summary.json. Perfetto overview: trace.json (tool rows aligned at zero, not concurrent execution)."])
+                          "", "Raw samples and operation semantics: results.json. Aggregate medians and ranges: summary.json. Perfetto overview: trace.json (compacted tool time; harness gaps omitted, not concurrent execution)."])
             (layout.root / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         print(f"Running {fixture.name}. Results: {layout.root}", flush=True)

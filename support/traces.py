@@ -235,15 +235,16 @@ def open_trace_in_perfetto(trace_path: Path, log: Callable[[str], None]) -> bool
 
 def write_lane_timeline(label: str, measurements: list[dict], traces: dict,
                         output: Path) -> None:
-    """Place command envelopes and available engine spans on one lane clock."""
+    """Concatenate measured operations, shifting engine spans with their command."""
     command_trace = output.with_name("commands.json")
     events = [{"ph": "M", "name": "thread_name", "pid": 1, "tid": 1,
-               "args": {"name": "Operations (wall time)"}}]
+               "args": {"name": "Compacted tool time"}}]
     offsets = {command_trace: 0.0}
+    start = 0.0
     for measurement in measurements:
-        start = measurement["start_seconds"] * 1_000_000
+        duration = measurement["elapsed_seconds"] * 1_000_000
         events.append({"ph": "X", "name": measurement["operation"], "pid": 1, "tid": 1,
-                       "ts": start, "dur": measurement["elapsed_seconds"] * 1_000_000,
+                       "ts": start, "dur": duration,
                        "cat": measurement["boundary"],
                        "args": {"returncode": measurement.get("returncode", 0)}})
         command = measurement.get("command", ())
@@ -252,6 +253,7 @@ def write_lane_timeline(label: str, measurements: list[dict], traces: dict,
             # Engine clocks start after process launch. Align to the envelope's
             # start as an approximation; do not imply cross-process clock sync.
             offsets[path] = start
+        start += duration
     command_trace.parent.mkdir(parents=True, exist_ok=True)
     command_trace.write_text(json.dumps({"traceEvents": events}), encoding="utf-8")
     sources = [command_trace, *dict.fromkeys(Path(path) for paths in traces.values() for path in paths)]

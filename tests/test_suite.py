@@ -73,7 +73,7 @@ class SuiteTests(unittest.TestCase):
         for index, build in enumerate(builds, 1):
             self.assertEqual((Path(build["path"]) / "file.txt").read_text(), f"version {index}")
 
-    def test_timeline_aligns_commands_and_keeps_engine_threads(self):
+    def test_timeline_compacts_gaps_and_keeps_engine_threads(self):
         from comparison_benchmark_suite.support.traces import write_lane_timeline
         profile = self.root / "profile"
         profile.mkdir()
@@ -91,10 +91,12 @@ class SuiteTests(unittest.TestCase):
         ], {"capture": [str(trace)]}, output)
         events = json.loads(output.read_text())["traceEvents"]
         spans = {event["name"]: event for event in events if event["ph"] == "X"}
-        self.assertEqual(spans["capture"]["ts"], 2_000_000)
+        self.assertEqual(spans["capture"]["ts"], 0)
         self.assertEqual(spans["capture"]["dur"], 1_000_000)
-        self.assertEqual(spans["hash"]["ts"], 2_000_100)
+        self.assertEqual(spans["hash"]["ts"], 100)
         self.assertNotEqual(spans["hash"]["tid"], spans["capture"]["tid"])
+        self.assertEqual(spans["verify"]["ts"], 1_000_000)
+        self.assertEqual(spans["verify"]["dur"], 500_000)
         self.assertEqual(spans["verify"]["args"]["returncode"], 1)
 
     def test_failed_candidate_retains_evidence_and_does_not_stop_copy(self):
