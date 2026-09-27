@@ -77,10 +77,13 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
         raw = {}
     if not isinstance(raw, dict):
         raise ValueError(f"{name} profile must be a mapping")
-    unknown_fields = set(raw) - {"chunk", "bundle", "compression", "storage", "jobs"}
+    unknown_fields = set(raw) - {"chunk", "chunker", "bundle", "compression", "storage", "jobs"}
     if unknown_fields:
         fields = ", ".join(sorted(unknown_fields))
         raise ValueError(f"{name} profile contains unsupported fields: {fields}")
+    chunker = raw.get("chunker", "fastcdc")
+    if chunker not in ("fastcdc", "jc"):
+        raise ValueError(f"invalid Gutch chunker for {name}")
     chunk = raw.get("chunk", "chunk_128KiB")
     bundle = raw.get("bundle", "bundle_8MiB")
     compression = raw.get("compression", {})
@@ -119,6 +122,7 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
         compression_level,
         storage,
         jobs,
+        chunker,
     )
 
 

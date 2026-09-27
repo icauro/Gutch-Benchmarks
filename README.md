@@ -324,7 +324,9 @@ archive path boundaries, the interactive run flow, and cancellation.
 Tool-specific mock tests and narrow configuration checks are intentionally omitted.
 
 Fixtures use a `lanes` list with explicit labels and a `profile` mapping for
-Gutch options. Alternate lane mappings, string profiles, and external bulk
+Gutch options. `profile.chunker` accepts `fastcdc` (default) or `jc` for
+Plakar-compatible jump chunking; `profile.chunk` selects the size target.
+Alternate lane mappings, string profiles, and external bulk
 workloads are not supported. Plain-terminal progress uses start/completion
 lines; the interactive screen owns live progress. Borg commands use Borg 2
 syntax directly. Executables resolve only from explicit paths or PATH.

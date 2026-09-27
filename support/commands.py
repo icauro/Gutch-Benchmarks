@@ -24,6 +24,8 @@ class GutchCli:
     @staticmethod
     def profile_args(profile: GutchProfile) -> list[str]:
         arguments = [
+            "--chunker",
+            profile.chunker,
             "--chunk-preset",
             profile.chunk_profile.removeprefix("chunk_"),
             "--bundle-preset",

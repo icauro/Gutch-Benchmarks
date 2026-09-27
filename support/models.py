@@ -10,5 +10,6 @@ class GutchProfile:
     compression_level: int | None = 3
     storage_mode: str = "bundled"
     jobs: int | None = None
+    chunker: str = "fastcdc"
 
 
