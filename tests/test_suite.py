@@ -306,6 +306,12 @@ class SuiteTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "either dataset or builds"):
             prepare_dataset({**values, "builds": builds}, self.root / "third.yaml", self.root / ".artifacts")
 
+    def test_no_argument_noninteractive_invocation_requires_fixture(self):
+        result = subprocess.run([sys.executable, ROOT / "run.py"], input="", capture_output=True,
+                                text=True, timeout=10)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("use --fixture NAME", result.stderr)
+
     def test_corruption_plan_preserves_permissions(self):
         from comparison_benchmark_suite.support.recovery import build_corruption_plan, apply_corruption_plan
         destination = self.root / "installation"

@@ -275,9 +275,27 @@ def print_fixture_report(fixture: FixtureSpec, product: Path, results: list[Lane
     print_gutch_profile_table(results)
 
 
+COMPARISON_HEADERS = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RSS MiB"]
+
+
+def comparison_rows(summary: dict, results: list[dict]) -> list[list[str]]:
+    rows = []
+    columns = [("backup", 1), ("restore", 1), ("repair", 1), ("full_restore_recovery", 1),
+               ("repo_size", 1048576), ("cpu_percent", 1), ("peak_rss_bytes", 1048576)]
+    for label, metrics in summary.items():
+        statuses = sorted({result["metadata"]["status"] for result in results
+                           if result["metadata"]["case"] == label})
+        row = [label, ", ".join(statuses)]
+        for key, divisor in columns:
+            median = metrics.get(key, {}).get("median") if isinstance(metrics.get(key), dict) else None
+            row.append("-" if median is None else f"{median / divisor:.3f}")
+        rows.append(row)
+    return rows
+
+
 def ascii_comparison_table(rows: list[list[str]]) -> str:
     """Render the same comparison cells used by the Markdown report."""
-    headers = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RSS MiB"]
+    headers = COMPARISON_HEADERS
     widths = [max(len(row[index]) for row in [headers, *rows]) for index in range(len(headers))]
     border = "+-" + "-+-".join("-" * width for width in widths) + "-+"
 

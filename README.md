@@ -13,7 +13,26 @@ python -m pip install -r requirements.txt
 python run.py
 ```
 
-The default fixture downloads two pinned Blender releases for Windows x64 or
+The command opens an interactive terminal screen. Hover or focus a fixture to
+read its description, then choose **Run fixture**. Arrow keys or Tab navigate;
+Enter activates a button. Mouse hover requires a terminal with mouse support.
+The running view shows elapsed time, the current operation, a live log and
+completed measured cases; preparation and warm-ups do not claim a completion
+percentage. **Stop run** (or Ctrl+C) stops the owned process tree and retains
+partial evidence. Afterward, the summary stays open with **Run another**,
+**Open Perfetto**, **Show run log**, and **Quit** actions.
+
+For scripts and noninteractive terminals, select a fixture explicitly:
+
+```text
+python run.py --fixture blender
+```
+
+The `--fixture` form runs once and exits. `--no-open-perfetto` suppresses automatic
+browser opening; the interactive screen uses this and opens Perfetto only when
+requested. Install updated requirements to get the Textual terminal dependency.
+
+The Blender fixture downloads two pinned Blender releases for Windows x64 or
 Linux x64. Downloads and extracted builds are cached in `.artifacts/`.
 The fixture runs one warm-up and three measured repetitions, rotating tool order.
 Preparation and independent output validation are outside tool-command timings.

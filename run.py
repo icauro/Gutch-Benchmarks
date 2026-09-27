@@ -28,8 +28,19 @@ def resolve_executable(value: str, fixture: Path) -> Path | None:
 
 def main(arguments=None) -> int:
     parser = argparse.ArgumentParser(description="Compare build storage tools. Results go to .artifacts/runs/.")
-    parser.add_argument("--fixture", default="blender", help="Fixture name, directory, or YAML file")
+    parser.add_argument("--fixture", help="Fixture name, directory, or YAML file")
+    parser.add_argument("--no-open-perfetto", action="store_true", help="Keep traces for manual opening")
     args = parser.parse_args(arguments)
+    if args.fixture is None:
+        if not sys.stdin.isatty() or not sys.stdout.isatty():
+            parser.error("Interactive mode needs a terminal; use --fixture NAME for scripted runs.")
+        try:
+            from .interactive import BenchmarkApp
+        except ImportError as error:
+            print(f"Missing dependency: {error}. Run: python -m pip install -r requirements.txt", file=sys.stderr)
+            return 2
+        BenchmarkApp(ROOT).run()
+        return 0
     try:
         import yaml
         from .datasets import prepare_dataset
@@ -42,7 +53,7 @@ def main(arguments=None) -> int:
         from .tools.config import load_fixture
         from .tools.external import ExternalTools
         from .tools.models import LaneResult
-        from .tools.report import ascii_comparison_table
+        from .tools.report import ascii_comparison_table, comparison_rows
         from .tools.workflow import LocalFixtureRunner
     except ImportError as error:
         print(f"Missing dependency: {error}. Run: python -m pip install -r requirements.txt", file=sys.stderr)
@@ -57,6 +68,8 @@ def main(arguments=None) -> int:
             fixture_path /= "fixture.yaml"
         fixture_path = fixture_path.resolve()
         fixture = load_fixture(fixture_path)
+        if args.no_open_perfetto:
+            fixture = replace(fixture, open_perfetto=False)
         values = yaml.safe_load(fixture_path.read_text(encoding="utf-8"))
         executables = values.get("executables", {})
         if not isinstance(executables, dict):
@@ -81,6 +94,7 @@ def main(arguments=None) -> int:
         if isinstance(warmups, bool) or warmups not in (0, 1):
             raise ValueError("warmups must be 0 or 1")
         artifacts = ROOT / ".artifacts"
+        print("Preparing and validating input builds...", flush=True)
         product, dataset_metadata = prepare_dataset(values, fixture_path, artifacts)
         selections = {
             (product, fixture.snapshot_limit, whole): DatasetSelection.resolve(
@@ -91,6 +105,9 @@ def main(arguments=None) -> int:
         if warmups:
             fixture = replace(fixture, lanes=tuple(replace(lane, warmup=True) for lane in fixture.lanes) + fixture.lanes)
         layout = RunLayout(create_run_dir(artifacts / "runs", fixture.name, "comparison"), retain_evidence=True)
+        print(f"Running {fixture.name}. Results: {layout.root}", flush=True)
+        if fixture.description:
+            print(fixture.description, flush=True)
         source_hash = hashlib.sha256()
         runtime_files = list(ROOT.glob("*.py"))
         for directory in ("support", "scheduling", "tools"):
@@ -100,7 +117,8 @@ def main(arguments=None) -> int:
             source_hash.update(b"\0" + hashlib.sha256(path.read_bytes()).digest())
         layout.write_manifest("preparing", suite_source_sha256=source_hash.hexdigest(), dataset=dataset_metadata,
                               executables={label: {"path": str(path), "sha256": file_sha256(path)} for label, path in resolved.items()})
-        commands = CommandRunner(memory_profile=fixture.profile_mode == "detailed")
+        commands = CommandRunner(memory_profile=fixture.profile_mode == "detailed",
+                                 on_step=lambda description: print(f"Step: {description}", flush=True))
         runners = {}
         for lane in fixture.lanes:
             if lane.label in runners:
@@ -139,17 +157,8 @@ def main(arguments=None) -> int:
             lines = ["# Comparison benchmark", "", fixture.description, "", "OS cache state: uncontrolled. Times are median seconds.", "",
                      "| Candidate | Status | Capture | Restore | In-place repair | Full recovery | Stored MiB | CPU % | Peak RSS MiB |",
                      "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
-            rows = []
-            for label, metrics in summary.items():
-                samples = [result for result in results if result.metadata["case"] == label]
-                statuses = ", ".join(sorted({result.metadata["status"] for result in samples}))
-                def value(key, divisor=1):
-                    median = metrics.get(key, {}).get("median") if isinstance(metrics.get(key), dict) else None
-                    return "-" if median is None else f"{median / divisor:.3f}"
-                row = [label, statuses, value('backup'), value('restore'), value('repair'),
-                       value('full_restore_recovery'), value('repo_size', 1048576),
-                       value('cpu_percent'), value('peak_rss_bytes', 1048576)]
-                rows.append(row)
+            rows = comparison_rows(summary, [result.as_json() for result in results])
+            for row in rows:
                 lines.append("| " + " | ".join(row) + " |")
             reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
             lines.extend(["", *reasons, "", "Restore includes the tool's own verification. Independent SHA-256 validation is outside command timing.",
@@ -167,11 +176,17 @@ def main(arguments=None) -> int:
                 print(reason)
 
 
-        print(f"Running {fixture.name}. Results: {layout.root}", flush=True)
-        if fixture.description:
-            print(fixture.description, flush=True)
+        completed = 0
+        total = sum(not lane.warmup for lane in fixture.lanes) * fixture.repetitions
+        def completed_case(result):
+            nonlocal completed
+            completed += 1
+            print(f"{result.label}: {result.metadata['status']}", flush=True)
+            print(f"Progress: {completed}/{total} measured cases", flush=True)
+            if completed == total:
+                print("Step: Building reports and finalizing the run", flush=True)
         results = execute_cases(fixture, layout, commands, execute, executable=resolved.get("gutch", Path("unavailable")),
-                                on_lane_complete=lambda result: print(f"{result.label}: {result.metadata['status']}", flush=True),
+                                on_lane_complete=completed_case,
                                 on_run_complete=report)
         print(f"Report: {layout.root / 'summary.md'}", flush=True)
         return 1 if json.loads((layout.root / "run.json").read_text(encoding="utf-8"))["status"] == "failed" else 0
