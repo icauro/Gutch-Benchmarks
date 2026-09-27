@@ -1,5 +1,12 @@
 name: gutch_vs_kopia
-description: Compare Gutch against kopia performance defaults on Blender.
+description: 'Kopia keeps default 4 MiB Buzhash chunking and disabled file compression.
+  Encryption remains AES256-GCM-HMAC-SHA256: no supported plaintext mode. Recovery
+  adds --delete-extra; repository verification uses --verify-files-percent=100. Gutch
+  uses unencrypted FastCDC with a 4 MiB target, compression off and 16 MiB bundles.
+  Chunk bounds, metadata compression, hashes and storage layout differ. Fresh local
+  repositories and isolated caches; automatic workers; noninteractive/output flags.
+  One warm-up and three rotating measured repetitions, profiling off. Independent
+  validation is outside timings; extra files are allowed.'
 dataset: blender/fixture.yaml
 repetitions: 3
 warmups: 1

@@ -69,6 +69,12 @@ storage layouts are not identical. Plakar's stream writer does not apply the
 stored compression level; its default LZ4 behavior is matched approximately,
 not treated as equivalent to Gutch LZ4 high compression level 9.
 
+Fixture descriptions explain command overrides and differences from Gutch. They
+are printed before execution and included in `summary.md` and `run.json`.
+Encryption is disabled wherever supported; an empty password is not treated as
+plaintext. Kopia and Restic remain encrypted because they have no supported
+plaintext mode.
+
 Existing operational choices remain: isolated repositories/caches, no encryption
 for Borg/Plakar, encryption for Kopia/Restic, independent validation, and native
 recovery options. Thus these preserve performance defaults where practical;

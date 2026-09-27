@@ -1,5 +1,12 @@
 name: gutch_vs_restic
-description: Compare Gutch against restic performance defaults on Blender.
+description: Restic keeps default Rabin chunking (about 1 MiB) and Zstd auto. Encryption
+  is mandatory and remains enabled. Restore adds --verify; recovery adds --overwrite
+  always --delete, scoped to the selected build. Repository check uses --read-data.
+  Gutch uses unencrypted FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles; chunk
+  bounds, Zstd implementations, hashes and storage layout differ. Fresh local repositories
+  and isolated caches; automatic workers; noninteractive/output flags. One warm-up
+  and three rotating measured repetitions, profiling off. Independent validation is
+  outside timings; extra files are allowed.
 dataset: blender/fixture.yaml
 repetitions: 3
 warmups: 1

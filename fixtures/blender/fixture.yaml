@@ -1,6 +1,15 @@
 # Paths in this file are relative to this fixture folder. Missing tools are reported.
 name: blender
-description: Compare two pinned Blender builds with approximately 1 MiB chunks and comparable Zstd presets where supported.
+description: 'All-tools overview with normalized settings, not native performance
+  defaults: Gutch FastCDC 1 MiB/Zstd 3; Restic Rabin about 1 MiB/Zstd auto; Kopia
+  Buzhash 1 MiB/Zstd; Borg 2 FastCDC 1 MiB/Zstd 3; Plakar default FastCDC/LZ4; BPT
+  1 MiB/internal compression. Encryption is disabled for Borg and Plakar, unavailable
+  in Gutch/BPT local workflows, and mandatory for Kopia/Restic. Native recovery flags
+  request extra deletion where available; restore/repository verification differs
+  by tool. Chunk bounds, codecs, hashes, packing and metadata differ. Fresh local
+  repositories and isolated caches; automatic workers; noninteractive/output flags.
+  One warm-up and three rotating measured repetitions, profiling off. Independent
+  validation is outside timings; extra files are allowed.'
 repetitions: 3
 warmups: 1
 profile_mode: 'off'

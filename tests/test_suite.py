@@ -48,7 +48,7 @@ class SuiteTests(unittest.TestCase):
         fixture = standalone / "fixtures" / "custom" / "fixture.yaml"
         fixture.parent.mkdir()
         fixture.write_text(yaml.safe_dump({
-            "name": "custom", "builds": builds, "warmups": 1, "repetitions": 2,
+            "name": "custom", "description": "Fixture settings and limitations.", "builds": builds, "warmups": 1, "repetitions": 2,
             "corrupt_repair": True, "lane_wait_seconds": 0, "step_wait_seconds": 0,
             "lanes": [{"label": "filesystem", "tool": "filesystem"},
                       {"label": "not-installed", "tool": "gutch"}],
@@ -59,6 +59,7 @@ class SuiteTests(unittest.TestCase):
         result = subprocess.run([sys.executable, standalone / "run.py", "--fixture", "custom"],
                                 cwd=self.root, env=env, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Fixture settings and limitations.", result.stdout)
         self.assertIn("| Tool", result.stdout)
         self.assertIn("Stored MiB", result.stdout)
         self.assertIn("not-installed", result.stdout)
@@ -69,7 +70,7 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(len(results), 4)
         self.assertEqual({r["metadata"]["status"] for r in results}, {"PASS", "UNAVAILABLE"})
         self.assertFalse(any((run / "lanes").glob("*/payload")))
-        self.assertTrue((run / "summary.md").exists())
+        self.assertIn("Fixture settings and limitations.", (run / "summary.md").read_text())
         events = json.loads((run / "trace.json").read_text())["traceEvents"]
         spans = [event for event in events if event["ph"] == "X"]
         self.assertEqual(len(spans), 12)  # Capture, restore, recovery x two builds x two measured runs.

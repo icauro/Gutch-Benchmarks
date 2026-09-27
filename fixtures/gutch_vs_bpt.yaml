@@ -1,5 +1,13 @@
 name: gutch_vs_bpt
-description: Compare Gutch against buildpatchtool performance defaults on Blender.
+description: BuildPatchTool keeps its default 1 MiB chunk window and internal compression.
+  Local ChunkBuildDirectory specifies FeatureLevel=Latest, artifact/version/launch
+  metadata and manifest filenames; no upload, authentication or encryption is enabled.
+  Recovery uses InstallManifest with PrevManifest. Gutch uses unencrypted FastCDC
+  with a 1 MiB target, Zstd 3 and 8 MiB bundles. BPT chunk windows are not CDC averages;
+  compression codec/level and artifact formats are unmatched. There is no separate
+  repository-check phase for BPT. Fresh local repositories and isolated caches; automatic
+  workers; noninteractive/output flags. One warm-up and three rotating measured repetitions,
+  profiling off. Independent validation is outside timings; extra files are allowed.
 dataset: blender/fixture.yaml
 repetitions: 3
 warmups: 1

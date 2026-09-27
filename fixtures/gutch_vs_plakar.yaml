@@ -1,5 +1,13 @@
 name: gutch_vs_plakar
-description: Compare Gutch against plakar performance defaults on Blender.
+description: Plakar keeps default FastCDC (about 1 MiB), LZ4 stream compression and
+  backup-cache policy. Repository creation disables encryption with -plaintext; the
+  adapter uses -stdio, -quiet and -no-progress. Recovery restores over existing output;
+  repository check is separate. Gutch uses unencrypted FastCDC with a 1 MiB target,
+  LZ4 0 and 8 MiB bundles. Chunk bounds, LZ4 implementation/framing, metadata and
+  storage layout differ; stored Plakar level 9 is not passed to its stream writer.
+  Fresh local repositories and isolated caches; automatic workers; noninteractive/output
+  flags. One warm-up and three rotating measured repetitions, profiling off. Independent
+  validation is outside timings; extra files are allowed.
 dataset: blender/fixture.yaml
 repetitions: 3
 warmups: 1

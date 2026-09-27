@@ -136,7 +136,7 @@ def main(arguments=None) -> int:
 
         def report(results):
             summary = json.loads((layout.root / "summary.json").read_text(encoding="utf-8"))
-            lines = ["# Comparison benchmark", "", "OS cache state: uncontrolled. Times are median seconds.", "",
+            lines = ["# Comparison benchmark", "", fixture.description, "", "OS cache state: uncontrolled. Times are median seconds.", "",
                      "| Candidate | Status | Capture | Restore | In-place repair | Full recovery | Stored MiB | CPU % | Peak RSS MiB |",
                      "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
             rows = []
@@ -168,6 +168,8 @@ def main(arguments=None) -> int:
 
 
         print(f"Running {fixture.name}. Results: {layout.root}", flush=True)
+        if fixture.description:
+            print(fixture.description, flush=True)
         results = execute_cases(fixture, layout, commands, execute, executable=resolved.get("gutch", Path("unavailable")),
                                 on_lane_complete=lambda result: print(f"{result.label}: {result.metadata['status']}", flush=True),
                                 on_run_complete=report)
