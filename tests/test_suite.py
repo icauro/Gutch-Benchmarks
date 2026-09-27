@@ -251,6 +251,25 @@ class SuiteTests(unittest.TestCase):
         dataset.validate(source, output, evidence)
         self.assertEqual(json.loads(evidence.read_text())["extra_files"], ["extra"])
 
+    def test_borg_one_is_rejected_before_repository_creation(self):
+        from comparison_benchmark_suite.tools.external import ExternalTools, run_external
+        calls = []
+        class Commands:
+            def run(self, command, **options):
+                calls.append(command)
+                return CommandResult(tuple(map(str, command)), 0.1, 0, "borg 1.4.5", "")
+        source = self.root / "product/v1"
+        source.mkdir(parents=True)
+        (source / "file").write_bytes(b"data")
+        binary = self.root / "borg.exe"
+        binary.write_bytes(b"test")
+        tools = ExternalTools(self.root, Commands(), borg=binary)
+        with self.assertRaisesRegex(ValueError, "Borg 2 is required"):
+            run_external(tools, RunLayout(self.root / "run").lane("borg"), source.parent,
+                         LaneSpec("borg", "borg"))
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][-1], "--version")
+
     def test_corruption_plan_preserves_permissions(self):
         from comparison_benchmark_suite.support.recovery import build_corruption_plan, apply_corruption_plan
         destination = self.root / "installation"

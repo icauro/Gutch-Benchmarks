@@ -48,7 +48,7 @@ every run. Earlier results using tool defaults are not directly comparable.
 | Gutch | Zstd, level 3 | `chunk_1MiB`: FastCDC, 256 KiB minimum / 1 MiB target / 4 MiB maximum | Numeric compression level and chunk profiles are selectable. Default 8 MiB bundles remain enabled. |
 | Restic | `--compression auto`: Zstd standard preset | Rabin, 512 KiB minimum / roughly 1 MiB target / 8 MiB maximum | CLI exposes named compression modes, not a numeric Zstd level or chunk-size setting. `auto` is an approximate level-3 counterpart, not an identical encoder. |
 | Kopia | `--compression=zstd`: standard preset | `--splitter=DYNAMIC-1M-BUZHASH`: 512 KiB minimum / 1 MiB target / 2 MiB maximum | Named codec/presets and splitter profiles are selectable; no numeric Zstd level in this policy. |
-| Borg | `--compression zstd,3` | `--chunker-params buzhash,19,23,20,4095`: 512 KiB minimum / 1 MiB mask target / 8 MiB maximum | Both codec/level and chunker parameters are selectable. Explicit Buzhash avoids different default chunkers across Borg versions. |
+| Borg | `--compression zstd,3` | `--chunker-params fastcdc,19,23,20,2`: 512 KiB minimum / 1 MiB target / 8 MiB maximum | Borg 2 only. Retains native FastCDC and normalization level 2; only the target size changes. Borg 1 is rejected. |
 | Plakar | LZ4, tool-managed level | Default FastCDC: 512 KiB minimum / 1 MiB target / 8 MiB maximum | Tested 1.1.5 CLI exposes compression on/off, but no codec, level, or chunk-size selector. Retained as a documented exception; no claim of Zstd-equivalent effort. |
 | BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Local restore and restore-over-existing are independently validated. |
 | Filesystem | None | None | Copy baseline; no deduplication or compression. |
@@ -171,7 +171,7 @@ harness does not chmod damaged files or remove extras on the tool's behalf.
 | Gutch | Existing installation repair | Existing native repair path; independent validation remains required. |
 | Restic | `restore --overwrite always --delete --verify` | Native extra deletion. Real small-fixture and Blender recovery passed. Individual restores retain `--include <build>` to protect other builds. |
 | Kopia | `snapshot restore --delete-extra` | Native extra deletion requested. Installed 0.23.1 failed replacing a read-only damaged file; atomic writes also failed in a separate probe. |
-| Borg | `extract --continue` on Borg 2; regular extract on Borg 1 | No native extra deletion option. Installed Windows Borg 2 failed on the read-only file. Resume skips based on metadata, so it is not a content-integrity guarantee. |
+| Borg | `extract --continue` (Borg 2 only) | No native extra deletion option. Installed Windows Borg 2 failed on the read-only file. Resume skips based on metadata, so it is not a content-integrity guarantee. |
 | Plakar | `restore` into the existing destination | No native extra deletion option established. Installed 1.1.5 left an extra file and a content mismatch in the probe. |
 | BuildPatchTool | `InstallManifest -PrevManifest=...` | No native extra deletion option advertised. Installed 1.8.8 left the unexpected file. |
 
@@ -221,3 +221,7 @@ no CPU samples. Peak RSS is the largest sampled resident-memory value across
 commands. Repeated runs report medians of these per-run values. Sampling can miss
 short peaks and process exit tails. Only the launched process is measured, not
 its children or helpers. The in-process filesystem baseline is intentionally `-`.
+
+Plakar backup uses its default cache policy; the suite no longer passes `-cache no`.
+Caches remain isolated per lane. Earlier Borg Buzhash / cache-disabled Plakar
+measurements should not be mixed with these settings.

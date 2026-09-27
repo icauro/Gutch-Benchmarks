@@ -47,7 +47,7 @@ lanes:
   arguments: [--compression=zstd, --splitter=DYNAMIC-1M-BUZHASH]
 - label: borg
   tool: borg
-  arguments: [--compression, "zstd,3", --chunker-params, "buzhash,19,23,20,4095"]
+  arguments: [--compression, "zstd,3", --chunker-params, "fastcdc,19,23,20,2"]
 - label: plakar
   tool: plakar
 - label: buildpatchtool

@@ -88,10 +88,8 @@ def _plakar_command(
     ]
 
 
-def borg_command(command, repository: Path, major_version: int):
-    """Borg 1 is pinned on Linux; the Windows executable uses Borg 2."""
-    if major_version == 1:
-        return command
+def borg_command(command, repository: Path):
+    """Render the benchmark's repository/archive arguments for Borg 2."""
     executable, operation, *arguments = command
     if operation == "init":
         return [executable, "repo-create", "--repo", repository, "--encryption", "none-sha256"]
@@ -128,18 +126,16 @@ def run_external(
     sources = list(dataset.sources)
     if not sources:
         raise ValueError(f"product has no target directories: {product}")
-    borg_major = 1
     tool_version = None
     if kind == "borg":
         tool_version = tools.commands.run([executable, "--version"], description=f"{lane_spec.label} version").stdout.strip()
-        match = re.search(r"\bborg(?:\.exe)?\s+([12])\.", tool_version)
+        match = re.search(r"\bborg(?:\.exe)?\s+2\.", tool_version)
         if match is None:
-            raise ValueError(f"unsupported Borg version: {tool_version}")
-        borg_major = int(match.group(1))
+            raise ValueError(f"Borg 2 is required; found: {tool_version}")
     elapsed_commands: list[float] = []
     def execute(command, **kwargs):
         if kind == "borg":
-            command = borg_command(command, repo, borg_major)
+            command = borg_command(command, repo)
         result = tools.commands.run(command, **kwargs)
         elapsed_commands.append(result.elapsed_seconds)
         return result
@@ -208,7 +204,7 @@ def run_external(
         identifiers["bulk"] = product.name
     elif bulk and kind == "plakar":
         execute(
-            _plakar_command(executable, repo, plakar_cache_directory, "backup", *lane_spec.arguments, "-cache", "no", "-no-progress", "."),
+            _plakar_command(executable, repo, plakar_cache_directory, "backup", *lane_spec.arguments, "-no-progress", "."),
             description=f"{lane_spec.label} backup",
             cwd=product,
             env=env,
@@ -239,7 +235,7 @@ def run_external(
             elif kind == "plakar":
                 tag = f"gutch-benchmark-{index:04d}"
                 execute(
-                    _plakar_command(executable, repo, plakar_cache_directory, "backup", *lane_spec.arguments, "-cache", "no", "-no-progress", "-tag", tag, source.name),
+                    _plakar_command(executable, repo, plakar_cache_directory, "backup", *lane_spec.arguments, "-no-progress", "-tag", tag, source.name),
                     description=f"{lane_spec.label} backup {source.name}",
                     cwd=product,
                     env=env,
@@ -265,7 +261,7 @@ def run_external(
         operation = "restore" if record_snapshots else "in-place recovery"
         restic_options = [] if record_snapshots else ["--overwrite", "always", "--delete"]
         kopia_options = [] if record_snapshots else ["--delete-extra"]
-        borg_options = [] if record_snapshots or borg_major == 1 else ["--continue"]
+        borg_options = [] if record_snapshots else ["--continue"]
         output.mkdir(parents=True, exist_ok=True)
         if bulk and kind == "restic":
             execute(
