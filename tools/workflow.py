@@ -10,9 +10,8 @@ from pathlib import Path
 import shutil
 import time
 from collections.abc import Callable
-from typing import Any
 
-from comparison_benchmark_suite.support.artifacts import RunLayout, create_run_dir
+from comparison_benchmark_suite.support.artifacts import LaneLayout, RunLayout, create_run_dir
 from comparison_benchmark_suite.support.command import CommandRunner
 from comparison_benchmark_suite.support.filesystem import remove_tree, scan_tree
 from comparison_benchmark_suite.support.recovery import apply_corruption_plan, build_corruption_plan
@@ -39,11 +38,10 @@ class LocalFixtureRunner:
 
     def _run_individual(
         self,
-        lane: Any,
+        lane: LaneLayout,
         dataset: DatasetSelection,
         lane_spec: LaneSpec,
         recovery_enabled: bool,
-        snapshot_limit: int | None = None,
     ) -> LaneResult:
         product = dataset.product
         repo = lane.payload / "repo"
@@ -56,19 +54,40 @@ class LocalFixtureRunner:
             raise ValueError(f"product has no target directories: {product}")
         snapshot_metrics = dataset.snapshot_metrics()
         backup_times: list[float] = []
-        restore_seconds = 0.0
-        verify_seconds = 0.0
         snapshots: list[tuple[str, str, Path]] = []
-        traces: dict[str, list[str]] = {"capture": [], "reconstruct": [], "corrupt": [], "repair": []}
+        capture_traces: list[str] = []
         for index, source in enumerate(sources, start=1):
             capture_stats = lane.stats / f"capture-{index:03d}.json"
             capture_trace = lane.traces / f"capture-{index:03d}" / "trace.json"
-            elapsed, stats = self.gutch.capture(lane.root, repo, source, lane_spec.profile, capture_stats, capture_trace, lane_spec.label)
+            elapsed, stats = self.gutch.capture(repo, source, lane_spec.profile, capture_stats, capture_trace, lane_spec.label)
             backup_times.append(elapsed)
             snapshot_metrics[source.name]["backup"] = elapsed
-            traces["capture"].append(str(capture_trace))
+            capture_traces.append(str(capture_trace))
             destination = output / source.name
             snapshots.append((source.name, _snapshot_id(stats), destination))
+        return self._restore_gutch_snapshots(
+            lane, dataset, lane_spec, snapshots, sum(backup_times),
+            capture_traces, snapshot_metrics, recovery_enabled,
+        )
+
+    def _restore_gutch_snapshots(
+        self,
+        lane: LaneLayout,
+        dataset: DatasetSelection,
+        lane_spec: LaneSpec,
+        snapshots: list[tuple[str, str, Path]],
+        capture_seconds: float,
+        capture_traces: list[str],
+        snapshot_metrics: dict,
+        recovery_enabled: bool,
+    ) -> LaneResult:
+        """Restore newest first, validate, then optionally corrupt and repair."""
+        repo = lane.payload / "repo"
+        output = lane.payload / "installation"
+        sources = dataset.sources
+        restore_seconds = 0.0
+        verify_seconds = 0.0
+        traces = {"capture": capture_traces, "reconstruct": [], "corrupt": [], "repair": []}
         repo_stats = scan_tree(repo)
         reconstructed: list[tuple[str, str, Path]] = []
         for index, (name, snapshot_id, destination) in enumerate(reversed(snapshots), start=1):
@@ -95,17 +114,16 @@ class LocalFixtureRunner:
             recovery = self.gutch.corrupt_and_repair(lane, repo, reconstructed, lane_spec.profile, lane_spec.label)
             traces["corrupt"].extend(recovery["corrupt_traces"])  # type: ignore[arg-type]
             traces["repair"].extend(recovery["repair_traces"])  # type: ignore[arg-type]
-        differences = []
         for source in sources:
             dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
         return LaneResult(
             lane_spec.label,
             lane_spec.kind,
             {
-                "backup": sum(backup_times),
+                "backup": capture_seconds,
                 "restore": restore_seconds,
                 "verify": verify_seconds,
-                "compare": 0.0 if not differences else 1.0,
+                "compare": 0.0,
                 "corrupt": float(recovery.get("corrupt", 0.0)),
                 "repair": float(recovery.get("repair", 0.0)),
                 "repo_size": repo_stats.total_bytes,
@@ -117,13 +135,13 @@ class LocalFixtureRunner:
                 "verify_source": "reconstruct_stats.verify_timings.total_seconds",
                 "verify_invocations": len(sources),
                 "corrupt_repair_after_reconstruct": recovery_enabled,
-                "differences": differences,
+                "differences": [],
             },
         )
 
     def _run_product_bulk(
         self,
-        lane: Any,
+        lane: LaneLayout,
         dataset: DatasetSelection,
         lane_spec: LaneSpec,
         recovery_enabled: bool,
@@ -140,7 +158,6 @@ class LocalFixtureRunner:
         if not sources:
             raise ValueError(f"product has no target directories: {product}")
         backup, capture = self.gutch.capture(
-            lane.root,
             repo,
             product,
             lane_spec.profile,
@@ -159,7 +176,6 @@ class LocalFixtureRunner:
         snapshots = [(product.name, _snapshot_id(capture), output)]
         recovery = self.gutch.corrupt_and_repair(lane, repo, snapshots, lane_spec.profile, lane_spec.label) if recovery_enabled else {}
         dataset.validate(product, output, lane.stats / "validate-final.json")
-        differences = []
         return LaneResult(
             lane_spec.label,
             lane_spec.kind,
@@ -167,7 +183,7 @@ class LocalFixtureRunner:
                 "backup": backup,
                 "restore": restore,
                 "verify": _verify_seconds(reconstruction),
-                "compare": 0.0 if not differences else 1.0,
+                "compare": 0.0,
                 "corrupt": float(recovery.get("corrupt", 0.0)),
                 "repair": float(recovery.get("repair", 0.0)),
                 "repo_size": repo_stats.total_bytes,
@@ -184,13 +200,13 @@ class LocalFixtureRunner:
                 "verify_source": "reconstruct_stats.verify_timings.total_seconds",
                 "verify_invocations": 1,
                 "corrupt_repair_after_reconstruct": recovery_enabled,
-                "differences": differences,
+                "differences": [],
             },
         )
 
     def _run_batch(
         self,
-        lane: Any,
+        lane: LaneLayout,
         dataset: DatasetSelection,
         lane_spec: LaneSpec,
         recovery_enabled: bool,
@@ -207,7 +223,6 @@ class LocalFixtureRunner:
         capture_stats = lane.stats / "capture-many.json"
         capture_trace = lane.traces / "capture-many" / "trace.json"
         backup, capture = self.gutch.capture_many(repo, product, lane_spec.profile, capture_stats, capture_trace, lane_spec.label, lane_spec.label)
-        repo_stats = scan_tree(repo)
         snapshots = capture.get("snapshots", [])
         by_name = {
             Path(item["input_path"]).name: str(item["snapshot_id"])
@@ -217,65 +232,15 @@ class LocalFixtureRunner:
         missing = [source.name for source in sources if source.name not in by_name]
         if missing:
             raise ValueError(f"capture-many stats omitted snapshots: {missing}")
-        snapshot_metrics = dataset.snapshot_metrics()
-        restore = 0.0
-        verify = 0.0
-        traces: dict[str, list[str]] = {"capture": [str(capture_trace)], "reconstruct": [], "corrupt": [], "repair": []}
-        reconstructed: list[tuple[str, str, Path]] = []
-        for index, source in enumerate(reversed(sources), start=1):
-            destination = output / source.name
-            stats = lane.stats / f"reconstruct-{index:03d}.json"
-            trace = lane.traces / f"reconstruct-{index:03d}" / "trace.json"
-            elapsed, reconstruction = self.gutch.reconstruct(
-                repo,
-                by_name[source.name],
-                destination,
-                lane_spec.profile,
-                stats,
-                trace,
-                f"{lane_spec.label} {source.name}",
-            )
-            restore += elapsed
-            snapshot_metrics[source.name]["restore"] = elapsed
-            verify = _add_optional(verify, _verify_seconds(reconstruction))
-            traces["reconstruct"].append(str(trace))
-            reconstructed.append((source.name, by_name[source.name], destination))
-        for source in sources:
-            dataset.validate(source, output / source.name, lane.stats / f"validate-restored-{source.name}.json")
-        recovery: dict[str, float | list[str]] = {}
-        if recovery_enabled:
-            recovery = self.gutch.corrupt_and_repair(lane, repo, reconstructed, lane_spec.profile, lane_spec.label)
-            traces["corrupt"].extend(recovery["corrupt_traces"])  # type: ignore[arg-type]
-            traces["repair"].extend(recovery["repair_traces"])  # type: ignore[arg-type]
-        differences: list[str] = []
-        for source in sources:
-            dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
-        return LaneResult(
-            lane_spec.label,
-            lane_spec.kind,
-            {
-                "backup": backup,
-                "restore": restore,
-                "verify": verify,
-                "compare": 0.0 if not differences else 1.0,
-                "corrupt": float(recovery.get("corrupt", 0.0)),
-                "repair": float(recovery.get("repair", 0.0)),
-                "repo_size": repo_stats.total_bytes,
-                "repo_files": repo_stats.file_count,
-            },
-            traces,
-            {
-                "snapshot_metrics": snapshot_metrics,
-                "verify_source": "reconstruct_stats.verify_timings.total_seconds",
-                "verify_invocations": len(sources),
-                "corrupt_repair_after_reconstruct": recovery_enabled,
-                "differences": differences,
-            },
+        snapshots = [(source.name, by_name[source.name], output / source.name) for source in sources]
+        return self._restore_gutch_snapshots(
+            lane, dataset, lane_spec, snapshots, backup, [str(capture_trace)],
+            dataset.snapshot_metrics(), recovery_enabled,
         )
 
     def _run_copy(
         self,
-        lane: Any,
+        lane: LaneLayout,
         dataset: DatasetSelection,
         lane_spec: LaneSpec,
         recovery_enabled: bool,
@@ -379,7 +344,6 @@ class LocalFixtureRunner:
                 dataset,
                 lane_spec,
                 recovery_enabled,
-                snapshot_limit=snapshot_limit,
             )
         if lane_spec.kind == "gutch-product-bulk":
             return self._run_product_bulk(lane, dataset, lane_spec, recovery_enabled)
@@ -387,7 +351,7 @@ class LocalFixtureRunner:
             return self._run_batch(lane, dataset, lane_spec, recovery_enabled)
         if lane_spec.kind == "filesystem-copy":
             return self._run_copy(lane, dataset, lane_spec, recovery_enabled)
-        raise ValueError(f"unsupported v2 Gutch lane kind: {lane_spec.kind}")
+        raise ValueError(f"unsupported benchmark lane kind: {lane_spec.kind}")
 
 
 def run_fixture(

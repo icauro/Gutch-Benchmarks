@@ -56,7 +56,6 @@ class GutchOperations:
 
     def capture(
         self,
-        lane_root: Path,
         repo: Path,
         source: Path,
         profile: GutchProfile,

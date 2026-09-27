@@ -304,3 +304,18 @@ Other benchmark harnesses can install this checkout with
 contains the same runtime and bundled fixtures; it has no parent-repository
 imports, build steps, or configuration. Tool binaries remain explicit inputs or
 are resolved from PATH. Downloads, fixtures, and reports belong to this project.
+
+## Maintaining the suite
+
+Start at `run.py` for CLI and terminal selection, and `benchmark.py` for a single
+comparison run. `interactive.py` launches the same CLI and displays its progress.
+`tools/report.py` owns the shared summary cells and report presentation.
+
+Tool workflows live in `tools/`; scheduling and aggregate measurements live in
+`scheduling/`; process execution, validation, and traces live in `support/`.
+Individual and batch Gutch captures share the same restore/validation/repair
+phase. The diagnostic entrypoints remain used by the separately installed
+Gutch benchmark harness.
+
+Run the portable regression suite with `python -m unittest discover -s tests`
+from this folder.

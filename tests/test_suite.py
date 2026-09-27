@@ -41,6 +41,45 @@ class SuiteTests(unittest.TestCase):
             builds.append({"path": str(source)})
         return builds
 
+    def test_capture_modes_share_reverse_restore_and_validation(self):
+        from unittest.mock import Mock
+        from comparison_benchmark_suite.support.commands import GutchCli
+        from comparison_benchmark_suite.support.models import GutchProfile
+        from comparison_benchmark_suite.tools.workflow import LocalFixtureRunner
+
+        product = self.root / "product"
+        for name in ("v1", "v2"):
+            source = product / name
+            source.mkdir(parents=True)
+            (source / "data.txt").write_text(name)
+        for workload in ("individual", "batch"):
+            with self.subTest(workload=workload):
+                layout = RunLayout(self.root / workload)
+                runner = LocalFixtureRunner(GutchCli(Path("unused")), Mock(), layout)
+                operations = runner.gutch = Mock()
+                operations.init_repo.side_effect = lambda repo, label: repo.mkdir(parents=True)
+                operations.capture.side_effect = lambda repo, source, *args: (2.0, {"snapshot_id": source.name})
+                operations.capture_many.return_value = (4.0, {"snapshots": [
+                    {"input_path": str(product / name), "snapshot_id": name} for name in ("v1", "v2")
+                ]})
+                restored = []
+
+                def restore(repo, snapshot_id, destination, *args):
+                    restored.append(snapshot_id)
+                    shutil.copytree(product / snapshot_id, destination)
+                    return 3.0, {"verify_timings": {"total_seconds": 0.5}}
+
+                operations.reconstruct.side_effect = restore
+                lane = LaneSpec(workload, "gutch", profile=GutchProfile("test"), workload=workload)
+                result = runner.run_lane(product, lane)
+                self.assertEqual(restored, ["v2", "v1"])
+                self.assertEqual(result.metrics["backup"], 4.0)
+                self.assertEqual(result.metrics["restore"], 6.0)
+                self.assertEqual(result.metrics["verify"], 1.0)
+                self.assertEqual(len(list(layout.root.glob("lanes/*/stats/validate-*.json"))), 4)
+                for metrics in result.metadata["snapshot_metrics"].values():
+                    self.assertEqual("backup" in metrics, workload == "individual")
+
     def test_copied_suite_runs_without_repository_and_preserves_inputs(self):
         standalone = self.root / "exported-suite"
         shutil.copytree(ROOT, standalone, ignore=shutil.ignore_patterns(".artifacts", "__pycache__", ".venv"))

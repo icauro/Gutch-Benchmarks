@@ -4,6 +4,7 @@ Paths are relative to this project root.
 
 ```
 __init__.py
+benchmark.py
 datasets.py
 fixtures/
 fixtures/blender/

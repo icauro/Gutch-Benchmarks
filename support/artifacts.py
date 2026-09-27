@@ -8,7 +8,6 @@ from pathlib import Path
 import re
 import time
 
-from comparison_benchmark_suite.support.filesystem import remove_tree
 from .retention import compact_success, prune_successful_runs
 from .retention import remove_owned
 import tempfile

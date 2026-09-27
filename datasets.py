@@ -2,7 +2,6 @@
 
 import json
 import hashlib
-import os
 from pathlib import Path
 import platform
 import shutil

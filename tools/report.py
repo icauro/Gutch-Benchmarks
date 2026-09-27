@@ -40,7 +40,7 @@ def _comparison(result: LaneResult) -> str:
     return f"FAIL ({len(differences)})" if isinstance(differences, list) else "FAIL"
 
 
-def _table(title: str, headers: list[str], rows: list[tuple[str, list[str]]]) -> None:
+def _table(headers: list[str], rows: list[tuple[str, list[str]]]) -> None:
     label_width = max(20, max(len(label) for label, _ in rows))
     lane_widths = [
         max(14, len(header), max(len(values[index]) for _, values in rows))
@@ -107,7 +107,7 @@ def print_comparison_table(
             ("Comparison", [_comparison(result) if name in values else "-"
                             for result, values in zip(results, measurements, strict=True)]),
         ]
-        _table("Snapshot", headers, rows)
+        _table(headers, rows)
 
     rows = [
         ("Total input bytes", [bytes_value(result, "input_bytes") for result in results]),
@@ -122,7 +122,7 @@ def print_comparison_table(
         ("Comparison", [_comparison(result) for result in results]),
     ]
     print("\n  Summary (averages per measured snapshot; speed = total bytes / total time)")
-    _table("Summary", headers, rows)
+    _table(headers, rows)
 
     additional = []
     for label, key in [("Embedded verify", "verify"), ("Repository check", "repository_check"),
@@ -137,7 +137,7 @@ def print_comparison_table(
             additional.append((label, values))
     if additional:
         print("\n  Verification and recovery (embedded verify is included in reconstruct time)")
-        _table("Verification and recovery", headers, additional)
+        _table(headers, additional)
 
 
 def _trace_paths(result: LaneResult) -> list[Path]:
@@ -267,7 +267,7 @@ def print_gutch_profile_table(results: list[LaneResult]) -> None:
     print()
     print("  Gutch Perfetto Profiles")
     print("  note: values are inclusive recorded spans; nested spans overlap and recording limits may omit jobs.")
-    _table("Gutch Perfetto Profiles", [label for label, _ in aggregates], rows)
+    _table([label for label, _ in aggregates], rows)
 
 
 def print_fixture_report(fixture: FixtureSpec, product: Path, results: list[LaneResult]) -> None:
@@ -307,3 +307,26 @@ def ascii_comparison_table(rows: list[list[str]]) -> str:
 
     return "\n".join([border, line(headers), border,
                        *(line(row, numeric=True) for row in rows), border])
+
+
+def write_comparison_report(directory: Path, description: str, results: list[LaneResult]) -> None:
+    utilization_note = "CPU/RSS: detailed mode only, direct tool processes; 100% CPU = one core. Child processes and harness excluded."
+    summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
+    lines = ["# Comparison benchmark", "", description, "", "OS cache state: uncontrolled. Times are median seconds.", "",
+             "| " + " | ".join(COMPARISON_HEADERS) + " |",
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+    rows = comparison_rows(summary, [result.as_json() for result in results])
+    for row in rows:
+        lines.append("| " + " | ".join(row) + " |")
+    reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
+    lines.extend(["", *reasons, "", "Restore includes the tool's own verification. Independent SHA-256 validation is outside command timing.",
+                  "", "Raw samples and operation semantics: results.json. Aggregate medians and ranges: summary.json. Perfetto overview: trace.json (compacted tool time; harness gaps omitted, not concurrent execution)."])
+    lines.extend(["", utilization_note])
+    (directory / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\nComparison: median seconds across measured runs; warm-ups excluded.")
+    print(ascii_comparison_table(rows))
+    print("Repair = in-place; recovery = full restore. '-' = not measured.")
+    print("Independent validation is outside timings. OS cache is uncontrolled.")
+    print(utilization_note)
+    for reason in reasons:
+        print(reason)
