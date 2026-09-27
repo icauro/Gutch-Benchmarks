@@ -133,8 +133,8 @@ def main(arguments=None) -> int:
         def report(results):
             summary = json.loads((layout.root / "summary.json").read_text(encoding="utf-8"))
             lines = ["# Comparison benchmark", "", "OS cache state: uncontrolled. Times are median seconds.", "",
-                     "| Candidate | Status | Capture | Restore | In-place repair | Full recovery | Stored MiB |",
-                     "|---|---|---:|---:|---:|---:|---:|"]
+                     "| Candidate | Status | Capture | Restore | In-place repair | Full recovery | Stored MiB | CPU % | Peak RSS MiB |",
+                     "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
             rows = []
             for label, metrics in summary.items():
                 samples = [result for result in results if result.metadata["case"] == label]
@@ -143,7 +143,8 @@ def main(arguments=None) -> int:
                     median = metrics.get(key, {}).get("median") if isinstance(metrics.get(key), dict) else None
                     return "-" if median is None else f"{median / divisor:.3f}"
                 row = [label, statuses, value('backup'), value('restore'), value('repair'),
-                       value('full_restore_recovery'), value('repo_size', 1048576)]
+                       value('full_restore_recovery'), value('repo_size', 1048576),
+                       value('cpu_percent'), value('peak_rss_bytes', 1048576)]
                 rows.append(row)
                 lines.append("| " + " | ".join(row) + " |")
             reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
@@ -154,6 +155,10 @@ def main(arguments=None) -> int:
             print(ascii_comparison_table(rows))
             print("Repair = in-place; recovery = full restore. '-' = not measured.")
             print("Independent validation is outside timings. OS cache is uncontrolled.")
+            utilization_note = "CPU/RSS: detailed mode only, direct tool processes; 100% CPU = one core. Child processes and harness excluded."
+            print(utilization_note)
+            with (layout.root / "summary.md").open("a", encoding="utf-8") as report_file:
+                report_file.write("\n" + utilization_note + "\n")
             for reason in reasons:
                 print(reason)
 

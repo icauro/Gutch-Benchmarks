@@ -114,7 +114,7 @@ without a built-in Blender download.
 ## Results
 
 The command prints an ASCII comparison table with status, median capture/restore
-and repair/recovery seconds, and stored MiB. Missing measurements show `-`;
+and repair/recovery seconds, stored MiB, CPU usage, and peak RSS MiB. Missing measurements show `-`;
 failure and capability reasons appear below the table. It also prints the report
 path under `.artifacts/runs/`. Each run contains:
 
@@ -206,3 +206,12 @@ Run the suite's own tests with:
 ```text
 python -m unittest discover -s tests
 ```
+
+CPU and memory columns require `profile_mode: detailed`; otherwise they show `-`.
+CPU is the observed CPU-time delta divided by observed sampling time, weighted
+across all tool commands (including setup and verification). 100% means one
+logical core; parallel execution may exceed 100%. Very short commands may have
+no CPU samples. Peak RSS is the largest sampled resident-memory value across
+commands. Repeated runs report medians of these per-run values. Sampling can miss
+short peaks and process exit tails. Only the launched process is measured, not
+its children or helpers. The in-process filesystem baseline is intentionally `-`.

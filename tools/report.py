@@ -277,7 +277,7 @@ def print_fixture_report(fixture: FixtureSpec, product: Path, results: list[Lane
 
 def ascii_comparison_table(rows: list[list[str]]) -> str:
     """Render the same comparison cells used by the Markdown report."""
-    headers = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB"]
+    headers = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RSS MiB"]
     widths = [max(len(row[index]) for row in [headers, *rows]) for index in range(len(headers))]
     border = "+-" + "-+-".join("-" * width for width in widths) + "-+"
 

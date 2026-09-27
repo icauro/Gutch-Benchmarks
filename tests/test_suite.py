@@ -206,6 +206,17 @@ class SuiteTests(unittest.TestCase):
         self.assertEqual(attempts[0], attempts[1])
         sleep.assert_called_once_with(0.25)
 
+    def test_utilization_weights_cpu_and_preserves_unavailable_values(self):
+        from comparison_benchmark_suite.support.memory import process_utilization
+        values = process_utilization([
+            {"memory": {"sampled_cpu_seconds": 2, "cpu_observed_seconds": 1, "sampled_peak_rss_bytes": 100}},
+            {"memory": {"sampled_cpu_seconds": 1, "cpu_observed_seconds": 3, "sampled_peak_rss_bytes": 200}},
+            {"memory": {"sampled_cpu_seconds": None, "cpu_observed_seconds": None}},
+        ])
+        self.assertEqual(values["cpu_percent"], 75)
+        self.assertEqual(values["peak_rss_bytes"], 200)
+        self.assertEqual(process_utilization([{}]), {})
+
     def test_corruption_plan_preserves_permissions(self):
         from comparison_benchmark_suite.support.recovery import build_corruption_plan, apply_corruption_plan
         destination = self.root / "installation"

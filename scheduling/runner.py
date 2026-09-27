@@ -6,6 +6,7 @@ import subprocess
 import time
 import statistics
 from comparison_benchmark_suite.support.filesystem import file_sha256
+from comparison_benchmark_suite.support.memory import process_utilization
 from comparison_benchmark_suite.support.traces import combine_labeled_traces, open_trace_in_perfetto, write_lane_timeline
 
 
@@ -44,6 +45,8 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
             commands.evidence_directory = layout.lane(label).root / 'commands'
             measurement_start = len(commands.measurements)
             result = execute(case)
+            result.metrics.update(process_utilization(commands.measurements[measurement_start:]))
+            result.metadata["utilization_scope"] = "direct tool processes; CPU 100% = one logical core; excludes descendants and harness"
             if result.metadata.get('status') == 'ERROR':
                 failed_cases.append(label)
             result.metadata.update(case=specification.label, repetition=repetition,
