@@ -317,5 +317,7 @@ Individual and batch Gutch captures share the same restore/validation/repair
 phase. The diagnostic entrypoints remain used by the separately installed
 Gutch benchmark harness.
 
-Run the portable regression suite with `python -m unittest discover -s tests`
-from this folder.
+Run the six core tests with `python -m unittest discover -s tests` from this
+folder. They cover portable execution, failure isolation, output validation,
+archive path boundaries, the interactive run flow, and cancellation.
+Tool-specific mock tests and narrow configuration checks are intentionally omitted.
