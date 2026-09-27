@@ -11,12 +11,16 @@ were smoke-tested in Debian unstable. Windows tools target x86-64.
 Upstreams and notices:
 
 - Borg: https://github.com/borgbackup/borg (licenses/borg.txt).
-- Restic: https://github.com/restic/restic (licenses/restic.txt and restic-windows.txt).
+- Restic: https://github.com/restic/restic (licenses/restic.txt).
 - Kopia: https://github.com/kopia/kopia (licenses/kopia.txt).
-- Plakar: https://github.com/PlakarKorp/plakar (licenses/plakar.txt and plakar-linux.txt).
+- Plakar: https://github.com/PlakarKorp/plakar (licenses/plakar.txt).
 - BuildPatchTool: Epic Games, product version 1.8.8; official package:
   https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip
 - Gutch: built from the source revision recorded in manifest.json.
 
 Old versions, archives and smoke-test logs stay in .artifacts/ and do not ship.
 After refreshing a binary, update its checksum and version in manifest.json.
+
+The suite does not ship BPT’s optional GUI or PDF guide, or Plakar man pages.
+Runtime support files and CLI binaries remain intact. Identical platform license
+texts share one copy. The repository file index excludes this vendor directory.
