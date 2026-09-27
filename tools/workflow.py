@@ -361,20 +361,18 @@ def run_fixture(
     artifacts_root: Path,
     *,
     keep_artifacts: bool,
-    repo_root: Path | None = None,
     on_lane_complete: Callable[[LaneResult], None] | None = None,
     on_run_complete: Callable[[list[LaneResult]], None] | None = None,
     on_step: Callable[[str], None] | None = None,
-    external_binary_root: Path | None = None,
 ) -> list[LaneResult]:
+    """Run Gutch's internal diagnostics using the shared measurement runtime."""
+    unsupported_tools = sorted({lane.tool for lane in fixture.lanes} - {"gutch", "filesystem"})
+    if unsupported_tools:
+        raise ValueError("External-tool comparisons belong in the standalone suite: " + ", ".join(unsupported_tools))
     if fixture.snapshot_limit is not None:
         supported_kinds = {
             "gutch-individual",
             "filesystem-copy",
-            "restic-individual",
-            "kopia-individual",
-            "borg-individual",
-            "plakar-individual",
         }
         unsupported = sorted(
             {lane.kind for lane in fixture.lanes if lane.kind not in supported_kinds}
@@ -387,24 +385,11 @@ def run_fixture(
     run_root = create_run_dir(artifacts_root, product.name, fixture.name)
     layout = RunLayout(run_root)
     commands = CommandRunner(step_wait_seconds=fixture.step_wait_seconds, on_step=on_step, memory_profile=fixture.profile_mode == "detailed")
-    external = ExternalTools(repo_root or Path(__file__).resolve().parents[1], commands)
-    if external_binary_root is not None:
-        external = ExternalTools(
-            external.repo_root,
-            commands,
-            restic=external_binary_root / "restic",
-            kopia=external_binary_root / "kopia",
-            borg=external_binary_root / "borg" if any(lane.tool == "borg" for lane in fixture.lanes) else None,
-            plakar=external_binary_root / "plakar",
-        )
-    if any(lane.tool == "borg" for lane in fixture.lanes):
-        external.check_borg_version()
     cli = GutchCli(cli.executable, profile_mode=fixture.profile_mode)
     runner = LocalFixtureRunner(
         cli,
         commands,
         layout,
-        external,
     )
     return execute_cases(fixture, layout, commands,
         lambda case: runner.run_lane(product, case, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit),
