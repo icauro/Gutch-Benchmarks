@@ -49,7 +49,7 @@ def _lane_arguments(values: dict[str, Any], name: str, kind: str) -> tuple[str, 
         raw = []
     if not isinstance(raw, list) or any(not isinstance(argument, str) or not argument for argument in raw):
         raise ValueError(f"{name} arguments must be a list of non-empty strings")
-    if raw and not kind.startswith(("restic-", "kopia-", "borg-", "plakar-")):
+    if raw and not kind.startswith(("restic-", "kopia-", "borg-", "plakar-", "buildpatchtool-")):
         raise ValueError(f"{name} arguments are only supported for external lanes")
     return tuple(raw)
 

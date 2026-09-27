@@ -1,6 +1,6 @@
 # Paths in this file are relative to this fixture folder. Missing tools are reported.
 name: blender
-description: Capture and independently validate two pinned Blender builds.
+description: Compare two pinned Blender builds with approximately 1 MiB chunks and comparable Zstd presets where supported.
 repetitions: 3
 warmups: 1
 profile_mode: 'off'
@@ -36,13 +36,20 @@ lanes:
   tool: filesystem
 - label: gutch
   tool: gutch
+  profile:
+    chunk: chunk_1MiB
+    compression: {algorithm: zstd, level: 3}
 - label: restic
   tool: restic
+  arguments: [--compression, auto]
 - label: kopia
   tool: kopia
+  arguments: [--compression=zstd, --splitter=DYNAMIC-1M-BUZHASH]
 - label: borg
   tool: borg
+  arguments: [--compression, "zstd,3", --chunker-params, "buzhash,19,23,20,4095"]
 - label: plakar
   tool: plakar
 - label: buildpatchtool
   tool: buildpatchtool
+  arguments: [-ChunkWindowSize=1048576]

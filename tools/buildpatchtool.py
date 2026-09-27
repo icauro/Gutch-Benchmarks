@@ -3,26 +3,29 @@
 from pathlib import Path
 
 from ..scheduling.dataset import DatasetSelection
+from ..support.command import CommandError
 from ..support.filesystem import file_sha256, scan_tree
 from .models import LaneResult
 
 
 def run_buildpatchtool(executable, commands, lane, product, specification, *, dataset=None):
-    probe = commands.run(
-        [executable, "-mode=PatchGeneration", "-help"],
-        description="BuildPatchTool local generation capabilities",
-        expected_failure=True,
-    )
+    try:
+        probe = commands.run(
+            [executable, "-mode=ChunkBuildDirectory", "-help"],
+            description="BuildPatchTool local generation capabilities",
+        )
+    except CommandError as error:
+        probe = error.result
     help_text = probe.stdout + probe.stderr
-    required = ("BuildRoot", "CloudDir", "AppID", "AppName", "BuildVersion", "AppLaunch", "AppArgs")
+    required = ("BuildRoot", "CloudDir", "ArtifactId", "FeatureLevel", "ChunkWindowSize", "BuildVersion", "AppLaunch", "AppArgs")
     # The Epic Store uploader is not the same interface as the local engine tool.
     # Do not guess credentials or substitute a publishing operation.
-    if not all(name.lower() in help_text.lower() for name in required) or any(
+    if probe.returncode != 0 or not all(name.lower() in help_text.lower() for name in required) or any(
         name.lower() in help_text.lower() for name in ("ClientSecret", "OrganizationID")
     ):
         return LaneResult(specification.label, specification.kind, metadata={
             "status": "UNSUPPORTED",
-            "reason": "This executable does not advertise the supported local PatchGeneration interface. Upload modes are not benchmarked.",
+            "reason": "This executable does not advertise the supported local ChunkBuildDirectory interface. Upload modes are not benchmarked.",
             "binary_sha256": file_sha256(executable),
         })
     dataset = dataset or DatasetSelection.resolve(product)
@@ -37,9 +40,10 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
         launch = next((name for name in files if Path(name).name in {"blender", "blender.exe"}), files[0])
         before = scan_tree(cloud).total_bytes
         result = commands.run([
-            executable, "-mode=PatchGeneration", f"-BuildRoot={source.as_posix()}",
-            f"-CloudDir={cloud.as_posix()}", "-AppID=1", "-AppName=ComparisonBenchmark",
+            executable, "-mode=ChunkBuildDirectory", f"-BuildRoot={source.as_posix()}",
+            f"-CloudDir={cloud.as_posix()}", "-ArtifactId=ComparisonBenchmark", "-FeatureLevel=Latest",
             f"-BuildVersion={source.name}", f"-AppLaunch={launch}", "-AppArgs=",
+            *specification.arguments,
         ], description=f"BuildPatchTool generate {source.name}", cwd=lane.root)
         elapsed += result.elapsed_seconds
         after = scan_tree(cloud).total_bytes

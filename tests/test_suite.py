@@ -182,9 +182,12 @@ class SuiteTests(unittest.TestCase):
     def test_buildpatch_local_capture_does_not_claim_restore_validation(self):
         class Commands:
             def run(self, command, **options):
+                assert not options.get("expected_failure", False)
+                assert "-mode=ChunkBuildDirectory" in command
                 if "-help" in command:
-                    output = "BuildRoot CloudDir AppID AppName BuildVersion AppLaunch AppArgs"
+                    output = "BuildRoot CloudDir ArtifactId FeatureLevel ChunkWindowSize BuildVersion AppLaunch AppArgs"
                 else:
+                    assert "-ChunkWindowSize=1048576" in command
                     cloud = Path(next(x.split("=", 1)[1] for x in command if str(x).startswith("-CloudDir=")))
                     (cloud / "data").write_bytes(b"generated")
                     output = ""
@@ -197,7 +200,7 @@ class SuiteTests(unittest.TestCase):
         binary = self.root / "tool"
         binary.write_bytes(b"example")
         result = run_buildpatchtool(binary, Commands(), RunLayout(self.root / "run").lane("bpt"),
-                                   product, LaneSpec("bpt", "buildpatchtool"))
+                                   product, LaneSpec("bpt", "buildpatchtool", arguments=("-ChunkWindowSize=1048576",)))
         self.assertEqual(result.metadata["status"], "CAPTURE_ONLY")
         self.assertNotIn("restore", result.metrics)
 

@@ -34,6 +34,41 @@ Paths in a fixture are relative to that fixture's folder. No tool is downloaded
 or built automatically. To compare two Gutch binaries, give their lanes distinct
 labels and put each executable under its label in `executables`.
 
+## Comparison settings
+
+The Blender fixture explicitly targets **1 MiB chunks** and **Zstd level 3 or
+its closest standard preset** where the tool exposes those controls. This is
+an approximate alignment, not equal compression work or identical chunk boundaries.
+The settings below belong to `fixtures/blender/fixture.yaml`; custom fixtures
+choose their own settings. Recorded fixture settings and command logs accompany
+every run. Earlier results using tool defaults are not directly comparable.
+
+| Tool | Compression selected | Chunking selected | Controls and remaining differences |
+|---|---|---|---|
+| Gutch | Zstd, level 3 | `chunk_1MiB`: FastCDC, 256 KiB minimum / 1 MiB target / 4 MiB maximum | Numeric compression level and chunk profiles are selectable. Default 8 MiB bundles remain enabled. |
+| Restic | `--compression auto`: Zstd standard preset | Rabin, 512 KiB minimum / roughly 1 MiB target / 8 MiB maximum | CLI exposes named compression modes, not a numeric Zstd level or chunk-size setting. `auto` is an approximate level-3 counterpart, not an identical encoder. |
+| Kopia | `--compression=zstd`: standard preset | `--splitter=DYNAMIC-1M-BUZHASH`: 512 KiB minimum / 1 MiB target / 2 MiB maximum | Named codec/presets and splitter profiles are selectable; no numeric Zstd level in this policy. |
+| Borg | `--compression zstd,3` | `--chunker-params buzhash,19,23,20,4095`: 512 KiB minimum / 1 MiB mask target / 8 MiB maximum | Both codec/level and chunker parameters are selectable. Explicit Buzhash avoids different default chunkers across Borg versions. |
+| Plakar | LZ4, tool-managed level | Default FastCDC: 512 KiB minimum / 1 MiB target / 8 MiB maximum | Tested 1.1.5 CLI exposes compression on/off, but no codec, level, or chunk-size selector. Retained as a documented exception; no claim of Zstd-equivalent effort. |
+| BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Capture only in this suite. |
+| Filesystem | None | None | Copy baseline; no deduplication or compression. |
+
+Chunk targets are nominal parameters, not measured means. File boundaries,
+minimum/maximum sizes, hashes, compression libraries and skip heuristics still
+change the resulting chunks and compression cost. Worker counts remain tool
+defaults; Restic and Kopia retain encryption, while Gutch, Borg and Plakar lanes
+use unencrypted storage. Packing, metadata and verification costs also differ.
+Interpret results as complete tool workflows, not isolated codec benchmarks.
+
+Settings were checked against the installed CLIs on 2026-09-27 and upstream
+[Kopia compressors](https://github.com/kopia/kopia/blob/v0.23.1/repo/compression/compressor_zstd.go),
+[Kopia splitters](https://github.com/kopia/kopia/blob/v0.23.1/repo/splitter/splitter_buzhash32.go),
+[Restic chunker](https://github.com/restic/chunker/blob/master/chunker.go),
+[Restic compression](https://github.com/restic/restic/blob/master/internal/repository/repository.go),
+[Borg chunker parameters](https://borgbackup.readthedocs.io/en/stable/usage/notes.html),
+and [Plakar chunking](https://github.com/PlakarKorp/kloset/blob/v1.1.5/chunking/chunking.go).
+Recheck the table when changing tool versions or fixture arguments.
+
 ## Use your own builds
 
 Create `fixtures/my_product/fixture.yaml` and put your builds beside it:
@@ -106,7 +141,9 @@ optional developer diagnostics; the simple command does not require those tools.
 
 ## BuildPatchTool
 
-Supply your own executable. The adapter probes `-mode=PatchGeneration -help` and
+Download the executable from [Epic](https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip),
+extract it with its accompanying Engine files, and set `executables.buildpatchtool`.
+The adapter probes `-mode=ChunkBuildDirectory -help` and
 runs only the supported local generation interface. Epic Store upload-only
 interfaces are reported as `UNSUPPORTED`; no upload or authentication is attempted.
 Successful local generation is `CAPTURE_ONLY`, not validated restore. This
