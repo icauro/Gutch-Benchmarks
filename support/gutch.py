@@ -100,7 +100,7 @@ class GutchOperations:
     ) -> tuple[float, dict[str, Any]]:
         result = self.commands.run(
             self.cli.command(
-                "snapshot",
+                "installation",
                 "reconstruct",
                 "--repo",
                 repo,
