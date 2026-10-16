@@ -1,12 +1,12 @@
 {
-  "gutch_source_commit": "40937b9dc24cc4a795c5c6badf76bf9cb84d0adb",
+  "gutch_source_commit": "def61847d1e77e6d4e75cd2e6ca2866ca75b1c37",
   "executables": [
     {
       "platform": "windows-x64",
       "tool": "gutch",
       "version": "0.2.0",
       "path": "windows-x64/gutch/gutch-cli.exe",
-      "sha256": "dec1d3ff8b2c677c2785c5e032d277cf46bfa3c48116c9ee3ee124542e7f56d4"
+      "sha256": "9f1fd420176d84c207aa9da962ffa25290e7f3b2c927bbd749c11842032f558c"
     },
     {
       "platform": "windows-x64",
