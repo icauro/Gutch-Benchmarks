@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="764" height="648" viewBox="0 0 764 648" role="img" aria-labelledby="title description">
+<title id="title">Gutch benchmark comparisons</title>
+<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>
+<rect width="764" height="648" fill="#000000"/>
+<g font-family="Segoe UI, Arial, sans-serif" fill="#edf2fa">
+<text x="8" y="34" font-size="25" font-weight="700" fill="#edf2fa" text-anchor="start">Gutch benchmark comparisons</text>
+<rect x="490" y="23" width="16.00" height="13" rx="3" fill="#2474f5"/>
+<text x="513" y="34" font-size="16" font-weight="400" fill="#edf2fa" text-anchor="start">Gutch</text>
+<rect x="600" y="23" width="16.00" height="13" rx="3" fill="#f78b32"/>
+<text x="623" y="34" font-size="16" font-weight="400" fill="#edf2fa" text-anchor="start">Paired tool</text>
+<rect x="8" y="52" width="748.00" height="586" rx="10" fill="#161b22"/>
+<text x="14" y="80" font-size="13" font-weight="700" fill="#a3afc2" text-anchor="start">COMPARISON</text>
+<text x="163" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Capture</text>
+<text x="163" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">seconds</text>
+<text x="313" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restore</text>
+<text x="313" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">seconds</text>
+<text x="463" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Repair</text>
+<text x="463" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">seconds</text>
+<text x="613" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Stored size</text>
+<text x="613" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
+<rect x="8" y="98" width="748.00" height="90" rx="0" fill="#000000"/>
+<path d="M8 98H756" stroke="#29313d"/>
+<text x="14" y="121" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="145" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restic [1]</text>
+<rect x="163" y="114" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="114" width="21.26" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="126" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">4.525</text>
+<rect x="163" y="139" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="139" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="151" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">8.939</text>
+<text x="163" y="177" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">1.98× faster</text>
+<rect x="313" y="114" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="114" width="13.75" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="126" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.911</text>
+<rect x="313" y="139" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="139" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="151" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">5.840</text>
+<text x="313" y="177" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">3.06× faster</text>
+<rect x="463" y="114" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="114" width="10.22" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="126" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.028</text>
+<rect x="463" y="139" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="139" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="151" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">4.225</text>
+<text x="463" y="177" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">4.11× faster</text>
+<rect x="613" y="114" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="114" width="40.36" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="126" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">689.4</text>
+<rect x="613" y="139" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="139" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="151" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">717.5</text>
+<text x="613" y="177" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">3.9% smaller</text>
+<rect x="8" y="188" width="748.00" height="90" rx="0" fill="#0d1117"/>
+<path d="M8 188H756" stroke="#29313d"/>
+<text x="14" y="211" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="235" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Kopia [2]</text>
+<rect x="163" y="204" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="204" width="42.00" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="216" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">10.462</text>
+<rect x="163" y="229" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="229" width="39.59" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="241" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">9.861</text>
+<text x="163" y="267" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">1.06× slower</text>
+<rect x="313" y="204" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="204" width="2.33" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="216" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">0.963</text>
+<rect x="313" y="229" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="229" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="241" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">17.341</text>
+<text x="313" y="267" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">18.02× faster</text>
+<rect x="463" y="204" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="204" width="2.52" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="216" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">0.628</text>
+<rect x="463" y="229" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="229" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="241" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">10.450</text>
+<text x="463" y="267" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">16.64× faster</text>
+<rect x="613" y="204" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="204" width="42.00" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="216" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1,758.2</text>
+<rect x="613" y="229" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="229" width="41.91" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="241" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1,754.5</text>
+<text x="613" y="267" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">0.2% larger</text>
+<rect x="8" y="278" width="748.00" height="90" rx="0" fill="#000000"/>
+<path d="M8 278H756" stroke="#29313d"/>
+<text x="14" y="301" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="325" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Borg [3]</text>
+<rect x="163" y="294" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="294" width="26.31" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="306" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">7.093</text>
+<rect x="163" y="319" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="319" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="331" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">11.321</text>
+<text x="163" y="357" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">1.60× faster</text>
+<rect x="313" y="294" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="294" width="7.43" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="306" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.745</text>
+<rect x="313" y="319" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="319" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="331" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">9.861</text>
+<text x="313" y="357" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">5.65× faster</text>
+<rect x="463" y="294" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="294" width="10.26" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="306" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">0.880</text>
+<rect x="463" y="319" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="319" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="331" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">3.602</text>
+<text x="463" y="357" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">4.09× faster</text>
+<rect x="613" y="294" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="294" width="41.88" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="306" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">913.6</text>
+<rect x="613" y="319" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="319" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="331" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">916.1</text>
+<text x="613" y="357" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">0.3% smaller</text>
+<rect x="8" y="368" width="748.00" height="90" rx="0" fill="#0d1117"/>
+<path d="M8 368H756" stroke="#29313d"/>
+<text x="14" y="391" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="415" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Rustic [4]</text>
+<rect x="163" y="384" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="384" width="12.79" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="396" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">4.487</text>
+<rect x="163" y="409" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="409" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="421" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">14.735</text>
+<text x="163" y="447" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">3.28× faster</text>
+<rect x="313" y="384" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="384" width="14.24" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="396" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.906</text>
+<rect x="313" y="409" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="409" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="421" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">5.621</text>
+<text x="313" y="447" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">2.95× faster</text>
+<rect x="463" y="384" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="384" width="10.18" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="396" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.020</text>
+<rect x="463" y="409" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="409" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="421" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">4.208</text>
+<text x="463" y="447" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">4.13× faster</text>
+<rect x="613" y="384" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="384" width="41.29" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="396" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">689.4</text>
+<rect x="613" y="409" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="409" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="421" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">701.2</text>
+<text x="613" y="447" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">1.7% smaller</text>
+<rect x="8" y="458" width="748.00" height="90" rx="0" fill="#000000"/>
+<path d="M8 458H756" stroke="#29313d"/>
+<text x="14" y="481" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="505" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Plakar [5]</text>
+<rect x="163" y="474" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="474" width="25.33" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="486" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">6.921</text>
+<rect x="163" y="499" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="499" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="511" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">11.476</text>
+<text x="163" y="537" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">1.66× faster</text>
+<rect x="313" y="474" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="474" width="11.03" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="486" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.398</text>
+<rect x="313" y="499" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="499" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="511" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">5.327</text>
+<text x="313" y="537" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">3.81× faster</text>
+<rect x="463" y="474" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="474" width="2.09" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="486" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">0.735</text>
+<rect x="463" y="499" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="499" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="511" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">14.778</text>
+<text x="463" y="537" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">20.12× faster</text>
+<rect x="613" y="474" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="474" width="41.88" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="486" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">913.9</text>
+<rect x="613" y="499" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="499" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="511" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">916.6</text>
+<text x="613" y="537" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">0.3% smaller</text>
+<rect x="8" y="548" width="748.00" height="90" rx="0" fill="#0d1117"/>
+<path d="M8 548H756" stroke="#29313d"/>
+<text x="14" y="571" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="595" font-size="14" font-weight="650" fill="#edf2fa" text-anchor="start">BuildPatchTool [6]</text>
+<rect x="163" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="564" width="5.13" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">4.487</text>
+<rect x="163" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">36.714</text>
+<text x="163" y="627" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">8.18× faster</text>
+<rect x="313" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="564" width="2.85" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.914</text>
+<rect x="313" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">28.158</text>
+<text x="313" y="627" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">14.71× faster</text>
+<rect x="463" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="564" width="18.58" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.008</text>
+<rect x="463" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">2.278</text>
+<text x="463" y="627" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">2.26× faster</text>
+<rect x="613" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="564" width="39.53" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">689.4</text>
+<rect x="613" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">732.3</text>
+<text x="613" y="627" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">5.9% smaller</text>
+<path d="M156 52V638" stroke="#29313d"/>
+<path d="M306 52V638" stroke="#29313d"/>
+<path d="M456 52V638" stroke="#29313d"/>
+<path d="M606 52V638" stroke="#29313d"/>
+<path d="M756 52V638" stroke="#29313d"/>
+<path d="M8 638H756" stroke="#29313d"/>
+</g>
+</svg>

@@ -1,0 +1,722 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Plakar uses native FastCDC around 1 MiB and LZ4 stream compression, with plaintext storage. Gutch uses a nominal 1 MiB FastCDC target, LZ4 0 and 8 MiB compressed bundles. Bounds, compression units/framing and packing differ. Plakar restores over existing output; this adapter has no native extra-file deletion. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 1 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+  "executables": {
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    },
+    "plakar": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/plakar/plakar",
+      "sha256": "b4e82ae9983373969bc3e1a4bc1d63bbf064c8f269c743a99f939086c571f53a"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Plakar uses native FastCDC around 1 MiB and LZ4 stream compression, with plaintext storage. Gutch uses a nominal 1 MiB FastCDC target, LZ4 0 and 8 MiB compressed bundles. Bounds, compression units/framing and packing differ. Plakar restores over existing output; this adapter has no native extra-file deletion. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 1 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "lz4",
+          "compression_level": 0,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "resource_sample": false,
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "plakar",
+        "profile": null,
+        "resource_sample": false,
+        "tool": "plakar",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "lz4",
+          "compression_level": 0,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "resource_sample": false,
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "plakar",
+        "profile": null,
+        "resource_sample": false,
+        "tool": "plakar",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_plakar",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 1,
+    "resource_sampling": true,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "measurement_contract": 2,
+  "operation_resources": {
+    "gutch": {
+      "incremental_capture": {
+        "peak_disk_bytes": 958301247,
+        "peak_rss_bytes": 74305536
+      },
+      "initial_capture": {
+        "peak_disk_bytes": 520115158,
+        "peak_rss_bytes": 70557696
+      },
+      "repair": {
+        "peak_disk_bytes": 2933300618,
+        "peak_rss_bytes": 155787264
+      },
+      "restore": {
+        "peak_disk_bytes": 2933300618,
+        "peak_rss_bytes": 50614272
+      }
+    },
+    "plakar": {
+      "incremental_capture": {
+        "peak_disk_bytes": 1128477530,
+        "peak_rss_bytes": 346132480
+      },
+      "initial_capture": {
+        "peak_disk_bytes": 710898735,
+        "peak_rss_bytes": 353083392
+      },
+      "repair": {
+        "peak_disk_bytes": 3095631936,
+        "peak_rss_bytes": 442740736
+      },
+      "restore": {
+        "peak_disk_bytes": 2955807926,
+        "peak_rss_bytes": 437600256
+      }
+    }
+  },
+  "operations": {
+    "gutch": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    },
+    "plakar": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "UNSUPPORTED: no native extra-file deletion in this adapter",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    }
+  },
+  "pair": "plakar",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41218304728",
+    "GITHUB_SHA": "4a514907dd490fd0874f2646414180945f9a784a",
+    "GUTCH_REVISION": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "resources": [
+    {
+      "kind": "gutch-individual",
+      "label": "gutch-resources",
+      "metadata": {
+        "case": "gutch",
+        "configuration": {
+          "arguments": [],
+          "configuration_label": "gutch",
+          "label": "gutch-resources",
+          "profile": {
+            "bundle_profile": "bundle_8MiB",
+            "chunk_profile": "chunk_1MiB",
+            "chunker": "fastcdc",
+            "compression_algorithm": "lz4",
+            "compression_level": 0,
+            "jobs": 4,
+            "name": "gutch",
+            "storage_mode": "bundled"
+          },
+          "resource_sample": true,
+          "tool": "gutch",
+          "warmup": false,
+          "workload": "individual"
+        },
+        "corrupt_repair_after_reconstruct": true,
+        "dataset_sha256": "2459919520ae7c15db29601a5aec5877d3a6f6b71a2bf4e7f491de231abdc259",
+        "differences": [],
+        "disk_sampling": {
+          "peak_disk_bytes": 2933300666,
+          "sample_count": 143,
+          "sampling_interval_seconds": 0.1,
+          "scope": "owned apparent file bytes"
+        },
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "measurement_contract": 2,
+        "memory_profile": true,
+        "operations": {
+          "capture": "PASS",
+          "clean_restore": "PASS",
+          "exact_recovery": "PASS",
+          "full_restore_recovery": "PASS",
+          "hidden_repair": "PASS",
+          "in_place_repair": "PASS",
+          "no_op_restore": "NOT_RUN",
+          "repair": "PASS",
+          "rollback": "NOT_RUN",
+          "update": "NOT_RUN"
+        },
+        "profile_mode": "off",
+        "repetition": 0,
+        "resource_sample": true,
+        "snapshot_metrics": {
+          "v1": {
+            "backup": 5.573487964000009,
+            "input_bytes": 965509154,
+            "repo_growth_bytes": 520114377,
+            "restore": 2.0402986080000005
+          },
+          "v2": {
+            "backup": 3.251457553000023,
+            "input_bytes": 1009490217,
+            "repo_growth_bytes": 438186089,
+            "restore": 1.170746274999999
+          }
+        },
+        "snapshots": [
+          "v1",
+          "v2"
+        ],
+        "status": "PASS",
+        "utilization_scope": "sampled process-tree RSS; direct-process CPU (100% = one core); excludes harness",
+        "verify_invocations": 2,
+        "verify_source": "reconstruct_stats.verify_timings.total_seconds",
+        "warmup": false
+      },
+      "metrics": {
+        "backup": 8.824945517000032,
+        "compare": 0.0,
+        "corrupt": 0.02677614899994296,
+        "cpu_percent": 151.53160641467252,
+        "exact_recovery": 4.041263194999942,
+        "exact_recovery_validated": 8.033178541999916,
+        "full_restore_recovery": 3.2196055770000385,
+        "full_restore_recovery_validated": 7.5487292310000385,
+        "hidden_repair": 4.086185911999962,
+        "hidden_repair_validated": 8.039815746999977,
+        "incremental_capture": 3.251457553000023,
+        "initial_capture": 5.573487964000009,
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "peak_disk_bytes": 2933300666,
+        "peak_rss_bytes": 155787264,
+        "repair": 4.077031266000006,
+        "repair_validated": 8.20036885999997,
+        "repo_files": 151,
+        "repo_growth_bytes": 438186089,
+        "repo_size": 958301247,
+        "restore": 3.2110448829999996,
+        "restore_validated": 7.367536991000037,
+        "sampled_cpu_seconds": 21.560000000000002,
+        "verify": null
+      },
+      "traces": {
+        "capture": [
+          "lanes/gutch-resources/traces/capture-001/trace.json",
+          "lanes/gutch-resources/traces/capture-002/trace.json"
+        ],
+        "corrupt": [],
+        "reconstruct": [
+          "lanes/gutch-resources/traces/reconstruct-001/trace.json",
+          "lanes/gutch-resources/traces/reconstruct-002/trace.json"
+        ],
+        "repair": []
+      }
+    },
+    {
+      "kind": "plakar-individual",
+      "label": "plakar-resources",
+      "metadata": {
+        "binary_sha256": "b4e82ae9983373969bc3e1a4bc1d63bbf064c8f269c743a99f939086c571f53a",
+        "case": "plakar",
+        "configuration": {
+          "arguments": [],
+          "configuration_label": "plakar",
+          "label": "plakar-resources",
+          "profile": null,
+          "resource_sample": true,
+          "tool": "plakar",
+          "warmup": false,
+          "workload": "individual"
+        },
+        "corrupt_repair_after_reconstruct": true,
+        "dataset_sha256": "2459919520ae7c15db29601a5aec5877d3a6f6b71a2bf4e7f491de231abdc259",
+        "differences": [],
+        "disk_sampling": {
+          "peak_disk_bytes": 3000911744,
+          "sample_count": 163,
+          "sampling_interval_seconds": 0.1,
+          "scope": "owned apparent file bytes"
+        },
+        "extra_file_policy": "no_native_delete_option",
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "measurement_contract": 2,
+        "memory_profile": true,
+        "operations": {
+          "capture": "PASS",
+          "clean_restore": "PASS",
+          "exact_recovery": "UNSUPPORTED: no native extra-file deletion in this adapter",
+          "full_restore_recovery": "PASS",
+          "hidden_repair": "PASS",
+          "in_place_repair": "PASS",
+          "no_op_restore": "NOT_RUN",
+          "repair": "PASS",
+          "rollback": "NOT_RUN",
+          "update": "NOT_RUN"
+        },
+        "profile_mode": "off",
+        "recovery_mode": "restore_existing",
+        "repetition": 0,
+        "resource_sample": true,
+        "snapshot_metrics": {
+          "v1": {
+            "backup": 7.135758453999983,
+            "input_bytes": 965509154,
+            "repo_growth_bytes": 522903765,
+            "restore": 4.1048236350000025
+          },
+          "v2": {
+            "backup": 5.526350356999956,
+            "input_bytes": 1009490217,
+            "repo_growth_bytes": 438404263,
+            "restore": 3.9226009509999926
+          }
+        },
+        "snapshots": [
+          "v1",
+          "v2"
+        ],
+        "status": "PASS",
+        "tool_version": null,
+        "utilization_scope": "sampled process-tree RSS; direct-process CPU (100% = one core); excludes harness",
+        "verify_invocations": 1,
+        "verify_position": "after_recovery",
+        "warmup": false
+      },
+      "metrics": {
+        "backup": 12.66210881099994,
+        "compare": 0.0,
+        "corrupt": 0.028592285000058837,
+        "cpu_percent": 146.40219001258225,
+        "full_restore_recovery": 6.9947520759999975,
+        "full_restore_recovery_validated": 11.50685267900002,
+        "hidden_repair": 14.522933002999991,
+        "hidden_repair_validated": 19.126967553999975,
+        "incremental_capture": 5.526350356999956,
+        "initial_capture": 7.135758453999983,
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "peak_disk_bytes": 3000911744,
+        "peak_rss_bytes": 442740736,
+        "repair": 21.48137446100003,
+        "repair_validated": 25.675949314000036,
+        "repo_files": 23,
+        "repo_growth_bytes": 438404263,
+        "repo_size": 961308397,
+        "repository_check": 5.625816790999977,
+        "restore": 8.027424585999995,
+        "restore_validated": 12.485069065999994,
+        "sampled_cpu_seconds": 83.65
+      },
+      "traces": {}
+    }
+  ],
+  "rows": [
+    [
+      "gutch",
+      "PASS",
+      "6.921",
+      "1.398",
+      "0.735",
+      "1.373",
+      "913.907",
+      "-",
+      "148.570",
+      "2797.414"
+    ],
+    [
+      "plakar",
+      "PASS",
+      "11.476",
+      "5.327",
+      "14.778",
+      "4.085",
+      "916.557",
+      "-",
+      "422.230",
+      "2861.892"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "gutch": {
+      "backup": {
+        "maximum": 6.921386380000001,
+        "median": 6.921386380000001,
+        "minimum": 6.921386380000001,
+        "samples": 1
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 1
+      },
+      "corrupt": {
+        "maximum": 0.027638869000014665,
+        "median": 0.027638869000014665,
+        "minimum": 0.027638869000014665,
+        "samples": 1
+      },
+      "exact_recovery": {
+        "maximum": 0.46282738600001494,
+        "median": 0.46282738600001494,
+        "minimum": 0.46282738600001494,
+        "samples": 1
+      },
+      "exact_recovery_validated": {
+        "maximum": 3.1484793330000116,
+        "median": 3.1484793330000116,
+        "minimum": 3.1484793330000116,
+        "samples": 1
+      },
+      "full_restore_recovery": {
+        "maximum": 1.3727816130000008,
+        "median": 1.3727816130000008,
+        "minimum": 1.3727816130000008,
+        "samples": 1
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 4.069800063000002,
+        "median": 4.069800063000002,
+        "minimum": 4.069800063000002,
+        "samples": 1
+      },
+      "hidden_repair": {
+        "maximum": 0.7336123919999977,
+        "median": 0.7336123919999977,
+        "minimum": 0.7336123919999977,
+        "samples": 1
+      },
+      "hidden_repair_validated": {
+        "maximum": 3.395557739999987,
+        "median": 3.395557739999987,
+        "minimum": 3.395557739999987,
+        "samples": 1
+      },
+      "incremental_capture": {
+        "maximum": 3.322684190999979,
+        "median": 3.322684190999979,
+        "minimum": 3.322684190999979,
+        "samples": 1
+      },
+      "initial_capture": {
+        "maximum": 3.598702189000022,
+        "median": 3.598702189000022,
+        "minimum": 3.598702189000022,
+        "samples": 1
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 1
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 1
+      },
+      "peak_disk_bytes": {
+        "maximum": 2933300666,
+        "median": 2933300666,
+        "minimum": 2933300666,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "peak_rss_bytes": {
+        "maximum": 155787264,
+        "median": 155787264,
+        "minimum": 155787264,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "repair": {
+        "maximum": 0.7346423930000014,
+        "median": 0.7346423930000014,
+        "minimum": 0.7346423930000014,
+        "samples": 1
+      },
+      "repair_validated": {
+        "maximum": 3.378111486000023,
+        "median": 3.378111486000023,
+        "minimum": 3.378111486000023,
+        "samples": 1
+      },
+      "repo_files": {
+        "maximum": 151,
+        "median": 151,
+        "minimum": 151,
+        "samples": 1
+      },
+      "repo_growth_bytes": {
+        "maximum": 438186069,
+        "median": 438186069,
+        "minimum": 438186069,
+        "samples": 1
+      },
+      "repo_size": {
+        "maximum": 958301207,
+        "median": 958301207,
+        "minimum": 958301207,
+        "samples": 1
+      },
+      "restore": {
+        "maximum": 1.3984658699999954,
+        "median": 1.3984658699999954,
+        "minimum": 1.3984658699999954,
+        "samples": 1
+      },
+      "restore_validated": {
+        "maximum": 4.090912472000014,
+        "median": 4.090912472000014,
+        "minimum": 4.090912472000014,
+        "samples": 1
+      },
+      "verify": null
+    },
+    "plakar": {
+      "backup": {
+        "maximum": 11.476469212000012,
+        "median": 11.476469212000012,
+        "minimum": 11.476469212000012,
+        "samples": 1
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 1
+      },
+      "corrupt": {
+        "maximum": 0.03799938399998837,
+        "median": 0.03799938399998837,
+        "minimum": 0.03799938399998837,
+        "samples": 1
+      },
+      "full_restore_recovery": {
+        "maximum": 4.0846933189999675,
+        "median": 4.0846933189999675,
+        "minimum": 4.0846933189999675,
+        "samples": 1
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 6.798900243999952,
+        "median": 6.798900243999952,
+        "minimum": 6.798900243999952,
+        "samples": 1
+      },
+      "hidden_repair": {
+        "maximum": 11.126700557999982,
+        "median": 11.126700557999982,
+        "minimum": 11.126700557999982,
+        "samples": 1
+      },
+      "hidden_repair_validated": {
+        "maximum": 13.847636534999992,
+        "median": 13.847636534999992,
+        "minimum": 13.847636534999992,
+        "samples": 1
+      },
+      "incremental_capture": {
+        "maximum": 5.144224030999993,
+        "median": 5.144224030999993,
+        "minimum": 5.144224030999993,
+        "samples": 1
+      },
+      "initial_capture": {
+        "maximum": 6.332245181000019,
+        "median": 6.332245181000019,
+        "minimum": 6.332245181000019,
+        "samples": 1
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 1
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 1
+      },
+      "peak_disk_bytes": {
+        "maximum": 3000911744,
+        "median": 3000911744,
+        "minimum": 3000911744,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "peak_rss_bytes": {
+        "maximum": 442740736,
+        "median": 442740736,
+        "minimum": 442740736,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "repair": {
+        "maximum": 14.778022651000015,
+        "median": 14.778022651000015,
+        "minimum": 14.778022651000015,
+        "samples": 1
+      },
+      "repair_validated": {
+        "maximum": 17.491905178000025,
+        "median": 17.491905178000025,
+        "minimum": 17.491905178000025,
+        "samples": 1
+      },
+      "repo_files": {
+        "maximum": 23,
+        "median": 23,
+        "minimum": 23,
+        "samples": 1
+      },
+      "repo_growth_bytes": {
+        "maximum": 438225230,
+        "median": 438225230,
+        "minimum": 438225230,
+        "samples": 1
+      },
+      "repo_size": {
+        "maximum": 961079912,
+        "median": 961079912,
+        "minimum": 961079912,
+        "samples": 1
+      },
+      "repository_check": {
+        "maximum": 3.124365097000009,
+        "median": 3.124365097000009,
+        "minimum": 3.124365097000009,
+        "samples": 1
+      },
+      "restore": {
+        "maximum": 5.327260888000012,
+        "median": 5.327260888000012,
+        "minimum": 5.327260888000012,
+        "samples": 1
+      },
+      "restore_validated": {
+        "maximum": 8.03443809600003,
+        "median": 8.03443809600003,
+        "minimum": 8.03443809600003,
+        "samples": 1
+      }
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "67c6237eb26ef2cb864941e8444b8877fa6531a0fc9b2a332653b455ea2831b4",
+      "path": "linux-x64/plakar/plakar",
+      "platform": "linux-x64",
+      "prerelease": false,
+      "release_url": "https://github.com/PlakarKorp/plakar/releases/tag/v1.1.8",
+      "sha256": "b4e82ae9983373969bc3e1a4bc1d63bbf064c8f269c743a99f939086c571f53a",
+      "source_url": "https://github.com/PlakarKorp/plakar/releases/download/v1.1.8/plakar_1.1.8_linux_amd64.tar.gz",
+      "tool": "plakar",
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "version": "1.1.8"
+    }
+  ]
+}
