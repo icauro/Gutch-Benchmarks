@@ -51,58 +51,58 @@ def render_svg(records: list[dict]) -> str:
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
              '<title id="title">Gutch benchmark comparisons</title>',
              '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians.</desc>',
-             f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
-             '<g font-family="Segoe UI, Arial, sans-serif" fill="#132644">']
+             f'<rect width="{width}" height="{height}" fill="#000000"/>',
+             '<g font-family="Segoe UI, Arial, sans-serif" fill="#edf2fa">']
 
-    def text(x, y, value, *, size=14, color="#132644", weight=400, anchor="start"):
+    def text(x, y, value, *, size=14, color="#edf2fa", weight=400, anchor="start"):
         parts.append(f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" fill="{color}" text-anchor="{anchor}">{escape(str(value))}</text>')
 
     def rect(x, y, w, h, color, radius=0):
         parts.append(f'<rect x="{x}" y="{y}" width="{w:.2f}" height="{h}" rx="{radius}" fill="{color}"/>')
 
     def line(x1, y1, x2, y2):
-        parts.append(f'<path d="M{x1} {y1}H{x2}" stroke="#dde5ef"/>' if y1 == y2 else
-                     f'<path d="M{x1} {y1}V{y2}" stroke="#dde5ef"/>')
+        parts.append(f'<path d="M{x1} {y1}H{x2}" stroke="#29313d"/>' if y1 == y2 else
+                     f'<path d="M{x1} {y1}V{y2}" stroke="#29313d"/>')
 
     text(margin, 48, "Gutch benchmark comparisons", size=32, weight=700)
     for x, color, label in ((1080, BLUE, "Gutch"), (1200, ORANGE, "Paired tool")):
         rect(x, 36, 16, 13, color, 3)
         text(x + 25, 48, label, size=14)
-    rect(margin, table_top, width - 2 * margin, table_bottom - table_top, "#f4f7fc", 10)
-    text(margin + 20, table_top + 34, "COMPARISON", size=12, color="#60718a", weight=700)
+    rect(margin, table_top, width - 2 * margin, table_bottom - table_top, "#161b22", 10)
+    text(margin + 20, table_top + 34, "COMPARISON", size=12, color="#a3afc2", weight=700)
     for index, (_, title, unit) in enumerate(METRICS):
         x = margin + pair_width + index * cell_width
         text(x + 18, table_top + 24, title, size=17, weight=650)
-        text(x + 18, table_top + 44, unit, size=12, color="#60718a")
+        text(x + 18, table_top + 44, unit, size=12, color="#a3afc2")
     for index, record in enumerate(records):
         y = table_top + header_height + index * row_height
-        rect(margin, y, width - 2 * margin, row_height, "#ffffff" if index % 2 == 0 else "#f8fafd")
+        rect(margin, y, width - 2 * margin, row_height, "#000000" if index % 2 == 0 else "#0d1117")
         line(margin, y, width - margin, y)
         other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
         title = "BuildPatchTool" if record["pair"] == "bpt" else record["pair"].title()
-        text(margin + 20, y + 27, "Gutch vs", size=12, color="#60718a")
+        text(margin + 20, y + 27, "Gutch vs", size=12, color="#a3afc2")
         text(margin + 20, y + 51, title, size=19, weight=650)
         status = record["status"]
-        rect(margin + 20, y + 65, 78, 22, "#e8f6ee" if status == "PASS" else "#fff0e5", 5)
-        text(margin + 30, y + 80, status, size=11, color="#177448" if status == "PASS" else "#9a4b14", weight=650)
+        rect(margin + 20, y + 65, 78, 22, "#123325" if status == "PASS" else "#392615", 5)
+        text(margin + 30, y + 80, status, size=11, color="#7cdda6" if status == "PASS" else "#ffba78", weight=650)
         for column, (metric, _, unit) in enumerate(METRICS):
             x = margin + pair_width + column * cell_width
             values = [_median(record, label, metric) for label in ("gutch", other)]
             maximum = max((value for value in values if value is not None), default=0)
             for slot, (value, color) in enumerate(zip(values, (BLUE, ORANGE))):
                 bar_y = y + 28 + slot * 27
-                rect(x + 18, bar_y, 98, 12, "#e8edf5", 2)
+                rect(x + 18, bar_y, 98, 12, "#252d3a", 2)
                 if value is not None:
                     if maximum:
                         rect(x + 18, bar_y, 98 * value / maximum, 12, color, 2)
                     label = f"{value:,.1f} MiB" if unit == "MiB" else f"{value:.3f} s"
                 else:
                     label = "—"
-                text(x + 130, bar_y + 11, label, size=13, color="#42536b")
+                text(x + 130, bar_y + 11, label, size=13, color="#c5cedc")
             ratio = relative_metric(record, metric)
             number, _, direction = ratio.partition(" ")
             slower = direction == "slower" or (metric == "repo_size" and all(v is not None for v in values) and values[0] > values[1])
-            color = "#a65a17" if slower else "#155dc5"
+            color = "#ffb36b" if slower else "#71a7ff"
             text(x + 220, y + 43, number.replace("x", "×"), size=20, color=color if ratio != "-" else "#8794a7", weight=700)
             text(x + 220, y + 64, direction, size=12, color=color)
     for column in range(5):

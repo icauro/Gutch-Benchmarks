@@ -218,7 +218,7 @@ class CiTests(unittest.TestCase):
         incoming = self.root / "incoming/benchmark-restic/restic"
         incoming.mkdir(parents=True)
         shutil.copyfile(export / "compact.json", incoming / "compact.json")
-        (self.root / "README.md").write_text(f"Original intro\n{ci.START}\nold\n{ci.END}\nOriginal footer")
+        (self.root / "README.md").write_text(f"Original intro\n![Latest per-pair benchmark comparisons](reports/comparison.svg)\n{ci.START}\nold\n{ci.END}\nOriginal footer")
         ci.publish("all", self.root / "incoming", "123", "2", self.root)
         readme = (self.root / "README.md").read_text()
         self.assertIn("Original intro", readme)
@@ -226,8 +226,15 @@ class CiTests(unittest.TestCase):
         self.assertIn("1.250", readme)
         self.assertIn("### Gutch vs Borg (ERROR)", readme)
         self.assertIn("![Latest per-pair benchmark comparisons]", readme)
-        self.assertEqual(len(list((self.root / "reports").rglob("comparison.svg"))), 1)
-        self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 6)
+        charts = list((self.root / "reports").rglob("comparison.svg"))
+        self.assertEqual(len(charts), 2)
+        self.assertEqual(charts[0].read_bytes(), charts[1].read_bytes())
+        self.assertLess(readme.index("![Latest per-pair"), readme.index(ci.START))
+        ci.publish("restic", self.root / "incoming", "124", "1", self.root)
+        self.assertEqual((self.root / "README.md").read_text().count("![Latest per-pair"), 1)
+        self.assertEqual((self.root / "reports/comparison.svg").read_bytes(),
+                         next((self.root / "reports").glob("*/124-1/comparison.svg")).read_bytes())
+        self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 7)
         self.assertFalse(list((self.root / "reports").rglob("command.log")))
         with self.assertRaises(ValueError):
             ci.publish("all", self.root / "incoming", "../escape", "1", self.root)

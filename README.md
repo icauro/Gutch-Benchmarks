@@ -1,5 +1,7 @@
 # Gutch benchmarks
 
+![Latest per-pair benchmark comparisons](reports/comparison.svg)
+
 Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic or Rustic.
 Each pair uses the same Blender inputs, pair-specific settings and independent
 SHA-256 output validation.

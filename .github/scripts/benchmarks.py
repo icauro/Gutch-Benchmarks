@@ -189,15 +189,14 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
             "pair": name, "status": "ERROR", "rows": [], "reasons": ["Job produced no report; see Actions logs."]}
         records.append(record)
         write_json(destination / f"{name}.json", record)
-    (destination / "comparison.svg").write_text(
-        render_svg(latest_records(root / "reports")), encoding="utf-8", newline="\n",
-    )
+    chart = render_svg(latest_records(root / "reports"))
+    for path in (destination / "comparison.svg", root / "reports/comparison.svg"):
+        path.write_text(chart, encoding="utf-8", newline="\n")
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")
     url = f"https://github.com/{repository}/actions/runs/{run_id}"
     lines = ["# Linux benchmark results", "", f"Run: [{run_id}, attempt {attempt}]({url}) | UTC date: {stamp}", "",
              "Each pair has its own settings. Hosted-runner timings are indicative; OS cache state is uncontrolled.", ""]
     overview = [f"[Full report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
-                f"![Latest per-pair benchmark comparisons]({relative.as_posix()}/comparison.svg)", "",
                 f"UTC date: {stamp}. Suite: `{os.environ.get('GITHUB_SHA', 'unknown')}`. "
                 f"Gutch: `{next((item.get('provenance', {}).get('GUTCH_REVISION') for item in records if item.get('provenance')), 'unknown')}`.", "",
                 "Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.", ""]
