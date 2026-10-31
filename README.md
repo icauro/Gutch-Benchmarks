@@ -7,9 +7,9 @@ SHA-256 output validation.
 ## Latest Linux results
 
 <!-- latest-benchmarks:start -->
-[Full report](reports/2026-10-31/41200340952-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41200340952)
+[Original all-pairs report](reports/2026-10-31/41200340952-1/README.md) · [Verified BPT rerun](reports/2026-10-31/41201391345-1/README.md)
 
-UTC date: 2026-10-31. Suite: `aeccad4d48f6caab6650733958cf4f3e4a8dbe57`. Gutch: `c50285368c91d127e51d52f75aab37603d810682`.
+UTC date: 2026-10-31. Gutch: `c50285368c91d127e51d52f75aab37603d810682`. Results combine the linked runs; suite commits are recorded in each report.
 
 Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.
 
@@ -21,13 +21,13 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 | gutch | PASS | 10.708 | 1.945 | 0.514 | 913.570 |
 | **Gutch relative** | - | 1.21x slower | 3.89x faster | 4.81x faster | 0.99x size |
 
-### Gutch vs BuildPatchTool (ERROR)
+### Gutch vs BuildPatchTool (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| buildpatchtool | ERROR | - | - | - | - |
-| gutch | PASS | 5.668 | 2.333 | 0.721 | 689.362 |
-| **Gutch relative** | - | - | - | - | - |
+| buildpatchtool | PASS | 25.488 | 25.503 | 1.198 | 732.343 |
+| gutch | PASS | 6.018 | 1.526 | 0.446 | 689.362 |
+| **Gutch relative** | - | 4.24x faster | 16.72x faster | 2.69x faster | 0.94x size |
 
 ### Gutch vs Kopia (PASS)
 
