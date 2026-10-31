@@ -7,7 +7,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
-from comparison_benchmark_suite.tools.chart import BLUE, ORANGE, latest_records, render_svg
+from comparison_benchmark_suite.tools.chart import BLUE, ORANGE, latest_records, render_svg, render_resources_svg
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +68,36 @@ class ChartTests(unittest.TestCase):
         root = ET.fromstring(chart)
         self.assertIn("Restic&amp;&lt;Script&gt;", chart)
         self.assertFalse(list(root.iter("{http://www.w3.org/2000/svg}script")))
+
+    def test_resource_svg_has_program_rows_and_eight_operation_columns(self):
+        record = pair_record()
+        record["operation_resources"] = {
+            "gutch": {"initial_capture": {"peak_rss_bytes": 1048576}},
+            "restic": {"initial_capture": {"peak_rss_bytes": 2097152}}}
+        chart = render_resources_svg([record])
+        self.assertEqual(chart, render_resources_svg([record]))
+        root = ET.fromstring(chart)
+        labels = [node.text for node in root.iter("{http://www.w3.org/2000/svg}text")]
+        self.assertEqual(sum(label.endswith(" RAM") for label in labels), 4)
+        self.assertEqual(sum(label.endswith(" disk") for label in labels), 4)
+        self.assertIn("Gutch", labels)
+        self.assertIn("Restic [4]", labels)
+        self.assertIn("1.0", labels)
+        self.assertIn("2.0", labels)
+        self.assertEqual(labels.count("—"), 14)
+        bars = [node for node in root.iter("{http://www.w3.org/2000/svg}rect")
+                if node.get("height") == "12" and node.get("fill") in (BLUE, ORANGE)]
+        self.assertEqual([float(node.get("width")) for node in bars], [21, 42])
+        self.assertIn("50% smaller", labels)
+        self.assertIn("Gutch vs", labels)
+
+    def test_failed_resource_rows_do_not_display_successful_measurements(self):
+        record = pair_record(status="ERROR")
+        record["operation_resources"] = {"gutch": {"repair": {"peak_rss_bytes": 1048576}}}
+        root = ET.fromstring(render_resources_svg([record]))
+        labels = [node.text for node in root.iter("{http://www.w3.org/2000/svg}text")]
+        self.assertNotIn("1.0", labels)
+        self.assertEqual(labels.count("—"), 16)
 
     def test_main_chart_keeps_resources_in_separate_report_tables(self):
         chart = render_svg([pair_record()])

@@ -5,6 +5,8 @@ using shared Blender inputs, pair-specific settings and SHA-256 output validatio
 
 ![Latest per-pair benchmark comparisons](reports/comparison.svg)
 
+![Peak resources by operation](reports/resources.svg)
+
 <details>
 <summary>Comparison differences and limits</summary>
 
@@ -30,8 +32,9 @@ tools flush writes can still differ. New performance runs default to six measure
 repetitions with alternating order; OS caches are not reset. A single local smoke
 run checks compatibility only. Older reports retain their original settings.
 
-Resource tables below each pair show peak RAM and disk by operation, in MiB,
-from a separate monitored pass. The latest saved run has command-level RAM samples
+The second SVG uses the same paired bars and comparison rows, with eight
+RAM/disk columns in MiB from a separate monitored pass. Text versions
+remain below each pair in the details. The latest saved run has command-level RAM samples
 but only a whole-workflow disk peak, so per-operation disk cells show `—`.
 Whole-workflow peaks are not substituted for missing command measurements.
 Sampling may miss short spikes; RAM includes child processes.

@@ -17,7 +17,7 @@ from comparison_benchmark_suite.support.memory import summarize_operation_resour
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.support.retention import remove_owned
 from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details, operation_resource_table
-from comparison_benchmark_suite.tools.chart import latest_records, render_svg
+from comparison_benchmark_suite.tools.chart import latest_records, render_svg, render_resources_svg
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -207,9 +207,9 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
         records.append(record)
         write_json(destination / f"{name}.json", record)
     latest = latest_records(root / "reports")
-    chart = render_svg(latest)
-    for path in (destination / "comparison.svg", root / "reports/comparison.svg"):
-        path.write_text(chart, encoding="utf-8", newline="\n")
+    for name, chart in (("comparison.svg", render_svg(latest)), ("resources.svg", render_resources_svg(latest))):
+        for path in (destination / name, root / "reports" / name):
+            path.write_text(chart, encoding="utf-8", newline="\n")
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")
     url = f"https://github.com/{repository}/actions/runs/{run_id}"
     lines = ["# Linux benchmark results", "", f"Run: [{run_id}, attempt {attempt}]({url}) | UTC date: {stamp}", "",

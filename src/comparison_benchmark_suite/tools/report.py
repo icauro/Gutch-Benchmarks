@@ -9,7 +9,7 @@ from .models import LaneResult
 COMPARISON_HEADERS = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RAM MiB", "Peak disk MiB"]
 
 
-def relative_metric(record: dict, metric: str) -> str:
+def relative_metric(record: dict, metric: str, *, size_metric: bool = False) -> str:
     """Compare valid, equally sampled raw medians for a successful pair."""
     other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
     statuses = {row[0]: row[1] for row in record.get("rows", [])}
@@ -24,7 +24,7 @@ def relative_metric(record: dict, metric: str) -> str:
                 or not math.isfinite(value) or value <= 0 for value in values)):
         return "-"
     gutch_value, peer_value = values
-    if metric in {"repo_size", "peak_rss_bytes", "peak_disk_bytes"}:
+    if size_metric or metric in {"repo_size", "peak_rss_bytes", "peak_disk_bytes"}:
         percent = round(100 * (gutch_value / peer_value - 1), 1)
         if percent == 0:
             return "same size" if metric == "repo_size" else "~same"

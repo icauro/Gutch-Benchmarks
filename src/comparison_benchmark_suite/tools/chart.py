@@ -12,6 +12,12 @@ from .report import relative_metric
 
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
            ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
+RESOURCE_METRICS = tuple(
+    (f"{operation}_{kind}", f"{title} {kind.upper() if kind == 'ram' else 'disk'}", "MiB")
+    for operation, title in (("initial_capture", "Initial"), ("incremental_capture", "Next"),
+                             ("restore", "Restore"), ("repair", "Repair"))
+    for kind in ("ram", "disk")
+)
 # Keep references stable when chart rows are reordered or only one pair is rendered.
 PAIR_NOTES = {"borg": 1, "plakar": 2, "kopia": 3, "restic": 4, "rustic": 5, "bpt": 6}
 BLUE, ORANGE = "#2474f5", "#f78b32"
@@ -41,21 +47,21 @@ def latest_records(reports: Path) -> list[dict]:
     return records
 
 
-def _median(record, label, metric):
+def _median(record, label, metric, unit):
     value = (record.get("summary", {}).get(label, {}).get(metric) or {}).get("median")
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
         return None
-    return value / 1048576 if metric in {"repo_size", "peak_rss_bytes", "peak_disk_bytes"} else value
+    return value / 1048576 if unit == "MiB" else value
 
 
-def render_svg(records: list[dict]) -> str:
+def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark comparisons") -> str:
     margin, pair_width, cell_width = 8, 148, 150
-    width = 2 * margin + pair_width + len(METRICS) * cell_width
+    width = 2 * margin + pair_width + len(metrics) * cell_width
     table_top, header_height, row_height = 52, 46, 90
     table_bottom = table_top + header_height + row_height * len(records)
     height = table_bottom + 10
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
-             '<title id="title">Gutch benchmark comparisons</title>',
+             f'<title id="title">{escape(title)}</title>',
              '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>',
              f'<rect width="{width}" height="{height}" fill="#000000"/>',
              '<g font-family="Segoe UI, Arial, sans-serif" fill="#edf2fa">']
@@ -70,13 +76,13 @@ def render_svg(records: list[dict]) -> str:
         parts.append(f'<path d="M{x1} {y1}H{x2}" stroke="#29313d"/>' if y1 == y2 else
                      f'<path d="M{x1} {y1}V{y2}" stroke="#29313d"/>')
 
-    text(margin, 34, "Gutch benchmark comparisons", size=25, weight=700)
+    text(margin, 34, title, size=25, weight=700)
     for x, color, label in ((width - 274, BLUE, "Gutch"), (width - 164, ORANGE, "Paired tool")):
         rect(x, 23, 16, 13, color, 3)
         text(x + 23, 34, label, size=16)
     rect(margin, table_top, width - 2 * margin, table_bottom - table_top, "#161b22", 10)
     text(margin + 6, table_top + 28, "COMPARISON", size=13, color="#a3afc2", weight=700)
-    for index, (_, title, unit) in enumerate(METRICS):
+    for index, (_, title, unit) in enumerate(metrics):
         x = margin + pair_width + index * cell_width
         text(x + 7, table_top + 21, title, size=17, weight=650)
         text(x + 7, table_top + 38, unit, size=13, color="#a3afc2")
@@ -93,9 +99,9 @@ def render_svg(records: list[dict]) -> str:
         status = record["status"]
         if status != "PASS":
             text(margin + 6, y + 77, status, size=13, color="#ffba78", weight=650)
-        for column, (metric, _, unit) in enumerate(METRICS):
+        for column, (metric, _, unit) in enumerate(metrics):
             x = margin + pair_width + column * cell_width
-            values = [_median(record, label, metric) for label in ("gutch", other)]
+            values = [_median(record, label, metric, unit) for label in ("gutch", other)]
             maximum = max((value for value in values if value is not None), default=0)
             for slot, (value, color) in enumerate(zip(values, (BLUE, ORANGE))):
                 bar_y = y + 16 + slot * 25
@@ -107,12 +113,12 @@ def render_svg(records: list[dict]) -> str:
                 else:
                     label = "—"
                 text(x + 58, bar_y + 12, label, size=17, color="#c5cedc")
-            ratio = relative_metric(record, metric)
+            ratio = relative_metric(record, metric, size_metric=unit == "MiB")
             slower = ratio.endswith(("slower", "larger"))
             neutral = ratio in ("-", "~same", "same size")
             color = "#a3afc2" if neutral else ("#ffb36b" if slower else "#71a7ff")
             text(x + 7, y + 79, ratio.replace("x", "×"), size=17, color=color, weight=700)
-    for column in range(len(METRICS) + 1):
+    for column in range(len(metrics) + 1):
         x = margin + pair_width + column * cell_width
         line(x, table_top, x, table_bottom)
     line(margin, table_bottom, width - margin, table_bottom)
@@ -120,10 +126,28 @@ def render_svg(records: list[dict]) -> str:
     return "\n".join(parts) + "\n"
 
 
+
+def render_resources_svg(records: list[dict]) -> str:
+    """Use the same paired-bar template with resource columns and saved values."""
+    resource_records = []
+    for record in records:
+        summary = {}
+        for tool, operations in record.get("operation_resources", {}).items():
+            summary[tool] = {}
+            for metric, _, _ in RESOURCE_METRICS:
+                operation, kind = metric.rsplit("_", 1)
+                field = "peak_rss_bytes" if kind == "ram" else "peak_disk_bytes"
+                value = operations.get(operation, {}).get(field) if record.get("status") == "PASS" else None
+                summary[tool][metric] = {"median": value, "samples": 1}
+        resource_records.append({**record, "summary": summary})
+    return render_svg(resource_records, metrics=RESOURCE_METRICS, title="Peak resources by operation")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reports", type=Path, required=True, help="Saved reports directory")
     parser.add_argument("--output", type=Path, required=True, help="Output SVG path")
+    parser.add_argument("--resources-output", type=Path, help="Optional resource-table SVG output")
     args = parser.parse_args()
     if not args.reports.is_dir():
         parser.error("--reports must name an existing reports directory")
@@ -133,6 +157,10 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(render_svg(records), encoding="utf-8", newline="\n")
     print(args.output.resolve())
+    if args.resources_output is not None:
+        args.resources_output.parent.mkdir(parents=True, exist_ok=True)
+        args.resources_output.write_text(render_resources_svg(records), encoding="utf-8", newline="\n")
+        print(args.resources_output.resolve())
 
 
 if __name__ == "__main__":

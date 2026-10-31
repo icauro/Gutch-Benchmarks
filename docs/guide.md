@@ -284,7 +284,7 @@ image-generation dependency.
 Generate a local image from saved reports without running benchmarks:
 
 ```sh
-python -m comparison_benchmark_suite.tools.chart --reports reports --output .artifacts/charts/latest.svg
+python -m comparison_benchmark_suite.tools.chart --reports reports --output .artifacts/charts/latest.svg --resources-output .artifacts/charts/resources.svg
 ```
 
 The command prints an ASCII comparison table with status, median capture/restore
@@ -342,9 +342,11 @@ Shipped fixtures enable `resource_sampling: true`. After speed repetitions, one
 additional fresh workflow per tool collects resource measurements. These commands
 never contribute speed samples, medians or speed traces. `resources.json` records
 raw monitored results; `summary.json` labels these peaks as `separate_resource_pass`.
-CI retains both evidence and compact resource results. The main chart shows speed
-and stored size; each pair’s resource table immediately follows its speed table.
-Rows are programs; the eight columns are initial-capture RAM/disk, next-capture
+CI retains both evidence and compact resource results. The first SVG shows speed
+and stored size. `reports/resources.svg` is a second SVG directly below it, using
+the same paired-bar template and eight RAM/disk columns across four operations. CI refreshes and
+archives both images. Text resource tables remain below each pair’s speed table.
+Rows are comparisons with Gutch/peer bars; the eight columns are initial-capture RAM/disk, next-capture
 RAM/disk, restore RAM/disk and content-repair RAM/disk. Operation RAM is the maximum
 across its commands; restore and repair cover both versions. Per-command disk
 values remain unavailable until recorded. The latest run’s RAM breakdown is
