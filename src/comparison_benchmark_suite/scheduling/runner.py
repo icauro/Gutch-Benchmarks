@@ -49,6 +49,7 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
             commands.evidence_directory = layout.lane(label).root / 'commands'
             measurement_start = len(commands.measurements)
             commands.memory_profile = fixture.profile_mode == "detailed" or specification.resource_sample
+            commands.temporary_directory = layout.lane(label).payload / "tmp" if specification.resource_sample else None
             disk = None
             if specification.resource_sample:
                 print(f"Resource pass: {specification.label}", flush=True)

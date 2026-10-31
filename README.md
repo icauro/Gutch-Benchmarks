@@ -26,7 +26,7 @@ unsupported checks receive no timing.
 
 Chart times include each tool's own checks. Detailed reports also show timings
 with our shared validation added and sample ranges. Metadata handling and when
-tools flush writes can still differ. New performance runs use six measured
+tools flush writes can still differ. New performance runs default to six measured
 repetitions with alternating order; OS caches are not reset. A single local smoke
 run checks compatibility only. Older reports retain their original settings.
 

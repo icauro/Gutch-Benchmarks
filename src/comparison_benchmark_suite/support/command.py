@@ -65,6 +65,7 @@ class CommandRunner:
         if not 0 < self.timeout_seconds < float("inf"):
             raise ValueError("benchmark command timeout must be finite and positive")
         self.memory_profile = memory_profile
+        self.temporary_directory: Path | None = None
         self.progress = (stream or sys.stderr).isatty() if progress is None else progress
         self.stream = stream or sys.stderr
         self.step_wait_seconds = step_wait_seconds
@@ -114,6 +115,10 @@ class CommandRunner:
         process_env = os.environ.copy()
         if env:
             process_env.update(env)
+        if self.temporary_directory is not None:
+            self.temporary_directory.mkdir(parents=True, exist_ok=True)
+            for name in ("TMPDIR", "TMP", "TEMP"):
+                process_env[name] = str(self.temporary_directory.resolve())
         self._wait_for_step(description)
         if self.on_step is not None:
             self.on_step(description)

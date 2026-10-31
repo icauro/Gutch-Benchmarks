@@ -351,6 +351,8 @@ can miss short-lived descendants or brief spikes. CPU remains direct-process CPU
 
 Peak disk is the maximum sampled apparent file size across the lane's repository,
 restored output, temporary files and caches (including Plakar's external cache).
+During resource passes, `TMPDIR`, `TMP` and `TEMP` point into the monitored lane.
+Tools that ignore these variables and write elsewhere are outside this scope.
 Inputs, executables and benchmark logs/stats/traces are excluded. Hard-linked
 files are counted once per scan. This is working-file space, not physical block
 allocation or disk I/O volume. Directory scans target 100 ms intervals and can

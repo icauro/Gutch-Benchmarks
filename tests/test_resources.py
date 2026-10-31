@@ -62,6 +62,18 @@ class ResourceTests(unittest.TestCase):
                         {"memory": {"error": "sampling denied", "sampled_peak_rss_bytes": 200}}]
         self.assertNotIn("peak_rss_bytes", process_utilization(measurements))
 
+    def test_resource_temp_environment_is_owned_and_does_not_change_parent_environment(self):
+        import os
+        commands = CommandRunner()
+        commands.temporary_directory = self.root / "owned-temp"
+        original = dict(os.environ)
+        with patch.object(commands, "_run_streamed", return_value=("", "", 0)) as launch:
+            commands.run(["synthetic"], description="test")
+        env = launch.call_args.kwargs["env"]
+        for name in ("TMPDIR", "TMP", "TEMP"):
+            self.assertEqual(env[name], str(commands.temporary_directory.resolve()))
+        self.assertEqual(dict(os.environ), original)
+
     def test_resource_timings_are_excluded_from_speed_summary(self):
         layout = RunLayout(self.root / "run", retain_evidence=True)
         fixture = FixtureSpec("test", "local", "", True, False,
