@@ -1,7 +1,9 @@
 name: gutch_vs_borg
 description: Borg 2 keeps default FastCDC (about 2 MiB, normalization 2), LZ4 and
-  cache policy. Repository creation explicitly disables encryption with --encryption
-  none-sha256. Recovery adds --continue; repository check uses --verify-data. Gutch
+  cache policy. Repository creation uses --encryption authenticated-sha256: payloads
+  are unencrypted but authenticated, with a fixed local test passphrase protecting
+  the key. Restore and recovery use --continue for the shared output directory;
+  repository check uses --verify-data. Gutch
   uses unencrypted FastCDC with a 2 MiB target, LZ4 0 and 8 MiB bundles. Normalization,
   chunk bounds, hash algorithms, LZ4 framing and storage layout differ. Borg resume
   uses metadata checks; independent validation still checks contents. Fresh local

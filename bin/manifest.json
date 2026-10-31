@@ -11,37 +11,66 @@
     {
       "platform": "windows-x64",
       "tool": "borg",
-      "version": "2.0.0b24.dev0+g116435fa4.d20260823",
+      "version": "2.0.0b25",
       "path": "windows-x64/borg/borg.exe",
-      "sha256": "27a6bea13ccddd8c52b746febd4937f3ab315adfa012d27a099bdc1aebd2df87"
+      "sha256": "bb350482172e48cb1bc451d799fe3edd1abda8960dd87276a3178dbed1bf82e4",
+      "release_url": "https://github.com/borgbackup/borg/releases/tag/2.0.0b25",
+      "source_url": "https://github.com/borgbackup/borg/releases/download/2.0.0b25/borg-windows-x86_64-gh.exe",
+      "archive_sha256": "bb350482172e48cb1bc451d799fe3edd1abda8960dd87276a3178dbed1bf82e4",
+      "prerelease": true,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "release_channel": "2.x prerelease; required by FastCDC fixtures"
     },
     {
       "platform": "windows-x64",
       "tool": "restic",
-      "version": "0.19.0",
+      "version": "0.19.1",
       "path": "windows-x64/restic/restic.exe",
-      "sha256": "40576f77c1d40245a9f4af92a0b37b0d2514e6be0dffbf16ca8855820c13693e"
+      "sha256": "b0dd1fd21eea5d8fe1325f55f7118213c21f36de8a261e04c0624a5ab9fd7830",
+      "release_url": "https://github.com/restic/restic/releases/tag/v0.19.1",
+      "source_url": "https://github.com/restic/restic/releases/download/v0.19.1/restic_0.19.1_windows_amd64.zip",
+      "archive_sha256": "da948ad707ed690426473aaba2046cd61f8f90f6f0e7dab6be0d5796531de67d",
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "windows-x64",
       "tool": "kopia",
       "version": "0.23.1",
       "path": "windows-x64/kopia/kopia.exe",
-      "sha256": "96c0946314b50dcc7c5ae9d3ec7e3763e742fcebf7d5cbebdaac3ceee5fb3bd7"
+      "sha256": "96c0946314b50dcc7c5ae9d3ec7e3763e742fcebf7d5cbebdaac3ceee5fb3bd7",
+      "release_url": "https://github.com/kopia/kopia/releases/tag/v0.23.1",
+      "source_url": "https://github.com/kopia/kopia/releases/download/v0.23.1/kopia-0.23.1-windows-x64.zip",
+      "archive_sha256": "f0369d9657dbe47a1b8b6ff4e308c5958a4813b405d4e32ae9d81b3f2b3d8251",
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "windows-x64",
       "tool": "plakar",
-      "version": "1.1.7",
+      "version": "1.1.8",
       "path": "windows-x64/plakar/plakar.exe",
-      "sha256": "67076ca82af44ca9863378052e7691c150803c6fc64427555a490cdd246ed02e"
+      "sha256": "f91e3df28d637d9b5221e055873589bdf3f0086617c99f9759ccc37478204bd1",
+      "release_url": "https://github.com/PlakarKorp/plakar/releases/tag/v1.1.8",
+      "source_url": "https://github.com/PlakarKorp/plakar/releases/download/v1.1.8/plakar_1.1.8_windows_amd64.tar.gz",
+      "archive_sha256": "6eb003ac1d89c09fe14c000d415a353a79c56243723da35f4f9431fdc37b5409",
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "windows-x64",
       "tool": "buildpatchtool",
       "version": "1.8.8",
       "path": "windows-x64/buildpatchtool/Engine/Binaries/Win64/BuildPatchTool.exe",
-      "sha256": "1a9dd65666c6eaea27b554d90a9aedd961eff40df2ec4dc5193a6a825cdc9253"
+      "sha256": "1a9dd65666c6eaea27b554d90a9aedd961eff40df2ec4dc5193a6a825cdc9253",
+      "source_url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip",
+      "archive_sha256": "9d56626cc073c1c5f12134a43e5d3be9e4c68146ecbe882f1645f0d3435b2660",
+      "verification": "matches current official package; publisher does not provide a separate checksum here",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "linux-x64",
@@ -53,37 +82,69 @@
     {
       "platform": "linux-x64",
       "tool": "borg",
-      "version": "2.0.0b24",
+      "version": "2.0.0b25",
       "path": "linux-x64/borg/borg",
-      "sha256": "5fa90f4eac2b6ea4847848c24f3f812926cae117a7a444ee10a2301b9ec6aba7"
+      "sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4",
+      "release_url": "https://github.com/borgbackup/borg/releases/tag/2.0.0b25",
+      "source_url": "https://github.com/borgbackup/borg/releases/download/2.0.0b25/borg-linux-glibc239-x86_64-gh",
+      "archive_sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4",
+      "prerelease": true,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "release_channel": "2.x prerelease; required by FastCDC fixtures",
+      "minimum_glibc": "2.39"
     },
     {
       "platform": "linux-x64",
       "tool": "restic",
       "version": "0.19.1",
       "path": "linux-x64/restic/restic",
-      "sha256": "20d4142678d0d95ec11a4759def1b73fd9190abc9ca19e4b62d067c0b387e639"
+      "sha256": "20d4142678d0d95ec11a4759def1b73fd9190abc9ca19e4b62d067c0b387e639",
+      "release_url": "https://github.com/restic/restic/releases/tag/v0.19.1",
+      "source_url": "https://github.com/restic/restic/releases/download/v0.19.1/restic_0.19.1_linux_amd64.bz2",
+      "archive_sha256": "f415415624dcc452f2a02b8c33641791a8c6d6d3b65bbb3543fcf9a25151585c",
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "linux-x64",
       "tool": "kopia",
       "version": "0.23.1",
       "path": "linux-x64/kopia/kopia",
-      "sha256": "e306c3d48b47756912928738241baffe68d1a8a16ab804ab3fbabd725a61df7f"
+      "sha256": "e306c3d48b47756912928738241baffe68d1a8a16ab804ab3fbabd725a61df7f",
+      "release_url": "https://github.com/kopia/kopia/releases/tag/v0.23.1",
+      "source_url": "https://github.com/kopia/kopia/releases/download/v0.23.1/kopia-0.23.1-linux-x64.tar.gz",
+      "archive_sha256": "416d0f84a3dbb321a8b2d8f0997b1a0a6e915babe79ee76fa6e4d2bd1e1c5178",
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "linux-x64",
       "tool": "plakar",
-      "version": "1.1.5",
+      "version": "1.1.8",
       "path": "linux-x64/plakar/plakar",
-      "sha256": "9c3d2c5068f16f49d1e282f5e5983bde6c2b4f1d2d71f65bce799b3e1ed6d086"
+      "sha256": "b4e82ae9983373969bc3e1a4bc1d63bbf064c8f269c743a99f939086c571f53a",
+      "release_url": "https://github.com/PlakarKorp/plakar/releases/tag/v1.1.8",
+      "source_url": "https://github.com/PlakarKorp/plakar/releases/download/v1.1.8/plakar_1.1.8_linux_amd64.tar.gz",
+      "archive_sha256": "67c6237eb26ef2cb864941e8444b8877fa6531a0fc9b2a332653b455ea2831b4",
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31"
     },
     {
       "platform": "linux-x64",
       "tool": "buildpatchtool",
       "version": "1.8.8",
       "path": "linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
-      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a"
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a",
+      "source_url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip",
+      "archive_sha256": "9d56626cc073c1c5f12134a43e5d3be9e4c68146ecbe882f1645f0d3435b2660",
+      "verification": "matches current official package; publisher does not provide a separate checksum here",
+      "verified_at": "2026-10-31"
     }
-  ]
+  ],
+  "external_tools_verified_at": "2026-10-31",
+  "external_tool_policy": "Stable official releases, except latest Borg 2 prerelease required by FastCDC fixtures; local files remain ignored."
 }

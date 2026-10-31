@@ -166,9 +166,12 @@ def run_external(
         env = {
             "BORG_BASE_DIR": str(lane_root / "borg"),
             "BORG_CACHE_DIR": str(lane_root / "borg-cache"),
+            # Borg 2.0.0b25 removed none-sha256. Payloads stay unencrypted;
+            # this fixed local test passphrase protects the authentication key.
+            "BORG_PASSPHRASE": "bench",
         }
         execute(
-            [executable, "repo-create", "--repo", repo, "--encryption", "none-sha256"],
+            [executable, "repo-create", "--repo", repo, "--encryption", "authenticated-sha256"],
             description=f"{lane_spec.label} init",
             env=env,
         )
@@ -215,7 +218,9 @@ def run_external(
         operation = "restore" if record_snapshots else "in-place recovery"
         restic_options = [] if record_snapshots else ["--overwrite", "always", "--delete"]
         kopia_options = [] if record_snapshots else ["--delete-extra"]
-        borg_options = [] if record_snapshots else ["--continue"]
+        # Borg 2.0.0b25 requires this even for the initial restore once another
+        # version directory exists under the shared output root.
+        borg_options = ["--continue"]
         output.mkdir(parents=True, exist_ok=True)
         for source in reversed(sources):
             if kind == "restic":
