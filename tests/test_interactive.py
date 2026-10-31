@@ -62,16 +62,16 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
                 await pilot.click("#run")
                 await pilot.pause()
                 await asyncio.wait_for(app.workers.wait_for_complete(), 30)
+                await pilot.pause()  # Let the results view finish layout before clicking it.
                 self.assertFalse(app.busy)
                 self.assertEqual(app.query_one("#table", DataTable).row_count, 1)
                 self.assertTrue(app.report_path.is_file())
                 self.assertEqual(app.query_one("#progress").progress, 1)
-                await pilot.click("#perfetto")
+                self.assertTrue(await pilot.click("#perfetto"))
                 await pilot.pause()
                 await asyncio.wait_for(app.workers.wait_for_complete(), 10)
                 self.assertEqual(opened, [app.run_root / "trace.json"])
                 await pilot.click("#another")
-                await pilot.pause()
                 await pilot.pause()
                 self.assertTrue(app.query_one("#picker").display)
                 app.query_one("#fixture-1").focus()
@@ -79,6 +79,7 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
                 await pilot.click("#run")
                 await pilot.pause()
                 await asyncio.wait_for(app.workers.wait_for_complete(), 30)
+                await pilot.pause()  # Let the results view finish layout before clicking it.
                 self.assertIn("failed", str(app.query_one("#outcome", Static).content))
                 self.assertEqual(app.query_one("#table", DataTable).row_count, 1)
 
