@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 from urllib.request import urlopen
 
@@ -190,6 +191,16 @@ def pair_overview(record):
     return lines
 
 
+def version_chart_links(text, root):
+    """Give changed SVGs new URLs so README images bypass stale browser caches."""
+    for name in ("comparison.svg", "ram.svg", "disk.svg"):
+        path = f"reports/{name}"
+        version = file_sha256(root / path)[:12]
+        text = re.sub(r"\(" + re.escape(path) + r"(?:\?[^)]*)?\)",
+                      f"({path}?v={version})", text)
+    return text
+
+
 def publish(pair, inputs, run_id, attempt, root=ROOT):
     # IDs are used in tracked paths and URLs; reject arbitrary path fragments.
     if not run_id.isdecimal() or not attempt.isdecimal():
@@ -247,6 +258,7 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     readme = root / "README.md"
     text = readme.read_text(encoding="utf-8")
     before, rest = text.split(START, 1)
+    before = version_chart_links(before, root)
     _, after = rest.split(END, 1)
     readme.write_text(before + START + "\n" + "\n".join(overview) + "\n" + END + after, encoding="utf-8", newline="\n")
     summary = os.environ.get("GITHUB_STEP_SUMMARY")

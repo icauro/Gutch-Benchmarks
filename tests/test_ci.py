@@ -232,6 +232,10 @@ class CiTests(unittest.TestCase):
         charts = list((self.root / "reports").rglob("comparison.svg"))
         self.assertEqual(len(charts), 2)
         self.assertEqual(charts[0].read_bytes(), charts[1].read_bytes())
+        for name in ("comparison.svg", "ram.svg", "disk.svg"):
+            version = ci.file_sha256(self.root / "reports" / name)[:12]
+            self.assertIn(f"(reports/{name}?v={version})", readme)
+        self.assertEqual(ci.version_chart_links(readme, self.root), readme)
         for name in ("ram.svg", "disk.svg"):
             resources = list((self.root / "reports").rglob(name))
             self.assertEqual(len(resources), 2)

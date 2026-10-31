@@ -3,11 +3,11 @@
 Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic and Rustic
 using shared Blender inputs, pair-specific settings and SHA-256 output validation.
 
-![Latest per-pair benchmark comparisons](reports/comparison.svg)
+![Latest per-pair benchmark comparisons](reports/comparison.svg?v=61cf51b09510)
 
-![Peak RAM by operation](reports/ram.svg)
+![Peak RAM by operation](reports/ram.svg?v=0926a8d43c73)
 
-![Peak disk by operation](reports/disk.svg)
+![Peak disk by operation](reports/disk.svg?v=78a256b465fc)
 
 <details>
 <summary>Comparison differences and limits</summary>
