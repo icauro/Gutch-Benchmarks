@@ -7,7 +7,20 @@ SHA-256 output validation.
 ## Latest Linux results
 
 <!-- latest-benchmarks:start -->
-No GitHub Actions benchmark reports have been published yet.
+[Full report](reports/2026-10-31/41198571245-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41198571245)
+
+UTC date: 2026-10-31. Suite: `ac6c48c09c8f78d16a6018f4064448e036814c3d`. Gutch: `unknown`.
+
+| Pair | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---|---:|---:|---:|---:|
+| Gutch vs borg | - | ERROR | - | - | - | - |
+| Gutch vs bpt | - | ERROR | - | - | - | - |
+| Gutch vs kopia | - | ERROR | - | - | - | - |
+| Gutch vs plakar | - | ERROR | - | - | - | - |
+| Gutch vs restic | - | ERROR | - | - | - | - |
+| Gutch vs rustic | - | ERROR | - | - | - | - |
+
+Pair outcomes: borg: **ERROR**, bpt: **ERROR**, kopia: **ERROR**, plakar: **ERROR**, restic: **ERROR**, rustic: **ERROR**.
 <!-- latest-benchmarks:end -->
 
 ## Run on GitHub
