@@ -236,34 +236,27 @@
 <path d="M8 548H1056" stroke="#29313d"/>
 <text x="14" y="571" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
 <text x="14" y="595" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Rustic [5]</text>
+<text x="14" y="625" font-size="13" font-weight="650" fill="#ffba78" text-anchor="start">ERROR</text>
 <rect x="163" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="163" y="564" width="22.43" height="12" rx="2" fill="#2474f5"/>
-<text x="214" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">6.185</text>
+<text x="214" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="163" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
-<text x="214" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">11.583</text>
-<text x="163" y="627" font-size="17" font-weight="700" fill="#71a7ff" text-anchor="start">1.87× faster</text>
+<text x="214" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
+<text x="163" y="627" font-size="17" font-weight="700" fill="#a3afc2" text-anchor="start">-</text>
 <rect x="313" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="313" y="564" width="13.54" height="12" rx="2" fill="#2474f5"/>
-<text x="364" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">1.404</text>
+<text x="364" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="313" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="313" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
-<text x="364" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">4.356</text>
-<text x="313" y="627" font-size="17" font-weight="700" fill="#71a7ff" text-anchor="start">3.10× faster</text>
+<text x="364" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
+<text x="313" y="627" font-size="17" font-weight="700" fill="#a3afc2" text-anchor="start">-</text>
 <rect x="463" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="463" y="564" width="9.67" height="12" rx="2" fill="#2474f5"/>
-<text x="514" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">0.800</text>
+<text x="514" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="463" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="463" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
-<text x="514" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">3.477</text>
-<text x="463" y="627" font-size="17" font-weight="700" fill="#71a7ff" text-anchor="start">4.34× faster</text>
+<text x="514" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
+<text x="463" y="627" font-size="17" font-weight="700" fill="#a3afc2" text-anchor="start">-</text>
 <rect x="613" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="613" y="564" width="41.39" height="12" rx="2" fill="#2474f5"/>
-<text x="664" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">689.4</text>
+<text x="664" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="613" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="613" y="589" width="42.00" height="12" rx="2" fill="#f78b32"/>
-<text x="664" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">699.5</text>
-<text x="613" y="627" font-size="17" font-weight="700" fill="#71a7ff" text-anchor="start">1.5% smaller</text>
+<text x="664" y="601" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
+<text x="613" y="627" font-size="17" font-weight="700" fill="#a3afc2" text-anchor="start">-</text>
 <rect x="763" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="814" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="763" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>
