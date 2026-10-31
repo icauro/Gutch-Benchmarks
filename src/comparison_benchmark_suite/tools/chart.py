@@ -14,8 +14,10 @@ METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
            ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
 RESOURCE_OPERATIONS = (("initial_capture", "First capture"), ("incremental_capture", "Second capture"),
                        ("restore", "Restore"), ("repair", "Repair"))
-# Keep references stable when chart rows are reordered or only one pair is rendered.
-PAIR_NOTES = {"borg": 1, "plakar": 2, "kopia": 3, "restic": 4, "rustic": 5, "bpt": 6}
+# Order and note numbers follow GitHub stars checked on 2026-10-31:
+# Restic 36,901; Kopia 14,541; Borg 13,897; Rustic 3,356; Plakar 2,103.
+# BuildPatchTool has no comparable public repository and stays last.
+PAIR_NOTES = {"restic": 1, "kopia": 2, "borg": 3, "rustic": 4, "plakar": 5, "bpt": 6}
 BLUE, ORANGE = "#2474f5", "#f78b32"
 
 
@@ -40,7 +42,7 @@ def latest_records(reports: Path) -> list[dict]:
             if resources.is_file():
                 record["operation_resources"] = json.loads(resources.read_text(encoding="utf-8"))["operation_resources"]
         records.append(record)
-    return records
+    return sorted(records, key=lambda record: PAIR_NOTES.get(record["pair"], len(PAIR_NOTES) + 1))
 
 
 def _median(record, label, metric, unit):
@@ -83,7 +85,8 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
         heading, _, detail = title.partition("\n")
         text(x + 7, table_top + 21, heading, size=17, weight=650)
         text(x + 7, table_top + 38, f"{detail} · {unit}" if detail else unit, size=13, color="#a3afc2")
-    for index, record in enumerate(records):
+    ordered_records = sorted(records, key=lambda record: PAIR_NOTES.get(record["pair"], len(PAIR_NOTES) + 1))
+    for index, record in enumerate(ordered_records):
         y = table_top + header_height + index * row_height
         rect(margin, y, width - 2 * margin, row_height, "#000000" if index % 2 == 0 else "#0d1117")
         line(margin, y, width - margin, y)

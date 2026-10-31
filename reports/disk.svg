@@ -21,7 +21,7 @@
 <rect x="8" y="98" width="748.00" height="90" rx="0" fill="#000000"/>
 <path d="M8 98H756" stroke="#29313d"/>
 <text x="14" y="121" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="145" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Borg [1]</text>
+<text x="14" y="145" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restic [1]</text>
 <rect x="163" y="114" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="214" y="126" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="139" width="42.00" height="12" rx="2" fill="#252d3a"/>
@@ -45,7 +45,7 @@
 <rect x="8" y="188" width="748.00" height="90" rx="0" fill="#0d1117"/>
 <path d="M8 188H756" stroke="#29313d"/>
 <text x="14" y="211" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="235" font-size="14" font-weight="650" fill="#edf2fa" text-anchor="start">BuildPatchTool [6]</text>
+<text x="14" y="235" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Kopia [2]</text>
 <rect x="163" y="204" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="214" y="216" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="229" width="42.00" height="12" rx="2" fill="#252d3a"/>
@@ -69,7 +69,7 @@
 <rect x="8" y="278" width="748.00" height="90" rx="0" fill="#000000"/>
 <path d="M8 278H756" stroke="#29313d"/>
 <text x="14" y="301" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="325" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Kopia [3]</text>
+<text x="14" y="325" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Borg [3]</text>
 <rect x="163" y="294" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="214" y="306" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="319" width="42.00" height="12" rx="2" fill="#252d3a"/>
@@ -93,7 +93,7 @@
 <rect x="8" y="368" width="748.00" height="90" rx="0" fill="#0d1117"/>
 <path d="M8 368H756" stroke="#29313d"/>
 <text x="14" y="391" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="415" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Plakar [2]</text>
+<text x="14" y="415" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Rustic [4]</text>
 <rect x="163" y="384" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="214" y="396" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="409" width="42.00" height="12" rx="2" fill="#252d3a"/>
@@ -117,7 +117,7 @@
 <rect x="8" y="458" width="748.00" height="90" rx="0" fill="#000000"/>
 <path d="M8 458H756" stroke="#29313d"/>
 <text x="14" y="481" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="505" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restic [4]</text>
+<text x="14" y="505" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Plakar [5]</text>
 <rect x="163" y="474" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="214" y="486" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="499" width="42.00" height="12" rx="2" fill="#252d3a"/>
@@ -141,7 +141,7 @@
 <rect x="8" y="548" width="748.00" height="90" rx="0" fill="#0d1117"/>
 <path d="M8 548H756" stroke="#29313d"/>
 <text x="14" y="571" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="595" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Rustic [5]</text>
+<text x="14" y="595" font-size="14" font-weight="650" fill="#edf2fa" text-anchor="start">BuildPatchTool [6]</text>
 <rect x="163" y="564" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <text x="214" y="576" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
 <rect x="163" y="589" width="42.00" height="12" rx="2" fill="#252d3a"/>

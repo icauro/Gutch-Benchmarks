@@ -23,6 +23,18 @@ def pair_record(pair="restic", status="PASS"):
 
 
 class ChartTests(unittest.TestCase):
+    def test_pair_order_and_note_numbers_match_popularity_order(self):
+        pairs = ["bpt", "plakar", "rustic", "borg", "kopia", "restic"]
+        records = [pair_record(pair) for pair in pairs]
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertEqual([record["pair"] for record in latest_records(Path(directory))], list(reversed(pairs)))
+        expected = ["Restic [1]", "Kopia [2]", "Borg [3]", "Rustic [4]", "Plakar [5]", "BuildPatchTool [6]"]
+        for chart in (render_svg(records), render_resources_svg(records, kind="ram"),
+                      render_resources_svg(records, kind="disk")):
+            root = ET.fromstring(chart)
+            labels = [node.text for node in root.iter("{http://www.w3.org/2000/svg}text")]
+            self.assertEqual([label for label in labels if label in expected], expected)
+
     def test_bar_lengths_are_linear_and_rendering_is_deterministic(self):
         chart = render_svg([pair_record()])
         self.assertEqual(chart, render_svg([pair_record()]))
@@ -83,7 +95,7 @@ class ChartTests(unittest.TestCase):
         self.assertIn("First capture", labels)
         self.assertIn("Second capture", labels)
         self.assertIn("Gutch", labels)
-        self.assertIn("Restic [4]", labels)
+        self.assertIn("Restic [1]", labels)
         self.assertIn("1.0", labels)
         self.assertIn("2.0", labels)
         self.assertEqual(labels.count("—"), 6)
@@ -119,9 +131,9 @@ class ChartTests(unittest.TestCase):
 
     def test_chart_references_match_readme_notes_and_survive_row_reordering(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        for pair, title, number in (("borg", "Borg", 1), ("plakar", "Plakar", 2),
-                                    ("kopia", "Kopia", 3), ("restic", "Restic", 4),
-                                    ("rustic", "Rustic", 5), ("bpt", "BuildPatchTool", 6)):
+        for pair, title, number in (("restic", "Restic", 1), ("kopia", "Kopia", 2),
+                                    ("borg", "Borg", 3), ("rustic", "Rustic", 4),
+                                    ("plakar", "Plakar", 5), ("bpt", "BuildPatchTool", 6)):
             chart = render_svg([pair_record(pair)])
             self.assertIn(f"{title} [{number}]", chart)
             self.assertIn(f"{number}. **{title}:**", readme)

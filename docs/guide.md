@@ -281,6 +281,10 @@ differences show percentages relative to the paired tool; timing ratios below
 pairs stay visible without blocking other rows. The SVG needs no plotting or
 image-generation dependency.
 
+Comparison rows and numbered README notes follow a saved GitHub star ranking
+checked on 2026-10-31: Restic, Kopia, Borg, Rustic, Plakar, then BuildPatchTool
+(which has no comparable public repository). Rendering does not query GitHub.
+
 Generate a local image from saved reports without running benchmarks:
 
 ```sh

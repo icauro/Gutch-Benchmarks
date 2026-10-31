@@ -222,6 +222,7 @@ class CiTests(unittest.TestCase):
         ci.publish("all", self.root / "incoming", "123", "2", self.root)
         readme = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("Original intro", readme)
+        self.assertNotIn("Lower values are better.", readme)
         self.assertIn("Original footer", readme)
         self.assertIn("1.250", readme)
         self.assertIn("<summary>Detailed results and source reports</summary>", readme)

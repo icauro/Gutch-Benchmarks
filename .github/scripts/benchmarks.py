@@ -222,8 +222,6 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     protocol_note = " · includes earlier measurement protocols" if any(item.get("measurement_contract") != 2 for item in latest) else " · measurement contract 2"
     overview = ["Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · " + ", ".join(dates) + protocol_note, "",
                 f"[This run's report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
-                "Lower values are better. Pair settings differ; bars scale independently within each cell.",
-                "Hosted-runner timings are indicative; OS caches are uncontrolled.", "",
                 "<details>", "<summary>Detailed results and source reports</summary>", ""]
     for item in latest:
         if item.get("source_report"):
