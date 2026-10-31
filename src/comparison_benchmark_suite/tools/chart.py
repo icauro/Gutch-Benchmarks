@@ -12,12 +12,8 @@ from .report import relative_metric
 
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
            ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
-RESOURCE_METRICS = tuple(
-    (f"{operation}_{kind}", f"{title}\n{kind.upper() if kind == 'ram' else 'disk'}", "MiB")
-    for operation, title in (("initial_capture", "First capture"), ("incremental_capture", "Second capture"),
-                             ("restore", "Restore"), ("repair", "Repair"))
-    for kind in ("ram", "disk")
-)
+RESOURCE_OPERATIONS = (("initial_capture", "First capture"), ("incremental_capture", "Second capture"),
+                       ("restore", "Restore"), ("repair", "Repair"))
 # Keep references stable when chart rows are reordered or only one pair is rendered.
 PAIR_NOTES = {"borg": 1, "plakar": 2, "kopia": 3, "restic": 4, "rustic": 5, "bpt": 6}
 BLUE, ORANGE = "#2474f5", "#f78b32"
@@ -128,27 +124,29 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
 
 
 
-def render_resources_svg(records: list[dict]) -> str:
-    """Use the same paired-bar template with resource columns and saved values."""
+def render_resources_svg(records: list[dict], *, kind: str) -> str:
+    """Use the shared paired-bar template for RAM or disk across four operations."""
+    metrics = tuple((f"{operation}_{kind}", title, "MiB") for operation, title in RESOURCE_OPERATIONS)
+    field = "peak_rss_bytes" if kind == "ram" else "peak_disk_bytes"
     resource_records = []
     for record in records:
         summary = {}
         for tool, operations in record.get("operation_resources", {}).items():
             summary[tool] = {}
-            for metric, _, _ in RESOURCE_METRICS:
-                operation, kind = metric.rsplit("_", 1)
-                field = "peak_rss_bytes" if kind == "ram" else "peak_disk_bytes"
+            for operation, _ in RESOURCE_OPERATIONS:
                 value = operations.get(operation, {}).get(field) if record.get("status") == "PASS" else None
-                summary[tool][metric] = {"median": value, "samples": 1}
+                summary[tool][f"{operation}_{kind}"] = {"median": value, "samples": 1}
         resource_records.append({**record, "summary": summary})
-    return render_svg(resource_records, metrics=RESOURCE_METRICS, title="Peak resources by operation")
+    title = "Peak RAM by operation" if kind == "ram" else "Peak disk by operation"
+    return render_svg(resource_records, metrics=metrics, title=title)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reports", type=Path, required=True, help="Saved reports directory")
     parser.add_argument("--output", type=Path, required=True, help="Output SVG path")
-    parser.add_argument("--resources-output", type=Path, help="Optional resource-table SVG output")
+    parser.add_argument("--ram-output", type=Path, help="Optional peak RAM SVG output")
+    parser.add_argument("--disk-output", type=Path, help="Optional peak disk SVG output")
     args = parser.parse_args()
     if not args.reports.is_dir():
         parser.error("--reports must name an existing reports directory")
@@ -158,10 +156,12 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(render_svg(records), encoding="utf-8", newline="\n")
     print(args.output.resolve())
-    if args.resources_output is not None:
-        args.resources_output.parent.mkdir(parents=True, exist_ok=True)
-        args.resources_output.write_text(render_resources_svg(records), encoding="utf-8", newline="\n")
-        print(args.resources_output.resolve())
+    for kind, output in (("ram", args.ram_output), ("disk", args.disk_output)):
+        if output is not None:
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(render_resources_svg(records, kind=kind), encoding="utf-8", newline="\n")
+            print(output.resolve())
+
 
 
 if __name__ == "__main__":

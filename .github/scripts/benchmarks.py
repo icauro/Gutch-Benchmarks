@@ -207,7 +207,11 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
         records.append(record)
         write_json(destination / f"{name}.json", record)
     latest = latest_records(root / "reports")
-    for name, chart in (("comparison.svg", render_svg(latest)), ("resources.svg", render_resources_svg(latest))):
+    for name, chart in (
+        ("comparison.svg", render_svg(latest)),
+        ("ram.svg", render_resources_svg(latest, kind="ram")),
+        ("disk.svg", render_resources_svg(latest, kind="disk")),
+    ):
         for path in (destination / name, root / "reports" / name):
             path.write_text(chart, encoding="utf-8", newline="\n")
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")

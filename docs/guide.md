@@ -284,7 +284,7 @@ image-generation dependency.
 Generate a local image from saved reports without running benchmarks:
 
 ```sh
-python -m comparison_benchmark_suite.tools.chart --reports reports --output .artifacts/charts/latest.svg --resources-output .artifacts/charts/resources.svg
+python -m comparison_benchmark_suite.tools.chart --reports reports --output .artifacts/charts/latest.svg --ram-output .artifacts/charts/ram.svg --disk-output .artifacts/charts/disk.svg
 ```
 
 The command prints an ASCII comparison table with status, median capture/restore
@@ -343,11 +343,11 @@ additional fresh workflow per tool collects resource measurements. These command
 never contribute speed samples, medians or speed traces. `resources.json` records
 raw monitored results; `summary.json` labels these peaks as `separate_resource_pass`.
 CI retains both evidence and compact resource results. The first SVG shows speed
-and stored size. `reports/resources.svg` is a second SVG directly below it, using
-the same paired-bar template and eight RAM/disk columns across four operations. CI refreshes and
-archives both images. Text resource tables remain below each pair’s speed table.
-Rows are comparisons with Gutch/peer bars; the eight columns are first-capture RAM/disk, second-capture
-RAM/disk, restore RAM/disk and content-repair RAM/disk. Operation RAM is the maximum
+and stored size. `reports/ram.svg` follows with peak RAM; `reports/disk.svg`
+follows with peak disk usage. All three use the same paired-bar template. Each
+resource SVG has first capture, second capture, restore and repair columns in MiB.
+CI refreshes and archives all three images. Combined text resource tables remain
+below each pair’s speed table as an accessible alternative. Operation RAM is the maximum
 across its commands; restore and repair cover both versions. Per-command disk
 values remain unavailable until recorded. The latest run’s RAM breakdown is
 derived from its saved command artifacts in `<pair>-resources.json`; its original
