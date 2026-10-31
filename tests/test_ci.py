@@ -227,7 +227,7 @@ class CiTests(unittest.TestCase):
         self.assertIn("1.250", readme)
         self.assertIn("<summary>Detailed results and source reports</summary>", readme)
         self.assertNotIn("Suite commit:", readme)
-        self.assertIn("### Gutch vs Borg (ERROR)", readme)
+        self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (ERROR)", readme)
         self.assertIn("![Latest per-pair benchmark comparisons]", readme)
         charts = list((self.root / "reports").rglob("comparison.svg"))
         self.assertEqual(len(charts), 2)
@@ -245,7 +245,7 @@ class CiTests(unittest.TestCase):
         self.assertEqual(updated.count("![Latest per-pair"), 1)
         self.assertIn("/123-2/borg.json", updated)
         self.assertIn("/124-1/restic.json", updated)
-        self.assertIn("### Gutch vs Borg (ERROR)", updated)
+        self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (ERROR)", updated)
         self.assertEqual((self.root / "reports/comparison.svg").read_bytes(),
                          next((self.root / "reports").glob("*/124-1/comparison.svg")).read_bytes())
         self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 7)
@@ -271,8 +271,8 @@ class CiTests(unittest.TestCase):
         self.assertNotIn(b"\r", report.read_bytes())
         readme = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("First capture RAM | First capture disk | Second capture RAM | Second capture disk", readme)
-        self.assertIn("gutch | 2.0 | —", readme)
-        self.assertIn("rustic | 4.0 | —", readme)
+        self.assertIn("[Gutch](https://github.com/icauro/Gutch) | 2.0 | —", readme)
+        self.assertIn("[Rustic](https://github.com/rustic-rs/rustic) | 4.0 | —", readme)
 
     def test_workflow_is_manual_only_and_pairs_share_one_cache_action(self):
         workflow = yaml.load((ROOT / ".github/workflows/benchmarks.yml").read_text(), Loader=yaml.BaseLoader)
@@ -287,6 +287,18 @@ class CiTests(unittest.TestCase):
         composite = (ROOT / ".github/actions/blender-inputs/action.yml").read_text()
         self.assertNotIn("matrix.pair", composite)
 
+    def test_markdown_tables_link_tools_and_keep_gutch_first(self):
+        record = {"pair": "borg", "status": "PASS", "measurement_contract": 2,
+                  "rows": [[label, "PASS", *["1"] * 8] for label in ("borg", "gutch")],
+                  "summary": {"borg": {}, "gutch": {}},
+                  "operation_resources": {"borg": {}, "gutch": {}}}
+        rendered = "\n".join(ci.pair_overview(record))
+        gutch = "[Gutch](https://github.com/icauro/Gutch)"
+        borg = "[Borg](https://github.com/borgbackup/borg)"
+        rows = [line for line in rendered.splitlines() if line.startswith("| " + gutch) or line.startswith("| " + borg)]
+        self.assertEqual([line.split(" | ")[0] for line in rows], ["| " + gutch, "| " + borg] * 2)
+        self.assertIn("| Measurement | " + gutch + " | " + borg + " |", rendered)
+
     def test_pair_ratios_use_raw_medians_and_show_direction(self):
         record = {"pair": "restic", "status": "PASS", "rows": [
             [label, "PASS", "0.000", "0.000", "0.000", "-", "0.000", "-", "-"]
@@ -295,7 +307,7 @@ class CiTests(unittest.TestCase):
             record["summary"][label] = {metric: {"median": value, "samples": 3}
                 for metric, value in zip(("backup", "restore", "repair", "repo_size"), values)}
         table = "\n".join(ci.pair_overview(record))
-        self.assertIn("### Gutch vs Restic (PASS)", table)
+        self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Restic](https://github.com/restic/restic) (PASS)", table)
         self.assertIn("| **Gutch relative** | - | 2.00x faster | 2.00x slower | ~same | 75% smaller |", table)
         record["summary"]["restic"]["backup"]["samples"] = 2
         self.assertIn("| **Gutch relative** | - | - | 2.00x slower", "\n".join(ci.pair_overview(record)))

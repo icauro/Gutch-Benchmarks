@@ -16,8 +16,8 @@ from comparison_benchmark_suite.datasets import extract_archive, prepare_dataset
 from comparison_benchmark_suite.support.memory import summarize_operation_resources
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.support.retention import remove_owned
-from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details, operation_resource_table
-from comparison_benchmark_suite.tools.chart import latest_records, render_svg, render_resources_svg
+from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details, operation_resource_table, markdown_tool_name
+from comparison_benchmark_suite.tools.chart import latest_records, render_svg, render_resources_svg, PAIR_NOTES
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -170,13 +170,14 @@ def pair_overview(record):
     """Render one pair; derive ratios from raw medians, never rounded cells."""
     pair = record["pair"]
     other = "buildpatchtool" if pair == "bpt" else pair
-    title = "BuildPatchTool" if pair == "bpt" else pair.title()
-    lines = [f"### Gutch vs {title} ({record['status']})", "",
+    lines = [f"### {markdown_tool_name('gutch')} vs {markdown_tool_name(other)} ({record['status']})", "",
              "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |",
              "|---|---|---:|---:|---:|---:|"]
     rows = record["rows"] or [[label, "NOT_RUN", *("-" for _ in range(7))]
                               for label in ("gutch", other)]
-    lines.extend("| " + " | ".join(row[i] for i in (0, 1, 2, 3, 4, 6)) + " |" for row in rows)
+    rows = sorted(rows, key=lambda row: row[0] != "gutch")
+    lines.extend("| " + " | ".join([markdown_tool_name(row[0]), *(row[i] for i in (1, 2, 3, 4, 6))]) + " |"
+                 for row in rows)
     ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size")]
     lines.extend(["| **Gutch relative** | - | " + " | ".join(ratios) + " |", ""])
     lines.extend(operation_resource_table(record))
@@ -228,7 +229,7 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
             overview.extend([f"[Source: Gutch vs {item['pair']}](reports/{item['source_report']})", ""])
         overview.extend(pair_overview(item))
     overview.extend(["</details>", ""])
-    for record in records:
+    for record in sorted(records, key=lambda record: PAIR_NOTES[record["pair"]]):
         name = record["pair"]
         provenance = record.get("provenance", {})
         lines.extend([f"## Gutch vs {name}: {record['status']}", "", record.get("description", ""), "",
@@ -236,7 +237,8 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
                       f"Host: `{record.get('host', {})}`", "",
                       f"[Machine-readable report]({name}.json)", "",
                       "| " + " | ".join(COMPARISON_HEADERS) + " |", "|" + "---|" * len(COMPARISON_HEADERS)])
-        lines.extend("| " + " | ".join(row) + " |" for row in record["rows"])
+        lines.extend("| " + " | ".join([markdown_tool_name(row[0]), *row[1:]]) + " |"
+                     for row in sorted(record["rows"], key=lambda row: row[0] != "gutch"))
         if record.get("measurement_contract") == 2:
             lines.extend(["", *measurement_details(record.get("summary", {}))])
         lines.extend(["", *record.get("reasons", []), ""])

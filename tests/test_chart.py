@@ -7,6 +7,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
+from comparison_benchmark_suite.tools.report import markdown_tool_name
 from comparison_benchmark_suite.tools.chart import BLUE, ORANGE, latest_records, render_svg, render_resources_svg
 
 
@@ -136,7 +137,8 @@ class ChartTests(unittest.TestCase):
                                     ("plakar", "Plakar", 5), ("bpt", "BuildPatchTool", 6)):
             chart = render_svg([pair_record(pair)])
             self.assertIn(f"{title} [{number}]", chart)
-            self.assertIn(f"{number}. **{title}:**", readme)
+            label = "buildpatchtool" if pair == "bpt" else pair
+            self.assertIn(f"{number}. **{markdown_tool_name(label)}:**", readme)
 
     def test_latest_selection_uses_numeric_run_order_and_keeps_bad_reports_visible(self):
         owner = ROOT / ".artifacts/tests"

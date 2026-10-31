@@ -283,7 +283,9 @@ image-generation dependency.
 
 Comparison rows and numbered README notes follow a saved GitHub star ranking
 checked on 2026-10-31: Restic, Kopia, Borg, Rustic, Plakar, then BuildPatchTool
-(which has no comparable public repository). Rendering does not query GitHub.
+(which has no comparable public repository). Rendering does not query GitHub. Tables consistently place Gutch first and link
+tool names to their source repositories; BuildPatchTool links to the
+Epic-authorized Unreal Engine repository.
 
 Generate a local image from saved reports without running benchmarks:
 

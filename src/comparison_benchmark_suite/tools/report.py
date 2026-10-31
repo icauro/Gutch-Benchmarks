@@ -9,6 +9,22 @@ from .models import LaneResult
 COMPARISON_HEADERS = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RAM MiB", "Peak disk MiB"]
 
 
+TOOL_SOURCES = {
+    "gutch": ("Gutch", "https://github.com/icauro/Gutch"),
+    "restic": ("Restic", "https://github.com/restic/restic"),
+    "kopia": ("Kopia", "https://github.com/kopia/kopia"),
+    "borg": ("Borg", "https://github.com/borgbackup/borg"),
+    "rustic": ("Rustic", "https://github.com/rustic-rs/rustic"),
+    "plakar": ("Plakar", "https://github.com/PlakarKorp/plakar"),
+    "buildpatchtool": ("BuildPatchTool", "https://github.com/EpicGames/UnrealEngine"),
+}
+
+
+def markdown_tool_name(label):
+    source = TOOL_SOURCES.get(label)
+    return f"[{source[0]}]({source[1]})" if source else label
+
+
 def relative_metric(record: dict, metric: str, *, size_metric: bool = False) -> str:
     """Compare valid, equally sampled raw medians for a successful pair."""
     other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
@@ -40,7 +56,8 @@ def comparison_rows(summary: dict, results: list[dict]) -> list[list[str]]:
     rows = []
     columns = [("backup", 1), ("restore", 1), ("repair", 1), ("full_restore_recovery", 1),
                ("repo_size", 1048576), ("cpu_percent", 1), ("peak_rss_bytes", 1048576), ("peak_disk_bytes", 1048576)]
-    for label, metrics in summary.items():
+    for label in sorted(summary, key=lambda label: label != "gutch"):
+        metrics = summary[label]
         statuses = sorted({result["metadata"]["status"] for result in results
                            if result["metadata"]["case"] == label})
         row = [label, ", ".join(statuses)]
@@ -82,7 +99,7 @@ def operation_resource_table(record):
             for metric in ("peak_rss_bytes", "peak_disk_bytes"):
                 value = resources.get(label, {}).get(operation, {}).get(metric)
                 cells.append("—" if value is None else f"{value / 1048576:,.1f}")
-        lines.append("| " + label + " | " + " | ".join(cells) + " |")
+        lines.append("| " + markdown_tool_name(label) + " | " + " | ".join(cells) + " |")
     lines.extend(["", "RAM is the largest sampled process-tree RSS across commands in that operation. "
                   "Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; "
                   "whole-workflow disk peaks are not reused here.", ""])
@@ -99,8 +116,8 @@ DETAIL_METRICS = (("initial_capture", "First capture s"), ("incremental_capture"
 
 def measurement_details(summary):
     """Display medians and observed ranges without implying statistical confidence."""
-    labels = list(summary)
-    lines = ["| Measurement | " + " | ".join(labels) + " |",
+    labels = sorted(summary, key=lambda label: label != "gutch")
+    lines = ["| Measurement | " + " | ".join(markdown_tool_name(label) for label in labels) + " |",
              "|---|" + "---:|" * len(labels)]
     for metric, title in DETAIL_METRICS:
         cells = []
@@ -120,7 +137,7 @@ def write_comparison_report(directory: Path, description: str, results: list[Lan
              "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     rows = comparison_rows(summary, [result.as_json() for result in results])
     for row in rows:
-        lines.append("| " + " | ".join(row) + " |")
+        lines.append("| " + " | ".join([markdown_tool_name(row[0]), *row[1:]]) + " |")
     reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
     lines.extend(["", *reasons, "", "Restore includes the tool's own verification. Independent SHA-256 validation is outside command timing.",
                   "", "Raw samples and operation semantics: results.json. Aggregate medians and ranges: summary.json. Perfetto overview: trace.json (compacted tool time; harness gaps omitted, not concurrent execution)."])
