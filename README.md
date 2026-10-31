@@ -30,6 +30,12 @@ tools flush writes can still differ. New performance runs use six measured
 repetitions with alternating order; OS caches are not reset. A single local smoke
 run checks compatibility only. Older reports retain their original settings.
 
+Peak RAM and peak disk come from one separate monitored pass per tool, so monitoring
+does not affect the chart's speed measurements. RAM includes child processes;
+disk counts tool-owned working files, including caches and restored output, but
+excludes shared inputs, executables and benchmark logs. Peaks are sampled and may
+miss short spikes; older results show `—` until measured.
+
 </details>
 
 <!-- latest-benchmarks:start -->

@@ -13,7 +13,7 @@ class ProcessMemorySampler:
         self.timeline = timeline
         self.interval = interval
         self.stopped = threading.Event()
-        self.result = {"scope": "process", "sampling_interval_seconds": interval,
+        self.result = {"scope": "process_tree_rss; direct_process_cpu", "sampling_interval_seconds": interval,
                        "sample_count": 0, "observed_mean_interval_seconds": None, "sampled_peak_rss_bytes": None,
                        "observed_os_peak_working_set_bytes": None,
                        "sampled_peak_private_bytes": None,
@@ -46,6 +46,11 @@ class ProcessMemorySampler:
                           "rss_bytes": info.rss,
                           "os_peak_working_set_bytes": getattr(info, "peak_wset", None),
                           "private_bytes": getattr(info, "private", None)}
+                for child in process.children(recursive=True):
+                    try:
+                        sample["rss_bytes"] += child.memory_info().rss
+                    except psutil.NoSuchProcess:
+                        pass
                 cpu = process.cpu_times()
                 cpu_seconds = cpu.user + cpu.system
                 sample["cpu_seconds"] = cpu_seconds
@@ -80,7 +85,8 @@ class ProcessMemorySampler:
 
 def process_utilization(measurements: list[dict]) -> dict:
     """Summarize sequential direct-child commands, weighting CPU by observed time."""
-    samples = [item["memory"] for item in measurements if item.get("memory")]
+    raw_samples = [item["memory"] for item in measurements if item.get("memory")]
+    samples = [item for item in raw_samples if not item.get("error")]
     cpu_samples = [item for item in samples if item.get("sampled_cpu_seconds") is not None
                    and (item.get("cpu_observed_seconds") or 0) > 0]
     result = {}
@@ -91,6 +97,62 @@ def process_utilization(measurements: list[dict]) -> dict:
         result["sampled_cpu_seconds"] = cpu_seconds
     peaks = [item["sampled_peak_rss_bytes"] for item in samples
              if item.get("sampled_peak_rss_bytes") is not None]
-    if peaks:
+    if peaks and all(not item.get("error") and item.get("sampled_peak_rss_bytes") is not None for item in raw_samples):
         result["peak_rss_bytes"] = max(peaks)
     return result
+
+
+class DiskSpaceSampler:
+    """Sample apparent owned file bytes; never traverse inputs, binaries or logs."""
+    def __init__(self, roots, interval=0.1):
+        self.roots = roots
+        self.interval = interval
+        self.stopped = threading.Event()
+        self.result = {"peak_disk_bytes": None, "sample_count": 0,
+                       "sampling_interval_seconds": interval, "scope": "owned apparent file bytes"}
+        self.thread = threading.Thread(target=self._sample, name="benchmark-disk")
+
+    def start(self):
+        self.thread.start()
+
+    def finish(self):
+        self.stopped.set()
+        self.thread.join()
+        self.sample()
+        return self.result
+
+    def sample(self):
+        import os
+        total = 0
+        seen = set()
+        try:
+            for root in self.roots:
+                def fail(error):
+                    raise error
+                for directory, dirs, files in os.walk(root, followlinks=False, onerror=fail):
+                    dirs[:] = [name for name in dirs if name not in {"commands", "stats", "traces", "kopia-logs"}
+                               and not (Path(directory) / name).is_symlink()]
+                    for name in files:
+                        path = Path(directory) / name
+                        try:
+                            if path.is_symlink():
+                                continue
+                            info = path.stat()
+                        except FileNotFoundError:
+                            continue  # Tools can remove temporary files between listing and stat.
+                        identity = (info.st_dev, info.st_ino)
+                        if identity not in seen:
+                            seen.add(identity)
+                            total += info.st_size
+            self.result["sample_count"] += 1
+            self.result["peak_disk_bytes"] = max(self.result["peak_disk_bytes"] or 0, total)
+        except FileNotFoundError:
+            pass  # A tool may atomically replace a directory during traversal.
+        except OSError as error:
+            self.result["error"] = str(error)
+
+    def _sample(self):
+        while True:
+            self.sample()
+            if self.stopped.wait(self.interval):
+                break

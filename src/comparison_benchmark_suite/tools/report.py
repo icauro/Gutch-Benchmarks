@@ -6,7 +6,7 @@ from pathlib import Path
 from .models import LaneResult
 
 
-COMPARISON_HEADERS = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RSS MiB"]
+COMPARISON_HEADERS = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RAM MiB", "Peak disk MiB"]
 
 
 def relative_metric(record: dict, metric: str) -> str:
@@ -24,10 +24,10 @@ def relative_metric(record: dict, metric: str) -> str:
                 or not math.isfinite(value) or value <= 0 for value in values)):
         return "-"
     gutch_value, peer_value = values
-    if metric == "repo_size":
+    if metric in {"repo_size", "peak_rss_bytes", "peak_disk_bytes"}:
         percent = round(100 * (gutch_value / peer_value - 1), 1)
         if percent == 0:
-            return "same size"
+            return "same size" if metric == "repo_size" else "~same"
         return f"{abs(percent):g}% {'smaller' if percent < 0 else 'larger'}"
     if max(gutch_value, peer_value) / min(gutch_value, peer_value) < 1.005:
         return "~same"
@@ -39,7 +39,7 @@ def relative_metric(record: dict, metric: str) -> str:
 def comparison_rows(summary: dict, results: list[dict]) -> list[list[str]]:
     rows = []
     columns = [("backup", 1), ("restore", 1), ("repair", 1), ("full_restore_recovery", 1),
-               ("repo_size", 1048576), ("cpu_percent", 1), ("peak_rss_bytes", 1048576)]
+               ("repo_size", 1048576), ("cpu_percent", 1), ("peak_rss_bytes", 1048576), ("peak_disk_bytes", 1048576)]
     for label, metrics in summary.items():
         statuses = sorted({result["metadata"]["status"] for result in results
                            if result["metadata"]["case"] == label})
@@ -92,11 +92,11 @@ def measurement_details(summary):
 
 
 def write_comparison_report(directory: Path, description: str, results: list[LaneResult]) -> None:
-    utilization_note = "CPU/RSS: detailed mode only, direct tool processes; 100% CPU = one core. Child processes and harness excluded."
+    utilization_note = "RAM/disk: sampled in a separate resource pass; RSS includes descendants. Disk is owned apparent file bytes. CPU 100% = one core; harness excluded."
     summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
     lines = ["# Comparison benchmark", "", description, "", "OS cache state: uncontrolled. Times are median seconds.", "",
              "| " + " | ".join(COMPARISON_HEADERS) + " |",
-             "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     rows = comparison_rows(summary, [result.as_json() for result in results])
     for row in rows:
         lines.append("| " + " | ".join(row) + " |")

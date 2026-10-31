@@ -9,6 +9,7 @@ description: Kopia explicitly uses DYNAMIC-4M-BUZHASH, disabled content compress
   are reported. Unsupported operations receive no timing.
 dataset: blender/dataset.yaml
 repetitions: 6
+resource_sampling: true
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true

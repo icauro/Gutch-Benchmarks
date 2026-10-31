@@ -10,6 +10,7 @@ description: Rustic explicitly uses Rabin with a 1 MiB average, 512 KiB minimum 
   reported. Unsupported operations receive no timing.
 dataset: blender/dataset.yaml
 repetitions: 6
+resource_sampling: true
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true

@@ -10,6 +10,7 @@ description: Borg explicitly uses FastCDC fastcdc,19,23,21,2, LZ4, authenticated
   receive no timing.
 dataset: blender/dataset.yaml
 repetitions: 6
+resource_sampling: true
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true

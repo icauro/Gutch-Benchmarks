@@ -17,6 +17,7 @@ class LaneSpec:
     arguments: tuple[str, ...] = ()
     workload: str = "individual"
     configuration_label: str = ""
+    resource_sample: bool = False
 
     @property
     def kind(self) -> str:
@@ -38,6 +39,7 @@ class FixtureSpec:
     snapshot_limit: int | None = None
     repetitions: int = 1
     profile_mode: str = "off"
+    resource_sampling: bool = False
 
 
 @dataclass

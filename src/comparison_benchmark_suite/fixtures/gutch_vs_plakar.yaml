@@ -9,6 +9,7 @@ description: Plakar uses native FastCDC around 1 MiB and LZ4 stream compression,
   durations are reported. Unsupported operations receive no timing.
 dataset: blender/dataset.yaml
 repetitions: 6
+resource_sampling: true
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true

@@ -118,7 +118,7 @@ def collect(pair, outcome, root=ROOT):
         compact["fixture"] = record.get("fixture", {})
         compact["dataset"] = record.get("dataset", {})
         compact["executables"] = record.get("executables", {})
-        for name in ("run.json", "results.json", "summary.json", "summary.md", "trace.json"):
+        for name in ("run.json", "results.json", "summary.json", "summary.md", "trace.json", "resources.json"):
             if (run / name).is_file():
                 shutil.copyfile(run / name, destination / name)
         if (run / "summary.json").is_file() and (run / "results.json").is_file():
@@ -127,6 +127,9 @@ def collect(pair, outcome, root=ROOT):
             compact["rows"] = comparison_rows(summary, results)
             compact["summary"] = summary
             compact["measurement_contract"] = 2
+            resources = run / "resources.json"
+            if resources.is_file():
+                compact["resources"] = json.loads(resources.read_text(encoding="utf-8"))
             compact["operations"] = {item["metadata"]["case"]: item["metadata"].get("operations", {}) for item in results}
             compact["reasons"] = list(dict.fromkeys(item["metadata"]["reason"]
                                       for item in results if item["metadata"].get("reason")))
@@ -167,12 +170,17 @@ def pair_overview(record):
     other = "buildpatchtool" if pair == "bpt" else pair
     title = "BuildPatchTool" if pair == "bpt" else pair.title()
     lines = [f"### Gutch vs {title} ({record['status']})", "",
-             "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |",
-             "|---|---|---:|---:|---:|---:|"]
+             "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |",
+             "|---|---|---:|---:|---:|---:|---:|---:|"]
     rows = record["rows"] or [[label, "NOT_RUN", *("-" for _ in range(7))]
                               for label in ("gutch", other)]
-    lines.extend("| " + " | ".join(row[i] for i in (0, 1, 2, 3, 4, 6)) + " |" for row in rows)
-    ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size")]
+    for row in rows:
+        resources = []
+        for metric in ("peak_rss_bytes", "peak_disk_bytes"):
+            value = (record.get("summary", {}).get(row[0], {}).get(metric) or {}).get("median")
+            resources.append("-" if value is None else f"{value / 1048576:.1f}")
+        lines.append("| " + " | ".join([*(row[i] for i in (0, 1, 2, 3, 4, 6)), *resources]) + " |")
+    ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size", "peak_rss_bytes", "peak_disk_bytes")]
     lines.extend(["| **Gutch relative** | - | " + " | ".join(ratios) + " |", ""])
     if record.get("measurement_contract") == 2:
         lines.extend(measurement_details(record.get("summary", {})))

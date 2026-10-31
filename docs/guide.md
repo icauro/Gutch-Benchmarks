@@ -336,6 +336,27 @@ provide operation spans, not internal worker traces. Its measurement overhead ma
 from the default `off` mode. The existing runtime modules also serve Gutch's
 optional developer diagnostics; the simple command does not require those tools.
 
+## Peak RAM and disk
+
+Shipped fixtures enable `resource_sampling: true`. After speed repetitions, one
+additional fresh workflow per tool collects resource measurements. These commands
+never contribute speed samples, medians or speed traces. `resources.json` records
+raw monitored results; `summary.json` labels these peaks as `separate_resource_pass`.
+CI retains both evidence and compact resource results and updates the two chart columns.
+
+Peak RAM is the largest sampled sum of RSS across a command and its descendants,
+then the maximum across commands in that resource workflow. Shared pages can be
+counted in more than one process. The target polling interval is 2 ms; sampling
+can miss short-lived descendants or brief spikes. CPU remains direct-process CPU.
+
+Peak disk is the maximum sampled apparent file size across the lane's repository,
+restored output, temporary files and caches (including Plakar's external cache).
+Inputs, executables and benchmark logs/stats/traces are excluded. Hard-linked
+files are counted once per scan. This is working-file space, not physical block
+allocation or disk I/O volume. Directory scans target 100 ms intervals and can
+miss transient files. Monitoring overhead is confined to the resource pass.
+Missing or failed samples remain unavailable rather than becoming zero.
+
 ## Native recovery and extra files
 
 Contract 2 changes file content without changing permissions. Content damage,

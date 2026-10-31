@@ -10,6 +10,7 @@ description: Restic uses native Rabin around 1 MiB, explicit Zstd auto, 8 MiB pa
   are reported. Unsupported operations receive no timing.
 dataset: blender/dataset.yaml
 repetitions: 6
+resource_sampling: true
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true

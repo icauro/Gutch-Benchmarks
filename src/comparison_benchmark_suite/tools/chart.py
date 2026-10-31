@@ -11,7 +11,8 @@ from .report import relative_metric
 
 
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
-           ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
+           ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"),
+           ("peak_rss_bytes", "Peak RAM", "MiB"), ("peak_disk_bytes", "Peak disk", "MiB"))
 # Keep references stable when chart rows are reordered or only one pair is rendered.
 PAIR_NOTES = {"borg": 1, "plakar": 2, "kopia": 3, "restic": 4, "rustic": 5, "bpt": 6}
 BLUE, ORANGE = "#2474f5", "#f78b32"
@@ -42,14 +43,14 @@ def _median(record, label, metric):
     value = (record.get("summary", {}).get(label, {}).get(metric) or {}).get("median")
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
         return None
-    return value / 1048576 if metric == "repo_size" else value
+    return value / 1048576 if metric in {"repo_size", "peak_rss_bytes", "peak_disk_bytes"} else value
 
 
 def render_svg(records: list[dict]) -> str:
-    width, margin, pair_width, cell_width = 1080, 20, 160, 220
-    table_top, header_height, row_height = 76, 56, 120
+    width, margin, pair_width, cell_width = 1064, 8, 148, 150
+    table_top, header_height, row_height = 52, 46, 90
     table_bottom = table_top + header_height + row_height * len(records)
-    height = table_bottom + 28
+    height = table_bottom + 10
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
              '<title id="title">Gutch benchmark comparisons</title>',
              '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>',
@@ -66,49 +67,49 @@ def render_svg(records: list[dict]) -> str:
         parts.append(f'<path d="M{x1} {y1}H{x2}" stroke="#29313d"/>' if y1 == y2 else
                      f'<path d="M{x1} {y1}V{y2}" stroke="#29313d"/>')
 
-    text(margin, 48, "Gutch benchmark comparisons", size=28, weight=700)
-    for x, color, label in ((780, BLUE, "Gutch"), (900, ORANGE, "Paired tool")):
-        rect(x, 36, 16, 13, color, 3)
-        text(x + 25, 48, label, size=16)
+    text(margin, 34, "Gutch benchmark comparisons", size=25, weight=700)
+    for x, color, label in ((790, BLUE, "Gutch"), (900, ORANGE, "Paired tool")):
+        rect(x, 23, 16, 13, color, 3)
+        text(x + 23, 34, label, size=16)
     rect(margin, table_top, width - 2 * margin, table_bottom - table_top, "#161b22", 10)
-    text(margin + 12, table_top + 34, "COMPARISON", size=15, color="#a3afc2", weight=700)
+    text(margin + 6, table_top + 28, "COMPARISON", size=13, color="#a3afc2", weight=700)
     for index, (_, title, unit) in enumerate(METRICS):
         x = margin + pair_width + index * cell_width
-        text(x + 18, table_top + 24, title, size=20, weight=650)
-        text(x + 18, table_top + 44, unit, size=15, color="#a3afc2")
+        text(x + 7, table_top + 21, title, size=17, weight=650)
+        text(x + 7, table_top + 38, unit, size=13, color="#a3afc2")
     for index, record in enumerate(records):
         y = table_top + header_height + index * row_height
         rect(margin, y, width - 2 * margin, row_height, "#000000" if index % 2 == 0 else "#0d1117")
         line(margin, y, width - margin, y)
         other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
         title = "BuildPatchTool" if record["pair"] == "bpt" else record["pair"].title()
-        text(margin + 12, y + 27, "Gutch vs", size=15, color="#a3afc2")
+        text(margin + 6, y + 23, "Gutch vs", size=14, color="#a3afc2")
         reference = PAIR_NOTES.get(record["pair"])
         label = f"{title} [{reference}]" if reference is not None else title
-        text(margin + 12, y + 51, label, size=16 if record["pair"] == "bpt" else 18, weight=650)
+        text(margin + 6, y + 47, label, size=14 if record["pair"] == "bpt" else 17, weight=650)
         status = record["status"]
         if status != "PASS":
-            text(margin + 12, y + 91, status, size=15, color="#ffba78", weight=650)
+            text(margin + 6, y + 77, status, size=13, color="#ffba78", weight=650)
         for column, (metric, _, unit) in enumerate(METRICS):
             x = margin + pair_width + column * cell_width
             values = [_median(record, label, metric) for label in ("gutch", other)]
             maximum = max((value for value in values if value is not None), default=0)
             for slot, (value, color) in enumerate(zip(values, (BLUE, ORANGE))):
-                bar_y = y + 24 + slot * 30
-                rect(x + 14, bar_y, 74, 12, "#252d3a", 2)
+                bar_y = y + 16 + slot * 25
+                rect(x + 7, bar_y, 42, 12, "#252d3a", 2)
                 if value is not None:
                     if maximum:
-                        rect(x + 14, bar_y, 74 * value / maximum, 12, color, 2)
+                        rect(x + 7, bar_y, 42 * value / maximum, 12, color, 2)
                     label = f"{value:,.1f}" if unit == "MiB" else f"{value:.3f}"
                 else:
                     label = "—"
-                text(x + 102, bar_y + 12, label, size=18, color="#c5cedc")
+                text(x + 58, bar_y + 12, label, size=17, color="#c5cedc")
             ratio = relative_metric(record, metric)
             slower = ratio.endswith(("slower", "larger"))
             neutral = ratio in ("-", "~same", "same size")
             color = "#a3afc2" if neutral else ("#ffb36b" if slower else "#71a7ff")
-            text(x + 14, y + 101, ratio.replace("x", "×"), size=20, color=color, weight=700)
-    for column in range(5):
+            text(x + 7, y + 79, ratio.replace("x", "×"), size=17, color=color, weight=700)
+    for column in range(len(METRICS) + 1):
         x = margin + pair_width + column * cell_width
         line(x, table_top, x, table_bottom)
     line(margin, table_bottom, width - margin, table_bottom)

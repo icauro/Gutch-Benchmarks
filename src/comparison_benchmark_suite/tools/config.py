@@ -191,4 +191,5 @@ def load_fixture(path: Path, *, gutch_workloads=("individual",)) -> FixtureSpec:
         snapshot_limit=_snapshot_limit(values, path),
         repetitions=repetitions,
         profile_mode=mode,
+        resource_sampling=_bool(values, "resource_sampling", False),
     )

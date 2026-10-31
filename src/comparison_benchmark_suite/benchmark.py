@@ -159,7 +159,8 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         print(f"{result.label}: {result.metadata['status']}", flush=True)
         print(f"Progress: {completed}/{total} measured cases", flush=True)
         if completed == total:
-            print("Step: Building reports and finalizing the run", flush=True)
+            print("Step: Speed samples complete; resource passes next" if fixture.resource_sampling else
+                  "Step: Building reports and finalizing the run", flush=True)
     execute_cases(fixture, layout, commands, execute, executable=resolved.get("gutch", Path("unavailable")),
                             discard_outputs=discard_outputs,
                             on_lane_complete=completed_case,
