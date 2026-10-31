@@ -56,6 +56,8 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
                 await pilot.hover("#fixture-1")
                 await pilot.pause()
                 self.assertIn("Second fixture", str(app.query_one("#description", Static).content))
+                # Keep mouse hover from overriding the keyboard selection under test.
+                await pilot.hover("#description")
                 app.query_one("#fixture-0").focus()
                 await pilot.pause()
                 self.assertEqual(app.selected, 0)
