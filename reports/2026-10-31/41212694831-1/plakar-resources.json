@@ -1,0 +1,36 @@
+{
+  "note": "Derived from per-command memory samples. Per-command disk samples were not recorded.",
+  "operation_resources": {
+    "gutch": {
+      "incremental_capture": {
+        "peak_rss_bytes": 79409152
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 74207232
+      },
+      "repair": {
+        "peak_rss_bytes": 148811776
+      },
+      "restore": {
+        "peak_rss_bytes": 52330496
+      }
+    },
+    "plakar": {
+      "incremental_capture": {
+        "peak_rss_bytes": 352505856
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 351023104
+      },
+      "repair": {
+        "peak_rss_bytes": 443977728
+      },
+      "restore": {
+        "peak_rss_bytes": 400134144
+      }
+    }
+  },
+  "pair": "plakar",
+  "source_artifact": "benchmark-plakar",
+  "source_run": "41212694831"
+}

@@ -67,6 +67,27 @@ def ascii_comparison_table(rows: list[list[str]]) -> str:
                        *(line(row, numeric=True) for row in rows), border])
 
 
+
+def operation_resource_table(record):
+    resources = record.get("operation_resources", {})
+    if not resources:
+        return []
+    other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
+    lines = ["**Resources by operation (MiB)**", "",
+             "| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |",
+             "|---|" + "---:|" * 8]
+    for label in ("gutch", other):
+        cells = []
+        for operation in ("initial_capture", "incremental_capture", "restore", "repair"):
+            for metric in ("peak_rss_bytes", "peak_disk_bytes"):
+                value = resources.get(label, {}).get(operation, {}).get(metric)
+                cells.append("—" if value is None else f"{value / 1048576:,.1f}")
+        lines.append("| " + label + " | " + " | ".join(cells) + " |")
+    lines.extend(["", "RAM is the largest sampled process-tree RSS across commands in that operation. "
+                  "Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; "
+                  "whole-workflow disk peaks are not reused here.", ""])
+    return lines
+
 DETAIL_METRICS = (("initial_capture", "Initial capture s"), ("incremental_capture", "Later-version capture s"),
                   ("repo_growth_bytes", "Later-version stored growth bytes"),
                   ("restore_validated", "Restore + independent validation s"),

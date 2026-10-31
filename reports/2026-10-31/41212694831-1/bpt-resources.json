@@ -1,0 +1,36 @@
+{
+  "note": "Derived from per-command memory samples. Per-command disk samples were not recorded.",
+  "operation_resources": {
+    "buildpatchtool": {
+      "incremental_capture": {
+        "peak_rss_bytes": 546041856
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 406052864
+      },
+      "repair": {
+        "peak_rss_bytes": 137785344
+      },
+      "restore": {
+        "peak_rss_bytes": 234393600
+      }
+    },
+    "gutch": {
+      "incremental_capture": {
+        "peak_rss_bytes": 137224192
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 149655552
+      },
+      "repair": {
+        "peak_rss_bytes": 162934784
+      },
+      "restore": {
+        "peak_rss_bytes": 129101824
+      }
+    }
+  },
+  "pair": "bpt",
+  "source_artifact": "benchmark-bpt",
+  "source_run": "41212694831"
+}

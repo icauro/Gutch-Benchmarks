@@ -157,3 +157,45 @@ class DiskSpaceSampler:
             self.sample()
             if self.stopped.wait(self.interval):
                 break
+
+
+def summarize_operation_resources(results, lanes_root):
+    """Recover operation peaks from recorded command samples, never workflow totals."""
+    from .artifacts import compact_component
+    tools = {}
+    for result in results:
+        if result.get("metadata", {}).get("status") != "PASS":
+            continue
+        snapshots = result["metadata"].get("snapshots", [])
+        if not snapshots:
+            continue
+        folder = lanes_root / compact_component(result["label"], 32) / "commands"
+        commands = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(folder.glob("*.json"))
+                    if path.stem.isdecimal()]
+        captures, restores, repairs = [], [], []
+        for command in commands:
+            operation = command.get("operation", "")
+            if any(f" {word} " in operation for word in ("capture", "backup", "create", "generate")) and any(operation.endswith(" " + name) for name in snapshots):
+                captures.append(command)
+            elif " restore " in operation or operation.startswith("reconstruct "):
+                restores.append(command)
+            elif " repair " in operation or " in-place recovery " in operation:
+                repairs.append(command)
+        count = len(snapshots)
+        groups = {"initial_capture": (captures[:1], 1),
+                  "incremental_capture": (captures[1:count], count - 1),
+                  "restore": (restores[:count], count), "repair": (repairs[:count], count)}
+        values = {}
+        for operation, (samples, expected_count) in groups.items():
+            if expected_count < 1 or len(samples) != expected_count:
+                continue
+            peak = process_utilization(samples).get("peak_rss_bytes")
+            if peak is not None:
+                values[operation] = {"peak_rss_bytes": peak}
+            # Only use disk samples explicitly recorded for these commands.
+            disk = [sample.get("peak_disk_bytes") for sample in samples]
+            if disk and all(value is not None for value in disk):
+                values.setdefault(operation, {})["peak_disk_bytes"] = max(disk)
+        if values:
+            tools[result["metadata"]["case"]] = values
+    return tools

@@ -1,0 +1,36 @@
+{
+  "note": "Derived from per-command memory samples. Per-command disk samples were not recorded.",
+  "operation_resources": {
+    "borg": {
+      "incremental_capture": {
+        "peak_rss_bytes": 250163200
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 261894144
+      },
+      "repair": {
+        "peak_rss_bytes": 326041600
+      },
+      "restore": {
+        "peak_rss_bytes": 384016384
+      }
+    },
+    "gutch": {
+      "incremental_capture": {
+        "peak_rss_bytes": 121331712
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 113876992
+      },
+      "repair": {
+        "peak_rss_bytes": 118607872
+      },
+      "restore": {
+        "peak_rss_bytes": 71098368
+      }
+    }
+  },
+  "pair": "borg",
+  "source_artifact": "benchmark-borg",
+  "source_run": "41212694831"
+}

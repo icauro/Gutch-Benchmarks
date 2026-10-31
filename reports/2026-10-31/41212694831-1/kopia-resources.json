@@ -1,0 +1,36 @@
+{
+  "note": "Derived from per-command memory samples. Per-command disk samples were not recorded.",
+  "operation_resources": {
+    "gutch": {
+      "incremental_capture": {
+        "peak_rss_bytes": 239218688
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 204197888
+      },
+      "repair": {
+        "peak_rss_bytes": 141815808
+      },
+      "restore": {
+        "peak_rss_bytes": 112467968
+      }
+    },
+    "kopia": {
+      "incremental_capture": {
+        "peak_rss_bytes": 190160896
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 205520896
+      },
+      "repair": {
+        "peak_rss_bytes": 326053888
+      },
+      "restore": {
+        "peak_rss_bytes": 279883776
+      }
+    }
+  },
+  "pair": "kopia",
+  "source_artifact": "benchmark-kopia",
+  "source_run": "41212694831"
+}

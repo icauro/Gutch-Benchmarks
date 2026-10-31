@@ -220,7 +220,7 @@ class CiTests(unittest.TestCase):
         shutil.copyfile(export / "compact.json", incoming / "compact.json")
         (self.root / "README.md").write_text(f"Original intro\n![Latest per-pair benchmark comparisons](reports/comparison.svg)\n{ci.START}\nold\n{ci.END}\nOriginal footer")
         ci.publish("all", self.root / "incoming", "123", "2", self.root)
-        readme = (self.root / "README.md").read_text()
+        readme = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("Original intro", readme)
         self.assertIn("Original footer", readme)
         self.assertIn("1.250", readme)
@@ -233,7 +233,7 @@ class CiTests(unittest.TestCase):
         self.assertEqual(charts[0].read_bytes(), charts[1].read_bytes())
         self.assertLess(readme.index("![Latest per-pair"), readme.index(ci.START))
         ci.publish("restic", self.root / "incoming", "124", "1", self.root)
-        updated = (self.root / "README.md").read_text()
+        updated = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertEqual(updated.count("![Latest per-pair"), 1)
         self.assertIn("/123-2/borg.json", updated)
         self.assertIn("/124-1/restic.json", updated)
@@ -253,16 +253,18 @@ class CiTests(unittest.TestCase):
             "summary": {label: {metric: {"median": value, "minimum": value, "maximum": value, "samples": 1}
                         for metric in ("peak_rss_bytes", "peak_disk_bytes")}
                         for label, value in (("gutch", 2097152), ("rustic", 4194304))}}
+        record["operation_resources"] = {label: {"initial_capture": {"peak_rss_bytes": value}}
+            for label, value in (("gutch", 2097152), ("rustic", 4194304))}
         (incoming / "compact.json").write_text(json.dumps(record))
         (self.root / "README.md").write_text(f"{ci.START}\nold\n{ci.END}")
         ci.publish("rustic", self.root / "incoming", "123", "1", self.root)
         report = next((self.root / "reports").glob("*/123-1/rustic.json"))
         self.assertEqual(json.loads(report.read_text())["status"], "PASS")
         self.assertNotIn(b"\r", report.read_bytes())
-        readme = (self.root / "README.md").read_text()
-        self.assertIn("Peak RAM MiB | Peak disk MiB", readme)
-        self.assertIn("2.0 | 2.0", readme)
-        self.assertIn("4.0 | 4.0", readme)
+        readme = (self.root / "README.md").read_text(encoding="utf-8")
+        self.assertIn("Initial RAM | Initial disk | Next RAM | Next disk", readme)
+        self.assertIn("gutch | 2.0 | —", readme)
+        self.assertIn("rustic | 4.0 | —", readme)
 
     def test_workflow_is_manual_only_and_pairs_share_one_cache_action(self):
         workflow = yaml.load((ROOT / ".github/workflows/benchmarks.yml").read_text(), Loader=yaml.BaseLoader)

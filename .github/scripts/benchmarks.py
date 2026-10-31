@@ -13,9 +13,10 @@ from urllib.request import urlopen
 import yaml
 
 from comparison_benchmark_suite.datasets import extract_archive, prepare_dataset
+from comparison_benchmark_suite.support.memory import summarize_operation_resources
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.support.retention import remove_owned
-from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details
+from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details, operation_resource_table
 from comparison_benchmark_suite.tools.chart import latest_records, render_svg
 
 
@@ -130,6 +131,7 @@ def collect(pair, outcome, root=ROOT):
             resources = run / "resources.json"
             if resources.is_file():
                 compact["resources"] = json.loads(resources.read_text(encoding="utf-8"))
+                compact["operation_resources"] = summarize_operation_resources(compact["resources"], run / "lanes")
             compact["operations"] = {item["metadata"]["case"]: item["metadata"].get("operations", {}) for item in results}
             compact["reasons"] = list(dict.fromkeys(item["metadata"]["reason"]
                                       for item in results if item["metadata"].get("reason")))
@@ -170,18 +172,14 @@ def pair_overview(record):
     other = "buildpatchtool" if pair == "bpt" else pair
     title = "BuildPatchTool" if pair == "bpt" else pair.title()
     lines = [f"### Gutch vs {title} ({record['status']})", "",
-             "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |",
-             "|---|---|---:|---:|---:|---:|---:|---:|"]
+             "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |",
+             "|---|---|---:|---:|---:|---:|"]
     rows = record["rows"] or [[label, "NOT_RUN", *("-" for _ in range(7))]
                               for label in ("gutch", other)]
-    for row in rows:
-        resources = []
-        for metric in ("peak_rss_bytes", "peak_disk_bytes"):
-            value = (record.get("summary", {}).get(row[0], {}).get(metric) or {}).get("median")
-            resources.append("-" if value is None else f"{value / 1048576:.1f}")
-        lines.append("| " + " | ".join([*(row[i] for i in (0, 1, 2, 3, 4, 6)), *resources]) + " |")
-    ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size", "peak_rss_bytes", "peak_disk_bytes")]
+    lines.extend("| " + " | ".join(row[i] for i in (0, 1, 2, 3, 4, 6)) + " |" for row in rows)
+    ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size")]
     lines.extend(["| **Gutch relative** | - | " + " | ".join(ratios) + " |", ""])
+    lines.extend(operation_resource_table(record))
     if record.get("measurement_contract") == 2:
         lines.extend(measurement_details(record.get("summary", {})))
         for label, operations in record.get("operations", {}).items():

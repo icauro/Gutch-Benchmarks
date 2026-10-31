@@ -342,7 +342,14 @@ Shipped fixtures enable `resource_sampling: true`. After speed repetitions, one
 additional fresh workflow per tool collects resource measurements. These commands
 never contribute speed samples, medians or speed traces. `resources.json` records
 raw monitored results; `summary.json` labels these peaks as `separate_resource_pass`.
-CI retains both evidence and compact resource results and updates the two chart columns.
+CI retains both evidence and compact resource results. The main chart shows speed
+and stored size; each pair’s resource table immediately follows its speed table.
+Rows are programs; the eight columns are initial-capture RAM/disk, next-capture
+RAM/disk, restore RAM/disk and content-repair RAM/disk. Operation RAM is the maximum
+across its commands; restore and repair cover both versions. Per-command disk
+values remain unavailable until recorded. The latest run’s RAM breakdown is
+derived from its saved command artifacts in `<pair>-resources.json`; its original
+report JSON and whole-workflow disk peaks remain unchanged.
 
 Peak RAM is the largest sampled sum of RSS across a command and its descendants,
 then the maximum across commands in that resource workflow. Shared pages can be

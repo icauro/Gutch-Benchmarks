@@ -7,7 +7,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
-from comparison_benchmark_suite.support.memory import DiskSpaceSampler, ProcessMemorySampler, process_utilization
+from comparison_benchmark_suite.support.memory import DiskSpaceSampler, ProcessMemorySampler, process_utilization, summarize_operation_resources
 from comparison_benchmark_suite.support.artifacts import RunLayout
 from comparison_benchmark_suite.support.command import CommandRunner
 from comparison_benchmark_suite.scheduling.runner import execute_cases
@@ -63,6 +63,23 @@ class ResourceTests(unittest.TestCase):
         measurements = [{"memory": {"sampled_peak_rss_bytes": 100}},
                         {"memory": {"error": "sampling denied", "sampled_peak_rss_bytes": 200}}]
         self.assertNotIn("peak_rss_bytes", process_utilization(measurements))
+
+    def test_operation_peaks_do_not_include_later_recovery_or_workflow_disk_totals(self):
+        folder = self.root / "gutch-resources/commands"
+        folder.mkdir(parents=True)
+        operations = [("gutch-resources capture v1", 10), ("gutch-resources capture v2", 20),
+                      ("reconstruct gutch-resources v2", 30), ("reconstruct gutch-resources v1", 40),
+                      ("gutch-resources repair v2", 50), ("gutch-resources repair v1", 60),
+                      ("gutch-resources hidden_repair v2", 999), ("reconstruct v2", 999)]
+        for index, (operation, peak) in enumerate(operations):
+            (folder / f"{index:04d}.json").write_text(json.dumps({"operation": operation,
+                "memory": {"sampled_peak_rss_bytes": peak}}))
+        results = [{"label": "gutch-resources", "metrics": {"peak_disk_bytes": 99999},
+                    "metadata": {"case": "gutch", "status": "PASS", "snapshots": ["v1", "v2"]}}]
+        values = summarize_operation_resources(results, self.root)["gutch"]
+        self.assertEqual([values[name]["peak_rss_bytes"] for name in
+            ("initial_capture", "incremental_capture", "restore", "repair")], [10, 20, 40, 60])
+        self.assertTrue(all("peak_disk_bytes" not in value for value in values.values()))
 
     def test_resource_temp_environment_is_owned_and_does_not_change_parent_environment(self):
         import os

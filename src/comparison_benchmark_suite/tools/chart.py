@@ -11,8 +11,7 @@ from .report import relative_metric
 
 
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
-           ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"),
-           ("peak_rss_bytes", "Peak RAM", "MiB"), ("peak_disk_bytes", "Peak disk", "MiB"))
+           ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
 # Keep references stable when chart rows are reordered or only one pair is rendered.
 PAIR_NOTES = {"borg": 1, "plakar": 2, "kopia": 3, "restic": 4, "rustic": 5, "bpt": 6}
 BLUE, ORANGE = "#2474f5", "#f78b32"
@@ -35,6 +34,9 @@ def latest_records(reports: Path) -> list[dict]:
             except (OSError, ValueError):
                 record = {"pair": pair, "status": "ERROR", "rows": []}
             record["source_report"] = source.relative_to(reports).as_posix()
+            resources = source.with_name(f"{pair}-resources.json")
+            if resources.is_file():
+                record["operation_resources"] = json.loads(resources.read_text(encoding="utf-8"))["operation_resources"]
         records.append(record)
     return records
 
@@ -47,7 +49,8 @@ def _median(record, label, metric):
 
 
 def render_svg(records: list[dict]) -> str:
-    width, margin, pair_width, cell_width = 1064, 8, 148, 150
+    margin, pair_width, cell_width = 8, 148, 150
+    width = 2 * margin + pair_width + len(METRICS) * cell_width
     table_top, header_height, row_height = 52, 46, 90
     table_bottom = table_top + header_height + row_height * len(records)
     height = table_bottom + 10
@@ -68,7 +71,7 @@ def render_svg(records: list[dict]) -> str:
                      f'<path d="M{x1} {y1}V{y2}" stroke="#29313d"/>')
 
     text(margin, 34, "Gutch benchmark comparisons", size=25, weight=700)
-    for x, color, label in ((790, BLUE, "Gutch"), (900, ORANGE, "Paired tool")):
+    for x, color, label in ((width - 274, BLUE, "Gutch"), (width - 164, ORANGE, "Paired tool")):
         rect(x, 23, 16, 13, color, 3)
         text(x + 23, 34, label, size=16)
     rect(margin, table_top, width - 2 * margin, table_bottom - table_top, "#161b22", 10)

@@ -69,19 +69,11 @@ class ChartTests(unittest.TestCase):
         self.assertIn("Restic&amp;&lt;Script&gt;", chart)
         self.assertFalse(list(root.iter("{http://www.w3.org/2000/svg}script")))
 
-    def test_resource_columns_convert_bytes_and_keep_missing_values_unavailable(self):
-        record = pair_record()
-        for label, value in (("gutch", 1048576), ("restic", 2097152)):
-            for metric in ("peak_rss_bytes", "peak_disk_bytes"):
-                record["summary"][label][metric] = {"median": value, "samples": 1}
-        chart = render_svg([record])
-        self.assertIn("Peak RAM", chart)
-        self.assertIn("Peak disk", chart)
-        self.assertIn(">1.0</text>", chart)
-        self.assertIn(">2.0</text>", chart)
-        record["summary"]["restic"].pop("peak_disk_bytes")
-        chart = render_svg([record])
-        self.assertIn(">—</text>", chart)
+    def test_main_chart_keeps_resources_in_separate_report_tables(self):
+        chart = render_svg([pair_record()])
+        self.assertIn("Stored size", chart)
+        self.assertNotIn("Peak RAM", chart)
+        self.assertNotIn("Peak disk", chart)
 
     def test_chart_references_match_readme_notes_and_survive_row_reordering(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

@@ -30,11 +30,11 @@ tools flush writes can still differ. New performance runs default to six measure
 repetitions with alternating order; OS caches are not reset. A single local smoke
 run checks compatibility only. Older reports retain their original settings.
 
-Peak RAM and peak disk come from one separate monitored pass per tool, so monitoring
-does not affect the chart's speed measurements. RAM includes child processes;
-disk counts tool-owned working files, including caches and restored output, but
-excludes shared inputs, executables and benchmark logs. Peaks are sampled and may
-miss short spikes; older results show `—` until measured.
+Resource tables below each pair show peak RAM and disk by operation, in MiB,
+from a separate monitored pass. The latest saved run has command-level RAM samples
+but only a whole-workflow disk peak, so per-operation disk cells show `—`.
+Whole-workflow peaks are not substituted for missing command measurements.
+Sampling may miss short spikes; RAM includes child processes.
 
 </details>
 
@@ -53,11 +53,20 @@ Hosted-runner timings are indicative; OS caches are uncontrolled.
 
 ### Gutch vs Borg (PASS)
 
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
-|---|---|---:|---:|---:|---:|---:|---:|
-| borg | PASS | 10.875 | 8.048 | 3.194 | 915.635 | 366.4 | 2835.0 |
-| gutch | PASS | 26.360 | 1.652 | 0.707 | 913.570 | 143.5 | 2797.1 |
-| **Gutch relative** | - | 2.42x slower | 4.87x faster | 4.52x faster | 0.2% smaller | 60.8% smaller | 1.3% smaller |
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| borg | PASS | 10.875 | 8.048 | 3.194 | 915.635 |
+| gutch | PASS | 26.360 | 1.652 | 0.707 | 913.570 |
+| **Gutch relative** | - | 2.42x slower | 4.87x faster | 4.52x faster | 0.2% smaller |
+
+**Resources by operation (MiB)**
+
+| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gutch | 108.6 | — | 115.7 | — | 67.8 | — | 113.1 | — |
+| borg | 249.8 | — | 238.6 | — | 366.2 | — | 310.9 | — |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
@@ -78,11 +87,20 @@ borg: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
 ### Gutch vs BuildPatchTool (PASS)
 
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
-|---|---|---:|---:|---:|---:|---:|---:|
-| buildpatchtool | PASS | 36.512 | 28.114 | 2.261 | 732.343 | 520.7 | 2615.8 |
-| gutch | PASS | 4.580 | 1.924 | 1.024 | 689.361 | 155.4 | 2572.9 |
-| **Gutch relative** | - | 7.97x faster | 14.61x faster | 2.21x faster | 5.9% smaller | 70.2% smaller | 1.6% smaller |
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| buildpatchtool | PASS | 36.512 | 28.114 | 2.261 | 732.343 |
+| gutch | PASS | 4.580 | 1.924 | 1.024 | 689.361 |
+| **Gutch relative** | - | 7.97x faster | 14.61x faster | 2.21x faster | 5.9% smaller |
+
+**Resources by operation (MiB)**
+
+| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gutch | 142.7 | — | 130.9 | — | 123.1 | — | 155.4 | — |
+| buildpatchtool | 387.2 | — | 520.7 | — | 223.5 | — | 131.4 | — |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
@@ -103,11 +121,20 @@ buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in th
 
 ### Gutch vs Kopia (PASS)
 
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
-|---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 5.390 | 1.356 | 0.788 | 1758.175 | 228.1 | 3641.7 |
-| kopia | PASS | 4.549 | 9.682 | 5.116 | 1754.516 | 348.2 | 5392.1 |
-| **Gutch relative** | - | 1.18x slower | 7.14x faster | 6.49x faster | 0.2% larger | 34.5% smaller | 32.5% smaller |
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | PASS | 5.390 | 1.356 | 0.788 | 1758.175 |
+| kopia | PASS | 4.549 | 9.682 | 5.116 | 1754.516 |
+| **Gutch relative** | - | 1.18x slower | 7.14x faster | 6.49x faster | 0.2% larger |
+
+**Resources by operation (MiB)**
+
+| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gutch | 194.7 | — | 228.1 | — | 107.3 | — | 135.2 | — |
+| kopia | 196.0 | — | 181.4 | — | 266.9 | — | 310.9 | — |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
@@ -126,11 +153,20 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 ### Gutch vs Plakar (PASS)
 
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
-|---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 3.218 | 1.757 | 0.941 | 913.907 | 141.9 | 2797.4 |
-| plakar | PASS | 12.714 | 6.835 | 6.919 | 916.023 | 423.4 | 2836.3 |
-| **Gutch relative** | - | 3.95x faster | 3.89x faster | 7.35x faster | 0.2% smaller | 66.5% smaller | 1.4% smaller |
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | PASS | 3.218 | 1.757 | 0.941 | 913.907 |
+| plakar | PASS | 12.714 | 6.835 | 6.919 | 916.023 |
+| **Gutch relative** | - | 3.95x faster | 3.89x faster | 7.35x faster | 0.2% smaller |
+
+**Resources by operation (MiB)**
+
+| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gutch | 70.8 | — | 75.7 | — | 49.9 | — | 141.9 | — |
+| plakar | 334.8 | — | 336.2 | — | 381.6 | — | 423.4 | — |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
@@ -151,11 +187,20 @@ plakar: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapt
 
 ### Gutch vs Restic (PASS)
 
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
-|---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 5.264 | 1.153 | 0.603 | 689.361 | 218.4 | 2572.9 |
-| restic | PASS | 7.465 | 4.526 | 3.262 | 715.186 | 206.6 | 2602.7 |
-| **Gutch relative** | - | 1.42x faster | 3.93x faster | 5.41x faster | 3.6% smaller | 5.7% larger | 1.1% smaller |
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | PASS | 5.264 | 1.153 | 0.603 | 689.361 |
+| restic | PASS | 7.465 | 4.526 | 3.262 | 715.186 |
+| **Gutch relative** | - | 1.42x faster | 3.93x faster | 5.41x faster | 3.6% smaller |
+
+**Resources by operation (MiB)**
+
+| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gutch | 142.6 | — | 133.1 | — | 137.7 | — | 193.1 | — |
+| restic | 206.6 | — | 198.7 | — | 111.8 | — | 67.6 | — |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
@@ -174,11 +219,20 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 ### Gutch vs Rustic (PASS)
 
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
-|---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 6.625 | 1.736 | 0.817 | 689.361 | 169.2 | 2572.9 |
-| rustic | PASS | 11.917 | 4.064 | 3.546 | 700.710 | 313.7 | 2585.9 |
-| **Gutch relative** | - | 1.80x faster | 2.34x faster | 4.34x faster | 1.6% smaller | 46.1% smaller | 0.5% smaller |
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | PASS | 6.625 | 1.736 | 0.817 | 689.361 |
+| rustic | PASS | 11.917 | 4.064 | 3.546 | 700.710 |
+| **Gutch relative** | - | 1.80x faster | 2.34x faster | 4.34x faster | 1.6% smaller |
+
+**Resources by operation (MiB)**
+
+| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| gutch | 143.5 | — | 132.2 | — | 128.3 | — | 144.2 | — |
+| rustic | 136.6 | — | 136.6 | — | 313.7 | — | 136.6 | — |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 

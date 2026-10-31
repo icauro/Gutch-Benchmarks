@@ -1,0 +1,36 @@
+{
+  "note": "Derived from per-command memory samples. Per-command disk samples were not recorded.",
+  "operation_resources": {
+    "gutch": {
+      "incremental_capture": {
+        "peak_rss_bytes": 138670080
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 150503424
+      },
+      "repair": {
+        "peak_rss_bytes": 151154688
+      },
+      "restore": {
+        "peak_rss_bytes": 134533120
+      }
+    },
+    "rustic": {
+      "incremental_capture": {
+        "peak_rss_bytes": 143228928
+      },
+      "initial_capture": {
+        "peak_rss_bytes": 143224832
+      },
+      "repair": {
+        "peak_rss_bytes": 143224832
+      },
+      "restore": {
+        "peak_rss_bytes": 328900608
+      }
+    }
+  },
+  "pair": "rustic",
+  "source_artifact": "benchmark-rustic",
+  "source_run": "41212694831"
+}
