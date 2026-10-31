@@ -41,7 +41,7 @@ miss short spikes; older results show `—` until measured.
 <!-- latest-benchmarks:start -->
 Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31 · measurement contract 2
 
-[This run's report](reports/2026-10-31/41211389156-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41211389156)
+[This run's report](reports/2026-10-31/41212694831-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41212694831)
 
 Lower values are better. Pair settings differ; bars scale independently within each cell.
 Hosted-runner timings are indicative; OS caches are uncontrolled.
@@ -49,149 +49,149 @@ Hosted-runner timings are indicative; OS caches are uncontrolled.
 <details>
 <summary>Detailed results and source reports</summary>
 
-[Source: Gutch vs borg](reports/2026-10-31/41209065070-1/borg.json)
+[Source: Gutch vs borg](reports/2026-10-31/41212694831-1/borg.json)
 
 ### Gutch vs Borg (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| borg | PASS | 12.701 | 10.053 | 3.541 | 915.942 | - | - |
-| gutch | PASS | 6.983 | 1.736 | 0.882 | 913.570 | - | - |
-| **Gutch relative** | - | 1.82x faster | 5.79x faster | 4.02x faster | 0.3% smaller | - | - |
+| borg | PASS | 10.875 | 8.048 | 3.194 | 915.635 | 366.4 | 2835.0 |
+| gutch | PASS | 26.360 | 1.652 | 0.707 | 913.570 | 143.5 | 2797.1 |
+| **Gutch relative** | - | 2.42x slower | 4.87x faster | 4.52x faster | 0.2% smaller | 60.8% smaller | 1.3% smaller |
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
 | Measurement | borg | gutch |
 |---|---:|---:|
-| Initial capture s | 6.379 (5.604–7.154; n=2) | 3.479 (3.412–3.546; n=2) |
-| Later-version capture s | 6.322 (5.556–7.088; n=2) | 3.504 (3.471–3.538; n=2) |
-| Later-version stored growth bytes | 438987918.500 (438917399.000–439058438.000; n=2) | 437891796.000 (437891796.000–437891796.000; n=2) |
-| Restore + independent validation s | 13.673 (13.569–13.776; n=2) | 5.358 (5.356–5.361; n=2) |
-| Content repair + validation s | 7.109 (7.099–7.120; n=2) | 4.449 (4.446–4.453; n=2) |
-| Preserved-mtime repair + validation s | - | 4.420 (4.416–4.424; n=2) |
-| Extra-file cleanup + validation s | - | 4.079 (4.070–4.089; n=2) |
-| Full restore recovery + validation s | 13.418 (13.328–13.508; n=2) | 5.408 (5.372–5.445; n=2) |
+| Initial capture s | 5.465 (5.465–5.465; n=1) | 12.923 (12.923–12.923; n=1) |
+| Later-version capture s | 5.409 (5.409–5.409; n=1) | 13.437 (13.437–13.437; n=1) |
+| Later-version stored growth bytes | 438680720.000 (438680720.000–438680720.000; n=1) | 437891774.000 (437891774.000–437891774.000; n=1) |
+| Restore + independent validation s | 11.204 (11.204–11.204; n=1) | 4.720 (4.720–4.720; n=1) |
+| Content repair + validation s | 6.305 (6.305–6.305; n=1) | 3.785 (3.785–3.785; n=1) |
+| Preserved-mtime repair + validation s | - | 3.798 (3.798–3.798; n=1) |
+| Extra-file cleanup + validation s | - | 3.450 (3.450–3.450; n=1) |
+| Full restore recovery + validation s | 11.220 (11.220–11.220; n=1) | 4.733 (4.733–4.733; n=1) |
 
 borg: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter; hidden_repair: UNSUPPORTED: native resume trusts size and mtime
 
-[Source: Gutch vs bpt](reports/2026-10-31/41209065070-1/bpt.json)
+[Source: Gutch vs bpt](reports/2026-10-31/41212694831-1/bpt.json)
 
 ### Gutch vs BuildPatchTool (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| buildpatchtool | PASS | 36.370 | 28.100 | 2.227 | 732.343 | - | - |
-| gutch | PASS | 4.414 | 1.900 | 1.005 | 689.362 | - | - |
-| **Gutch relative** | - | 8.24x faster | 14.79x faster | 2.22x faster | 5.9% smaller | - | - |
+| buildpatchtool | PASS | 36.512 | 28.114 | 2.261 | 732.343 | 520.7 | 2615.8 |
+| gutch | PASS | 4.580 | 1.924 | 1.024 | 689.361 | 155.4 | 2572.9 |
+| **Gutch relative** | - | 7.97x faster | 14.61x faster | 2.21x faster | 5.9% smaller | 70.2% smaller | 1.6% smaller |
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
 | Measurement | buildpatchtool | gutch |
 |---|---:|---:|
-| Initial capture s | 13.274 (13.260–13.288; n=2) | 2.230 (2.230–2.231; n=2) |
-| Later-version capture s | 23.096 (23.045–23.147; n=2) | 2.184 (2.181–2.187; n=2) |
-| Later-version stored growth bytes | 344645859.500 (344645851.000–344645868.000; n=2) | 322167265.000 (322167265.000–322167265.000; n=2) |
-| Restore + independent validation s | 31.699 (31.654–31.745; n=2) | 5.559 (5.552–5.565; n=2) |
-| Content repair + validation s | 5.823 (5.820–5.825; n=2) | 4.616 (4.602–4.630; n=2) |
-| Preserved-mtime repair + validation s | 5.844 (5.822–5.866; n=2) | 4.602 (4.602–4.602; n=2) |
-| Extra-file cleanup + validation s | - | 4.156 (4.150–4.162; n=2) |
-| Full restore recovery + validation s | 31.785 (31.741–31.828; n=2) | 5.571 (5.548–5.595; n=2) |
+| Initial capture s | 13.548 (13.548–13.548; n=1) | 2.306 (2.306–2.306; n=1) |
+| Later-version capture s | 22.965 (22.965–22.965; n=1) | 2.274 (2.274–2.274; n=1) |
+| Later-version stored growth bytes | 344645846.000 (344645846.000–344645846.000; n=1) | 322167243.000 (322167243.000–322167243.000; n=1) |
+| Restore + independent validation s | 31.724 (31.724–31.724; n=1) | 5.599 (5.599–5.599; n=1) |
+| Content repair + validation s | 5.869 (5.869–5.869; n=1) | 4.660 (4.660–4.660; n=1) |
+| Preserved-mtime repair + validation s | 5.807 (5.807–5.807; n=1) | 4.616 (4.616–4.616; n=1) |
+| Extra-file cleanup + validation s | - | 4.142 (4.142–4.142; n=1) |
+| Full restore recovery + validation s | 31.646 (31.646–31.646; n=1) | 5.587 (5.587–5.587; n=1) |
 
 buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
-[Source: Gutch vs kopia](reports/2026-10-31/41209065070-1/kopia.json)
+[Source: Gutch vs kopia](reports/2026-10-31/41212694831-1/kopia.json)
 
 ### Gutch vs Kopia (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 5.319 | 1.313 | 1.113 | 1758.175 | - | - |
-| kopia | PASS | 4.564 | 7.491 | 6.295 | 1754.510 | - | - |
-| **Gutch relative** | - | 1.17x slower | 5.71x faster | 5.65x faster | 0.2% larger | - | - |
+| gutch | PASS | 5.390 | 1.356 | 0.788 | 1758.175 | 228.1 | 3641.7 |
+| kopia | PASS | 4.549 | 9.682 | 5.116 | 1754.516 | 348.2 | 5392.1 |
+| **Gutch relative** | - | 1.18x slower | 7.14x faster | 6.49x faster | 0.2% larger | 34.5% smaller | 32.5% smaller |
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
 | Measurement | gutch | kopia |
 |---|---:|---:|
-| Initial capture s | 2.707 (2.691–2.724; n=2) | 2.387 (2.372–2.403; n=2) |
-| Later-version capture s | 2.612 (2.611–2.612; n=2) | 2.177 (2.159–2.195; n=2) |
-| Later-version stored growth bytes | 887308617.000 (887308617.000–887308617.000; n=2) | 883231172.500 (883228604.000–883233741.000; n=2) |
-| Restore + independent validation s | 4.999 (4.993–5.005; n=2) | 11.299 (10.967–11.632; n=2) |
-| Content repair + validation s | 4.764 (4.421–5.107; n=2) | 9.994 (8.798–11.191; n=2) |
-| Preserved-mtime repair + validation s | 4.402 (4.400–4.404; n=2) | 8.881 (8.870–8.893; n=2) |
-| Extra-file cleanup + validation s | 4.164 (4.150–4.178; n=2) | 8.869 (8.850–8.889; n=2) |
-| Full restore recovery + validation s | 5.040 (4.999–5.080; n=2) | 6.581 (6.578–6.584; n=2) |
+| Initial capture s | 2.740 (2.740–2.740; n=1) | 2.319 (2.319–2.319; n=1) |
+| Later-version capture s | 2.650 (2.650–2.650; n=1) | 2.231 (2.231–2.231; n=1) |
+| Later-version stored growth bytes | 887308595.000 (887308595.000–887308595.000; n=1) | 883228376.000 (883228376.000–883228376.000; n=1) |
+| Restore + independent validation s | 5.082 (5.082–5.082; n=1) | 13.400 (13.400–13.400; n=1) |
+| Content repair + validation s | 4.486 (4.486–4.486; n=1) | 8.806 (8.806–8.806; n=1) |
+| Preserved-mtime repair + validation s | 4.416 (4.416–4.416; n=1) | 9.008 (9.008–9.008; n=1) |
+| Extra-file cleanup + validation s | 4.171 (4.171–4.171; n=1) | 8.987 (8.987–8.987; n=1) |
+| Full restore recovery + validation s | 5.058 (5.058–5.058; n=1) | 6.656 (6.656–6.656; n=1) |
 
-[Source: Gutch vs plakar](reports/2026-10-31/41209065070-1/plakar.json)
+[Source: Gutch vs plakar](reports/2026-10-31/41212694831-1/plakar.json)
 
 ### Gutch vs Plakar (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 6.712 | 1.392 | 0.717 | 913.907 | - | - |
-| plakar | PASS | 11.128 | 5.351 | 14.614 | 916.463 | - | - |
-| **Gutch relative** | - | 1.66x faster | 3.84x faster | 20.37x faster | 0.3% smaller | - | - |
+| gutch | PASS | 3.218 | 1.757 | 0.941 | 913.907 | 141.9 | 2797.4 |
+| plakar | PASS | 12.714 | 6.835 | 6.919 | 916.023 | 423.4 | 2836.3 |
+| **Gutch relative** | - | 3.95x faster | 3.89x faster | 7.35x faster | 0.2% smaller | 66.5% smaller | 1.4% smaller |
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
 | Measurement | gutch | plakar |
 |---|---:|---:|
-| Initial capture s | 3.332 (3.224–3.439; n=2) | 6.417 (6.254–6.580; n=2) |
-| Later-version capture s | 3.381 (3.114–3.647; n=2) | 4.711 (4.568–4.853; n=2) |
-| Later-version stored growth bytes | 438186091.000 (438186091.000–438186091.000; n=2) | 438077173.500 (437904486.000–438249861.000; n=2) |
-| Restore + independent validation s | 4.089 (4.076–4.102; n=2) | 8.070 (7.932–8.207; n=2) |
-| Content repair + validation s | 3.359 (3.346–3.373; n=2) | 17.328 (14.613–20.044; n=2) |
-| Preserved-mtime repair + validation s | 3.366 (3.363–3.369; n=2) | 13.583 (13.582–13.583; n=2) |
-| Extra-file cleanup + validation s | 3.108 (3.103–3.114; n=2) | - |
-| Full restore recovery + validation s | 4.036 (4.030–4.041; n=2) | 6.967 (6.824–7.110; n=2) |
+| Initial capture s | 1.655 (1.655–1.655; n=1) | 7.047 (7.047–7.047; n=1) |
+| Later-version capture s | 1.563 (1.563–1.563; n=1) | 5.667 (5.667–5.667; n=1) |
+| Later-version stored growth bytes | 438186069.000 (438186069.000–438186069.000; n=1) | 437728976.000 (437728976.000–437728976.000; n=1) |
+| Restore + independent validation s | 5.473 (5.473–5.473; n=1) | 10.570 (10.570–10.570; n=1) |
+| Content repair + validation s | 4.606 (4.606–4.606; n=1) | 10.722 (10.722–10.722; n=1) |
+| Preserved-mtime repair + validation s | 4.615 (4.615–4.615; n=1) | 10.839 (10.839–10.839; n=1) |
+| Extra-file cleanup + validation s | 4.217 (4.217–4.217; n=1) | - |
+| Full restore recovery + validation s | 5.502 (5.502–5.502; n=1) | 9.316 (9.316–9.316; n=1) |
 
 plakar: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
-[Source: Gutch vs restic](reports/2026-10-31/41209065070-1/restic.json)
+[Source: Gutch vs restic](reports/2026-10-31/41212694831-1/restic.json)
 
 ### Gutch vs Restic (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 4.575 | 1.941 | 1.031 | 689.362 | - | - |
-| restic | PASS | 8.963 | 5.888 | 4.290 | 715.621 | - | - |
-| **Gutch relative** | - | 1.96x faster | 3.03x faster | 4.16x faster | 3.7% smaller | - | - |
+| gutch | PASS | 5.264 | 1.153 | 0.603 | 689.361 | 218.4 | 2572.9 |
+| restic | PASS | 7.465 | 4.526 | 3.262 | 715.186 | 206.6 | 2602.7 |
+| **Gutch relative** | - | 1.42x faster | 3.93x faster | 5.41x faster | 3.6% smaller | 5.7% larger | 1.1% smaller |
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
 | Measurement | gutch | restic |
 |---|---:|---:|
-| Initial capture s | 2.309 (2.305–2.313; n=2) | 4.547 (4.516–4.578; n=2) |
-| Later-version capture s | 2.266 (2.248–2.284; n=2) | 4.416 (4.399–4.434; n=2) |
-| Later-version stored growth bytes | 322167265.000 (322167265.000–322167265.000; n=2) | 333781848.500 (332836321.000–334727376.000; n=2) |
-| Restore + independent validation s | 5.620 (5.592–5.649; n=2) | 9.516 (9.506–9.526; n=2) |
-| Content repair + validation s | 4.670 (4.663–4.677; n=2) | 7.974 (7.932–8.017; n=2) |
-| Preserved-mtime repair + validation s | 4.632 (4.624–4.640; n=2) | 7.830 (7.806–7.854; n=2) |
-| Extra-file cleanup + validation s | 4.156 (4.155–4.158; n=2) | 7.659 (7.656–7.662; n=2) |
-| Full restore recovery + validation s | 5.680 (5.633–5.728; n=2) | 9.519 (9.518–9.521; n=2) |
+| Initial capture s | 2.985 (2.985–2.985; n=1) | 3.863 (3.863–3.863; n=1) |
+| Later-version capture s | 2.279 (2.279–2.279; n=1) | 3.603 (3.603–3.603; n=1) |
+| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 332910924.000 (332910924.000–332910924.000; n=1) |
+| Restore + independent validation s | 3.292 (3.292–3.292; n=1) | 6.631 (6.631–6.631; n=1) |
+| Content repair + validation s | 2.681 (2.681–2.681; n=1) | 5.374 (5.374–5.374; n=1) |
+| Preserved-mtime repair + validation s | 2.724 (2.724–2.724; n=1) | 5.880 (5.880–5.880; n=1) |
+| Extra-file cleanup + validation s | 2.407 (2.407–2.407; n=1) | 5.289 (5.289–5.289; n=1) |
+| Full restore recovery + validation s | 3.308 (3.308–3.308; n=1) | 6.576 (6.576–6.576; n=1) |
 
-[Source: Gutch vs rustic](reports/2026-10-31/41211389156-1/rustic.json)
+[Source: Gutch vs rustic](reports/2026-10-31/41212694831-1/rustic.json)
 
 ### Gutch vs Rustic (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| gutch | PASS | 5.290 | 1.114 | 0.610 | 689.361 | 217.6 | 2572.6 |
-| rustic | PASS | 9.856 | 3.920 | 3.313 | 694.532 | 321.7 | 2583.6 |
-| **Gutch relative** | - | 1.86x faster | 3.52x faster | 5.43x faster | 0.7% smaller | 32.4% smaller | 0.4% smaller |
+| gutch | PASS | 6.625 | 1.736 | 0.817 | 689.361 | 169.2 | 2572.9 |
+| rustic | PASS | 11.917 | 4.064 | 3.546 | 700.710 | 313.7 | 2585.9 |
+| **Gutch relative** | - | 1.80x faster | 2.34x faster | 4.34x faster | 1.6% smaller | 46.1% smaller | 0.5% smaller |
 
 Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
 
 | Measurement | gutch | rustic |
 |---|---:|---:|
-| Initial capture s | 2.714 (2.714–2.714; n=1) | 5.264 (5.264–5.264; n=1) |
-| Later-version capture s | 2.576 (2.576–2.576; n=1) | 4.593 (4.593–4.593; n=1) |
-| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 322367611.000 (322367611.000–322367611.000; n=1) |
-| Restore + independent validation s | 3.304 (3.304–3.304; n=1) | 6.065 (6.065–6.065; n=1) |
-| Content repair + validation s | 2.639 (2.639–2.639; n=1) | 5.407 (5.407–5.407; n=1) |
-| Preserved-mtime repair + validation s | 2.633 (2.633–2.633; n=1) | 5.383 (5.383–5.383; n=1) |
-| Extra-file cleanup + validation s | 2.330 (2.330–2.330; n=1) | 5.266 (5.266–5.266; n=1) |
-| Full restore recovery + validation s | 3.301 (3.301–3.301; n=1) | 6.216 (6.216–6.216; n=1) |
+| Initial capture s | 3.480 (3.480–3.480; n=1) | 6.287 (6.287–6.287; n=1) |
+| Later-version capture s | 3.145 (3.145–3.145; n=1) | 5.630 (5.630–5.630; n=1) |
+| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 327773412.000 (327773412.000–327773412.000; n=1) |
+| Restore + independent validation s | 4.759 (4.759–4.759; n=1) | 7.121 (7.121–7.121; n=1) |
+| Content repair + validation s | 3.804 (3.804–3.804; n=1) | 6.556 (6.556–6.556; n=1) |
+| Preserved-mtime repair + validation s | 3.783 (3.783–3.783; n=1) | 6.544 (6.544–6.544; n=1) |
+| Extra-file cleanup + validation s | 3.324 (3.324–3.324; n=1) | 6.434 (6.434–6.434; n=1) |
+| Full restore recovery + validation s | 4.714 (4.714–4.714; n=1) | 7.224 (7.224–7.224; n=1) |
 
 </details>
 
