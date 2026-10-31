@@ -46,9 +46,12 @@ def prepare_dataset(values: dict, fixture: Path, artifacts: Path) -> tuple[Path,
     builds = values.get("builds")
     if not isinstance(builds, list) or len(builds) < 2:
         raise ValueError("The fixture needs at least two builds, ordered oldest to newest.")
-    fingerprint = hashlib.sha256(
-        json.dumps({"fixture": str(fixture), "builds": builds, "platform": platform.system(), "machine": platform.machine()}, sort_keys=True).encode()
-    ).hexdigest()[:16]
+    # Download-only recipes identify bytes, independent of a pair's fixture or
+    # checkout location. Local paths must still be scoped to their source folder.
+    identity = {"builds": builds, "platform": platform.system(), "machine": platform.machine()}
+    if any(isinstance(build, dict) and "path" in build for build in builds):
+        identity["fixture"] = str(fixture)
+    fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:16]
     cache = artifacts / "datasets" / fingerprint
     product = cache / "builds"
     product.mkdir(parents=True, exist_ok=True)

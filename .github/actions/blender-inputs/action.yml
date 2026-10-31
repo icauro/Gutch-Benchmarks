@@ -1,0 +1,23 @@
+name: Shared Blender inputs
+description: Restore and validate the same input cache for every pair or test job
+inputs:
+  populate:
+    description: Allow downloading and saving a missing cache before consumer jobs start
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      id: cache
+      with:
+        path: .artifacts/datasets
+        key: blender-inputs-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('fixtures/blender/dataset.yaml', 'datasets.py', 'support/filesystem.py') }}
+        fail-on-cache-miss: ${{ inputs.populate != 'true' }}
+    - name: Prepare or validate immutable inputs
+      shell: bash
+      run: python ci/benchmarks.py dataset
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: inputs.populate == 'true' && steps.cache.outputs.cache-hit != 'true'
+      with:
+        path: .artifacts/datasets
+        key: ${{ steps.cache.outputs.cache-primary-key }}

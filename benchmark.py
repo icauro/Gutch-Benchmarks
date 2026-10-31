@@ -70,7 +70,8 @@ def operation_statuses(tool: str, recovery_enabled: bool, recovery_failed: bool)
     return statuses
 
 
-def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None = None) -> int:
+def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None = None,
+                  discard_outputs: bool = False) -> int:
     fixture_path = Path(fixture_name).expanduser()
     if not fixture_path.exists():
         fixture_path = root / "fixtures" / fixture_name
@@ -158,6 +159,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         if completed == total:
             print("Step: Building reports and finalizing the run", flush=True)
     execute_cases(fixture, layout, commands, execute, executable=resolved.get("gutch", Path("unavailable")),
+                            discard_outputs=discard_outputs,
                             on_lane_complete=completed_case,
                             on_run_complete=partial(write_comparison_report, layout.root, fixture.description))
     print(f"Report: {layout.root / 'summary.md'}", flush=True)

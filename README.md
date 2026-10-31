@@ -7,6 +7,52 @@ Compare storage tools using the same builds and independent SHA-256 checks.
 This root project works on its own: copy it anywhere, with any folder name. It does not need the Gutch
 repository, Rust, Docker, or cloud credentials.
 
+## Latest Linux benchmarks
+
+<!-- latest-benchmarks:start -->
+No GitHub Actions benchmark reports have been published yet.
+<!-- latest-benchmarks:end -->
+
+## Manual GitHub Actions runs
+
+Open **Actions > Manual Linux benchmarks > Run workflow**. The default runs all
+six Gutch-vs-tool pairs on Ubuntu 24.04, each in a separate job. Choose a single
+pair, a Gutch branch/tag/commit, and the number of measured repetitions if needed.
+One warm-up is always included. Nothing runs on pushes, pull requests or a schedule.
+
+The workflow prepares Blender once, then every pair restores the same validated
+input cache. The cache key depends on the dataset recipe and preparation code,
+not the pair or Gutch revision. Any future test job in this repository that needs
+these inputs should reuse `.github/actions/blender-inputs` after installing the
+suite. A preparation job uses `populate: 'true'`; consumers restore and validate.
+GitHub caches are repository-scoped; a different repository cannot directly
+restore this cache. Synthetic unit tests still generate their own tiny inputs.
+
+Gutch is built once from the selected revision with the locked Rust dependencies;
+all pairs use that executable. External tools are explicitly downloaded for CI
+from `bin/manifest.json`, with archive and executable checksum verification.
+BPT retains its accompanying Engine files. Tools and datasets never enter Git.
+Input restoration, validation, downloads and builds are outside benchmark timing.
+
+Every case discards its tool repository, restored output and caches after its
+measurements, including failures. The immutable input cache survives. Detailed
+reports, logs and traces are Actions artifacts retained for 30 days. The Gutch
+build artifact lasts seven days. Nothing uploads repository/output payloads.
+
+Default-branch runs commit compact JSON reports and a Markdown report under
+`reports/<UTC-date>/<run-id>-<attempt>/`, then update the latest-results section
+above. Failed or missing pairs are shown explicitly. Runs from other branches
+retain Actions artifacts without updating the README. Repository rules must
+allow the workflow's `contents: write` token to push report commits; otherwise
+publication fails and the detailed reports remain downloadable from Actions.
+
+Caches can be evicted: the next preparation job downloads and verifies them
+again. Consumer jobs fail clearly if the prepared cache disappears before they
+restore it. Each benchmark job has a 330-minute timeout. Hosted-runner CPU/disk
+performance and OS caches are uncontrolled; use these results as indicative
+comparisons, rather than precise measurements of small changes across runs.
+The first real workflow execution is a separate manual action.
+
 ## Run
 
 Install Python 3.12 or newer, then run these commands in this folder:
@@ -35,10 +81,12 @@ The `--fixture` form runs once and exits. `--no-open-perfetto` suppresses automa
 browser opening; the interactive screen uses this and opens Perfetto only when
 requested. Install updated requirements to get the Textual terminal dependency.
 
-The pairwise fixtures read the same local 5.0.0 and 5.1.0 Windows x64 builds from
-`fixtures/blender/builds/`; the suite does not download inputs. Both host platforms
-benchmark these same files as data. Local build folders stay outside Git history;
-include them when copying or distributing the ready-to-run suite folder.
+Selecting a shipped pair explicitly prepares the pinned Blender 5.0.0 and 5.1.0
+Windows x64 ZIP inputs in `fixtures/blender/dataset.yaml`. Both Linux and Windows
+benchmark those same files as data; Blender is never executed. Missing inputs
+are downloaded from Blender's official server, SHA-256 checked and extracted
+under `.artifacts/`. Existing prepared inputs are inventoried before reuse.
+Use local `path` builds in a custom fixture to work without downloading inputs.
 Each fixture runs one warm-up and three measured repetitions, rotating tool order.
 Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
@@ -46,7 +94,8 @@ OS cache state is uncontrolled; these are not cold-cache measurements.
 Comparison executables are supplied locally. Install tools on PATH, set their
 paths in the fixture, or place them in the ignored `bin/windows-x64/` or
 `bin/linux-x64/` folders. Executables and vendor runtime distributions are not
-tracked. The suite never downloads tools automatically. For example:
+tracked. The local runner never downloads tools automatically; CI provisions
+them explicitly. For example:
 
 ```yaml
 executables:
@@ -70,8 +119,8 @@ never reads a sibling project's build directory.
 
 Missing tools are clearly reported as `UNAVAILABLE`; available tools still run.
 Paths in a fixture are relative to that fixture's folder. No tool is downloaded
-or built automatically. To compare two Gutch binaries, give their lanes distinct
-labels and put each executable under its label in `executables`.
+or built automatically by the local runner. To compare two Gutch binaries, give
+their lanes distinct labels and put each executable under its label in `executables`.
 
 ## Pairwise comparisons
 
@@ -217,7 +266,10 @@ silently approximated by clean restore. Compression settings and verification
 work differ between tools, so this is an end-to-end workflow comparison.
 
 Successful runs remove mutable repository/output payloads and retain evidence.
-Failed runs retain their payloads and command evidence; other candidates continue.
+By default, failed local runs retain payloads and command evidence. Pass
+`--discard-outputs` with `--fixture` to delete payloads and tool caches after each
+case, including failures; CI always selects this option. Reports and command
+evidence survive. Other candidates continue after a failed case.
 The command exits nonzero if a measured candidate fails. The newest 20 unpinned
 successful reports are retained. Plakar uses a short OS temporary socket/cache
 path where needed; successful cleanup removes that run-owned path too.
@@ -345,7 +397,9 @@ python -m unittest discover -s tests
 The tests cover portable execution, failure isolation, output validation,
 archive path boundaries, the interactive run flow, and cancellation.
 Rustic adapter tests use mocked commands and block subprocess creation. The
-fixture catalog checks keep shipped comparisons pairwise.
+fixture catalog checks keep shipped comparisons pairwise. CI tests use tiny
+synthetic archives and mocked cases to check input-cache reuse, checksum failures,
+output disposal and report publishing without running comparison tools.
 
 Fixtures use a `lanes` list with explicit labels and a `profile` mapping for
 Gutch options. `profile.chunker` accepts `fastcdc` (default), `jc` for

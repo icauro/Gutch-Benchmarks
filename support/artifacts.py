@@ -104,23 +104,26 @@ class RunLayout:
             return
         for lane in payload_root.iterdir():
             if lane.is_dir():
-                remove_owned(lane / "payload", self.root)
-                for name in ("restic-cache", "kopia-cache", "borg-cache"):
-                    remove_owned(lane / name, self.root)
-                from comparison_benchmark_suite.tools.external import _plakar_cache_directory
-                cache = _plakar_cache_directory(lane)
-                for attempt in range(41):
-                    try:
-                        remove_owned(cache, Path(tempfile.gettempdir()))
-                        break
-                    except OSError as error:
-                        # Plakar's cache helper can briefly outlive its CLI on
-                        # Windows. Wait only for this run-owned cache to close.
-                        if getattr(error, "winerror", None) not in {32, 33} or attempt == 40:
-                            raise
-                        if attempt == 0:
-                            print("Waiting for the Plakar cache to close...", flush=True)
-                        time.sleep(0.25)
+                self.remove_lane_payloads(lane.name)
+
+    def remove_lane_payloads(self, label: str) -> None:
+        lane = self.root / "lanes" / compact_component(label, 32)
+        remove_owned(lane / "payload", self.root)
+        for name in ("restic-cache", "rustic-cache", "kopia-cache", "borg-cache"):
+            remove_owned(lane / name, self.root)
+        from comparison_benchmark_suite.tools.external import _plakar_cache_directory
+        cache = _plakar_cache_directory(lane)
+        for attempt in range(41):
+            try:
+                remove_owned(cache, Path(tempfile.gettempdir()))
+                break
+            except OSError as error:
+                # Plakar's cache helper can briefly outlive its CLI on Windows.
+                if getattr(error, "winerror", None) not in {32, 33} or attempt == 40:
+                    raise
+                if attempt == 0:
+                    print("Waiting for the Plakar cache to close...", flush=True)
+                time.sleep(0.25)
 
     def finish(self, *, keep=False):
         if not keep:

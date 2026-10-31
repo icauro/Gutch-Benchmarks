@@ -4,6 +4,9 @@ Paths are relative to this project root.
 
 ```
 __init__.py
+.github/actions/blender-inputs/action.yml
+.github/workflows/benchmarks.yml
+ci/benchmarks.py
 benchmark.py
 datasets.py
 fixtures/
@@ -16,6 +19,7 @@ fixtures/gutch_vs_plakar.yaml
 fixtures/gutch_vs_restic.yaml
 fixtures/gutch_vs_rustic.yaml
 LICENSE
+MANIFEST.in
 THIRD_PARTY_NOTICES.md
 index.md
 interactive.py
@@ -44,6 +48,7 @@ tests/
 tests/test_interactive.py
 tests/test_suite.py
 tests/test_rustic.py
+tests/test_ci.py
 tools/
 tools/__init__.py
 tools/buildpatchtool.py

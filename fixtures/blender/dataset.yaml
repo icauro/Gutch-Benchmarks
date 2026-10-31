@@ -1,6 +1,14 @@
-# Shared inputs only; choose a gutch_vs_* fixture to compare two tools.
+# Shared byte-identical inputs on both hosts; Blender is never executed.
 builds:
 - version: 5.0.0
-  path: builds/blender-5.0.0-windows-x64
+  downloads:
+    windows-x64: &blender500
+      url: https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip
+      sha256: 14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698
+    linux-x64: *blender500
 - version: 5.1.0
-  path: builds/blender-5.1.0-windows-x64
+  downloads:
+    windows-x64: &blender510
+      url: https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip
+      sha256: bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee
+    linux-x64: *blender510

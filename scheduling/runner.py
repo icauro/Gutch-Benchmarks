@@ -11,7 +11,7 @@ from comparison_benchmark_suite.support.traces import combine_labeled_traces, op
 
 
 def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifacts=False,
-                  on_lane_complete=None, on_run_complete=None):
+                  on_lane_complete=None, on_run_complete=None, discard_outputs=False):
     results = []
     timelines = []
     failed_cases = []
@@ -62,6 +62,8 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
                 timelines.append((label, timeline))
                 layout.write_results([item.as_json() for item in results])
                 if on_lane_complete: on_lane_complete(result)
+            if discard_outputs:
+                layout.remove_lane_payloads(label)
             if index + 1 < len(schedule) and fixture.lane_wait_seconds:
                 time.sleep(fixture.lane_wait_seconds)
         combine_labeled_traces(timelines, layout.root / 'trace.json')
@@ -87,6 +89,9 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
     except BaseException as error:
         layout.write_manifest('cancelled' if isinstance(error, KeyboardInterrupt) else 'failed', error=str(error))
         raise
+    finally:
+        if discard_outputs:
+            layout.remove_payloads()
     print(f"Wrote benchmark results: {layout.root / 'results.json'}")
     if fixture.open_perfetto:
         open_trace_in_perfetto(layout.root / 'trace.json', print)

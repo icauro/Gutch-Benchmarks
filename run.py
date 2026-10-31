@@ -20,6 +20,8 @@ def main(arguments=None) -> int:
     parser = argparse.ArgumentParser(description="Compare build storage tools. Results go to .artifacts/runs/.")
     parser.add_argument("--fixture", help="Fixture name, directory, or YAML file")
     parser.add_argument("--no-open-perfetto", action="store_true", help="Keep traces for manual opening")
+    parser.add_argument("--discard-outputs", action="store_true",
+                        help="Remove repositories and restored files after each case, including failures")
     args = parser.parse_args(arguments)
     if args.fixture is None:
         if not sys.stdin.isatty() or not sys.stdout.isatty():
@@ -38,7 +40,8 @@ def main(arguments=None) -> int:
         print(f"Missing dependency: {error}. Run: python -m pip install -r requirements.txt", file=sys.stderr)
         return 2
     try:
-        return run_benchmark(ROOT, args.fixture, open_perfetto=False if args.no_open_perfetto else None)
+        return run_benchmark(ROOT, args.fixture, open_perfetto=False if args.no_open_perfetto else None,
+                             discard_outputs=args.discard_outputs)
     except (OSError, ValueError, RuntimeError, yaml.YAMLError) as error:
         print(f"Comparison benchmark: {error}", file=sys.stderr)
         return 1
