@@ -45,10 +45,9 @@ def _median(record, label, metric):
 
 def render_svg(records: list[dict]) -> str:
     width, margin, pair_width, cell_width = 1440, 28, 184, 300
-    table_top, header_height, row_height = 132, 56, 104
+    table_top, header_height, row_height = 76, 56, 104
     table_bottom = table_top + header_height + row_height * len(records)
-    height = table_bottom + 92
-    sources = sorted({record["source_report"].split("/")[1] for record in records if record.get("source_report")})
+    height = table_bottom + 28
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
              '<title id="title">Gutch benchmark comparisons</title>',
              '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians.</desc>',
@@ -66,8 +65,6 @@ def render_svg(records: list[dict]) -> str:
                      f'<path d="M{x1} {y1}V{y2}" stroke="#dde5ef"/>')
 
     text(margin, 48, "Gutch benchmark comparisons", size=32, weight=700)
-    text(margin, 80, "Latest saved result for each pair · median values · lower is better", size=16, color="#60718a")
-    text(margin, 106, "Each cell uses its own linear scale. Compare the two bars within that cell; pair settings differ.", size=13, color="#60718a")
     for x, color, label in ((1080, BLUE, "Gutch"), (1200, ORANGE, "Paired tool")):
         rect(x, 36, 16, 13, color, 3)
         text(x + 25, 48, label, size=14)
@@ -112,9 +109,6 @@ def render_svg(records: list[dict]) -> str:
         x = margin + pair_width + column * cell_width
         line(x, table_top, x, table_bottom)
     line(margin, table_bottom, width - margin, table_bottom)
-    text(margin, table_bottom + 29, "Time factors describe Gutch relative to its paired tool. Storage factors are Gutch / paired-tool size.", size=13, color="#60718a")
-    text(margin, table_bottom + 52, "Source runs: " + ", ".join(sources) + ". OS cache state is uncontrolled; source reports contain settings and provenance.", size=13, color="#60718a")
-    text(margin, table_bottom + 73, "Failed pairs and missing or invalid measurements have no relative factor.", size=12, color="#77869a")
     parts.extend(["</g>", "</svg>"])
     return "\n".join(parts) + "\n"
 
