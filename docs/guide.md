@@ -10,8 +10,9 @@ repository, Rust, Docker, or cloud credentials.
 ## Manual GitHub Actions runs
 
 Open **Actions > Manual Linux benchmarks > Run workflow**. The default runs all
-six Gutch-vs-tool pairs on Ubuntu 24.04, each in a separate job. Choose a single
-pair, a Gutch branch/tag/commit, and the number of measured repetitions if needed.
+six Gutch-vs-tool pairs on Ubuntu 24.04, each in a separate job. All selected
+pair jobs can run concurrently; tools within a pair run sequentially. Choose a
+single pair, a Gutch branch/tag/commit, and measured repetitions if needed.
 One warm-up is always included. Nothing runs on pushes, pull requests or a schedule.
 
 The workflow prepares Blender once, then every pair restores the same validated

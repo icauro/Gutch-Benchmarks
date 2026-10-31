@@ -28,6 +28,7 @@ Pair outcomes: borg: **ERROR**, bpt: **ERROR**, kopia: **ERROR**, plakar: **ERRO
 Open **Actions > Manual Linux benchmarks > Run workflow**. Choose `all` or one
 pair, the Gutch revision, and repetitions. Defaults: Ubuntu 24.04, all six pairs,
 one warm-up and three measured repetitions.
+All six pairs can run concurrently, each on its own runner.
 
 All jobs share a validated Blender input cache. Repositories and restored outputs
 are discarded after each sample. Runs on the default branch save compact reports

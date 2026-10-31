@@ -100,7 +100,6 @@ jobs:
     timeout-minutes: 330
     strategy:
       fail-fast: false
-      max-parallel: 2
       matrix:
         pair: ${{ fromJSON(needs.inputs.outputs.pairs) }}
     env:
