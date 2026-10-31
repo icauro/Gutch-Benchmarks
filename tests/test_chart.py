@@ -107,7 +107,7 @@ class ChartTests(unittest.TestCase):
         self.assertIn("Gutch vs", labels)
         disk = ET.fromstring(render_resources_svg([record], kind="disk"))
         disk_labels = [node.text for node in disk.iter("{http://www.w3.org/2000/svg}text")]
-        self.assertIn("Peak disk by operation", disk_labels)
+        self.assertIn("Peak disk footprint by operation", disk_labels)
         self.assertEqual(disk_labels.count("—"), 8)
         self.assertEqual(root.attrib["viewBox"], disk.attrib["viewBox"])
         record["operation_resources"]["gutch"]["restore"] = {"peak_disk_bytes": 4194304}

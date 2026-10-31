@@ -140,7 +140,7 @@ def render_resources_svg(records: list[dict], *, kind: str) -> str:
                 value = operations.get(operation, {}).get(field) if record.get("status") == "PASS" else None
                 summary[tool][f"{operation}_{kind}"] = {"median": value, "samples": 1}
         resource_records.append({**record, "summary": summary})
-    title = "Peak RAM by operation" if kind == "ram" else "Peak disk by operation"
+    title = "Peak RAM by operation" if kind == "ram" else "Peak disk footprint by operation"
     return render_svg(resource_records, metrics=metrics, title=title)
 
 

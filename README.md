@@ -7,7 +7,7 @@ using shared Blender inputs, pair-specific settings and SHA-256 output validatio
 
 ![Peak RAM by operation](reports/ram.svg?v=0926a8d43c73)
 
-![Peak disk by operation](reports/disk.svg?v=78a256b465fc)
+![Peak disk by operation](reports/disk.svg?v=6a4b3f39cd4f)
 
 <details>
 <summary>Comparison differences and limits</summary>
@@ -34,12 +34,13 @@ tools flush writes can still differ. New performance runs default to six measure
 repetitions with alternating order; OS caches are not reset. A single local smoke
 run checks compatibility only. Older reports retain their original settings.
 
-The second SVG shows peak RAM; the third shows peak disk usage. Both reuse the
+The second SVG shows peak RAM; the third shows peak disk footprint. Both reuse the
 same paired-bar template with first capture, second capture, restore and repair
 columns in MiB from a separate monitored pass. Text versions
-remain below each pair in the details. The latest saved run has command-level RAM samples
-but only a whole-workflow disk peak, so per-operation disk cells show `—`.
-Whole-workflow peaks are not substituted for missing command measurements.
+remain below each pair in the details. New runs record disk peaks per command;
+older reports without those samples show `—`. Disk includes existing repository,
+cache and output files, rather than growth or bytes written. Whole-workflow peaks
+are not substituted for missing command measurements.
 Sampling may miss short spikes; RAM includes child processes.
 
 </details>

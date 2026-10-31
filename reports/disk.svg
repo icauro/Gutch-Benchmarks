@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="764" height="648" viewBox="0 0 764 648" role="img" aria-labelledby="title description">
-<title id="title">Peak disk by operation</title>
+<title id="title">Peak disk footprint by operation</title>
 <desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>
 <rect width="764" height="648" fill="#000000"/>
 <g font-family="Segoe UI, Arial, sans-serif" fill="#edf2fa">
-<text x="8" y="34" font-size="25" font-weight="700" fill="#edf2fa" text-anchor="start">Peak disk by operation</text>
+<text x="8" y="34" font-size="25" font-weight="700" fill="#edf2fa" text-anchor="start">Peak disk footprint by operation</text>
 <rect x="490" y="23" width="16.00" height="13" rx="3" fill="#2474f5"/>
 <text x="513" y="34" font-size="16" font-weight="400" fill="#edf2fa" text-anchor="start">Gutch</text>
 <rect x="600" y="23" width="16.00" height="13" rx="3" fill="#f78b32"/>

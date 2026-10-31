@@ -113,6 +113,8 @@ class DiskSpaceSampler:
         self.thread = threading.Thread(target=self._sample, name="benchmark-disk")
 
     def start(self):
+        # Include the starting footprint even when a command immediately removes files.
+        self.sample()
         self.thread.start()
 
     def finish(self):

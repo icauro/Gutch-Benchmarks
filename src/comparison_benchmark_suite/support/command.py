@@ -65,6 +65,7 @@ class CommandRunner:
         if not 0 < self.timeout_seconds < float("inf"):
             raise ValueError("benchmark command timeout must be finite and positive")
         self.memory_profile = memory_profile
+        self.disk_roots: list[Path] | None = None
         self.temporary_directory: Path | None = None
         self.progress = (stream or sys.stderr).isatty() if progress is None else progress
         self.stream = stream or sys.stderr
@@ -130,6 +131,11 @@ class CommandRunner:
             memory_options = {"memory": memory, "memory_timeline":
                 self.evidence_directory / f"{len(self.measurements) + 1:04d}.memory.jsonl"
                 if self.evidence_directory is not None else None}
+        disk = None
+        if self.disk_roots is not None:
+            from comparison_benchmark_suite.support.memory import DiskSpaceSampler
+            disk = DiskSpaceSampler(self.disk_roots)
+            disk.start()
         try:
             stdout, stderr, returncode = self._run_streamed(
                 rendered, cwd=cwd, env=process_env, timeout_seconds=self.timeout_seconds, **memory_options,
@@ -143,6 +149,8 @@ class CommandRunner:
                     "operation": description, "error": redact_output(str(error)),
                     "timeout_seconds": self.timeout_seconds}), encoding="utf-8")
             raise
+        finally:
+            disk_result = disk.finish() if disk is not None else None
         result = CommandResult(
             command=tuple(_redact(item) for item in rendered),
             elapsed_seconds=time.perf_counter() - started,
@@ -154,6 +162,10 @@ class CommandRunner:
             "start_seconds": started - self.lane_started,
             "elapsed_seconds": result.elapsed_seconds, "command": result.command,
             "returncode": result.returncode}
+        if disk_result is not None:
+            measurement["disk_sampling"] = disk_result
+            if not disk_result.get("error") and disk_result["peak_disk_bytes"] is not None:
+                measurement["peak_disk_bytes"] = disk_result["peak_disk_bytes"]
         if memory is not None:
             measurement["memory"] = memory
         if memory is not None and "--profile-dir" in rendered:

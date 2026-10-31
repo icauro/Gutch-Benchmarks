@@ -354,24 +354,28 @@ follows with peak disk usage. All three use the same paired-bar template. Each
 resource SVG has first capture, second capture, restore and repair columns in MiB.
 CI refreshes and archives all three images. Combined text resource tables remain
 below each pair’s speed table as an accessible alternative. Operation RAM is the maximum
-across its commands; restore and repair cover both versions. Per-command disk
-values remain unavailable until recorded. The latest run’s RAM breakdown is
-derived from its saved command artifacts in `<pair>-resources.json`; its original
-report JSON and whole-workflow disk peaks remain unchanged.
+across its commands; restore and repair cover both versions. New resource passes
+record a fresh disk peak for each command, with the same scope as the workflow
+sampler. Each operation uses the maximum of its commands, including both versions
+for restore and repair. Command JSON retains the sampling details and errors; a
+failed or missing command sample leaves that operation unavailable. Historical
+reports retain their recorded values; workflow peaks are never substituted.
 
 Peak RAM is the largest sampled sum of RSS across a command and its descendants,
 then the maximum across commands in that resource workflow. Shared pages can be
 counted in more than one process. The target polling interval is 2 ms; sampling
 can miss short-lived descendants or brief spikes. CPU remains direct-process CPU.
 
-Peak disk is the maximum sampled apparent file size across the lane's repository,
+Peak disk footprint is the maximum sampled apparent file size across the lane's repository,
 restored output, temporary files and caches (including Plakar's external cache).
 During resource passes, `TMPDIR`, `TMP` and `TEMP` point into the monitored lane.
 Tools that ignore these variables and write elsewhere are outside this scope.
 Inputs, executables and benchmark logs/stats/traces are excluded. Hard-linked
 files are counted once per scan. This is working-file space, not physical block
 allocation or disk I/O volume. Directory scans target 100 ms intervals and can
-miss transient files. Monitoring overhead is confined to the resource pass.
+miss transient files. Starting and final footprints are also sampled. Values
+include existing repository/output files, rather than growth or bytes written.
+Monitoring overhead is confined to the resource pass.
 Missing or failed samples remain unavailable rather than becoming zero.
 
 ## Native recovery and extra files

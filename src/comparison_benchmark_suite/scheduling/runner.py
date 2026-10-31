@@ -51,17 +51,20 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
             commands.memory_profile = fixture.profile_mode == "detailed" or specification.resource_sample
             commands.temporary_directory = layout.lane(label).payload / "tmp" if specification.resource_sample else None
             disk = None
+            commands.disk_roots = None
             if specification.resource_sample:
                 print(f"Resource pass: {specification.label}", flush=True)
                 roots = [layout.lane(label).root]
                 if specification.tool == "plakar":
                     from comparison_benchmark_suite.tools.external import _plakar_cache_directory
                     roots.append(_plakar_cache_directory(layout.lane(label).root))
+                commands.disk_roots = roots
                 disk = DiskSpaceSampler(roots)
                 disk.start()
             try:
                 result = execute(case)
             finally:
+                commands.disk_roots = None
                 disk_result = disk.finish() if disk is not None else None
             if disk_result is not None:
                 result.metadata["disk_sampling"] = disk_result

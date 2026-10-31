@@ -1,5 +1,7 @@
 """Resource scope and separation from performance samples."""
 import json
+import subprocess
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 import tempfile
@@ -44,6 +46,49 @@ class ResourceTests(unittest.TestCase):
         sampler.sample()
         self.assertEqual(sampler.result["peak_disk_bytes"], 350)
 
+    def test_commands_record_independent_disk_peaks_and_exclude_logs(self):
+        lane = self.root / "lane"
+        lane.mkdir()
+        (lane / "commands").mkdir()
+        (lane / "commands/large.log").write_bytes(b"x" * 10000)
+        payload = lane / "data"
+        payload.write_bytes(b"x" * 4096)
+        commands = CommandRunner()
+        commands.disk_roots = [lane]
+        commands.evidence_directory = lane / "commands"
+        commands.run([sys.executable, "-c", "from pathlib import Path; Path('data').unlink()"],
+                     cwd=lane, description="remove existing data")
+        self.assertEqual(commands.measurements[-1]["peak_disk_bytes"], 4096)
+        commands.run([sys.executable, "-c", "pass"], description="empty command")
+        self.assertEqual(commands.measurements[-1]["peak_disk_bytes"], 0)
+        commands.run([sys.executable, "-c",
+                      "from pathlib import Path; import time; p=Path('transient'); "
+                      "p.write_bytes(b'x'*8192); time.sleep(0.3); p.unlink()"],
+                     cwd=lane, description="temporary disk peak")
+        self.assertEqual(commands.measurements[-1]["peak_disk_bytes"], 8192)
+        self.assertFalse((lane / "transient").exists())
+        saved = json.loads((lane / "commands/0001.json").read_text(encoding="utf-8"))
+        self.assertEqual(saved["peak_disk_bytes"], 4096)
+        commands.disk_roots = None
+        commands.run([sys.executable, "-c", "pass"], description="speed command")
+        self.assertNotIn("peak_disk_bytes", commands.measurements[-1])
+
+    def test_command_disk_monitor_stops_after_timeout_and_omits_failed_samples(self):
+        commands = CommandRunner()
+        commands.disk_roots = [self.root]
+        sampler = Mock()
+        sampler.finish.return_value = {"peak_disk_bytes": 42, "error": "access denied"}
+        with patch("comparison_benchmark_suite.support.memory.DiskSpaceSampler", return_value=sampler), patch.object(
+            commands, "_run_streamed", side_effect=subprocess.TimeoutExpired("test", 1)):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                commands.run(["synthetic"], description="timeout")
+        sampler.finish.assert_called_once()
+        with patch("comparison_benchmark_suite.support.memory.DiskSpaceSampler", return_value=sampler), patch.object(
+            commands, "_run_streamed", return_value=("", "", 0)):
+            commands.run(["synthetic"], description="sampling failed")
+        self.assertNotIn("peak_disk_bytes", commands.measurements[-1])
+        self.assertIn("error", commands.measurements[-1]["disk_sampling"])
+
     def test_memory_sums_parent_and_descendants_in_one_sample(self):
         parent = Mock()
         parent.memory_info.return_value = SimpleNamespace(rss=1000)
@@ -80,6 +125,18 @@ class ResourceTests(unittest.TestCase):
         self.assertEqual([values[name]["peak_rss_bytes"] for name in
             ("initial_capture", "incremental_capture", "restore", "repair")], [10, 20, 40, 60])
         self.assertTrue(all("peak_disk_bytes" not in value for value in values.values()))
+        for index, (_, peak) in enumerate(operations):
+            path = folder / f"{index:04d}.json"
+            sample = json.loads(path.read_text(encoding="utf-8"))
+            sample["peak_disk_bytes"] = peak * 100
+            path.write_text(json.dumps(sample), encoding="utf-8")
+        values = summarize_operation_resources(results, self.root)["gutch"]
+        self.assertEqual([values[name]["peak_disk_bytes"] for name in
+            ("initial_capture", "incremental_capture", "restore", "repair")], [1000, 2000, 4000, 6000])
+        sample = json.loads((folder / "0005.json").read_text(encoding="utf-8"))
+        sample.pop("peak_disk_bytes")
+        (folder / "0005.json").write_text(json.dumps(sample), encoding="utf-8")
+        self.assertNotIn("peak_disk_bytes", summarize_operation_resources(results, self.root)["gutch"].get("repair", {}))
 
     def test_resource_temp_environment_is_owned_and_does_not_change_parent_environment(self):
         import os
@@ -101,7 +158,7 @@ class ResourceTests(unittest.TestCase):
         commands = CommandRunner()
         seen = []
         def execute(case):
-            seen.append((case.resource_sample, commands.memory_profile))
+            seen.append((case.resource_sample, commands.memory_profile, bool(commands.disk_roots)))
             payload = layout.lane(case.label).payload
             (payload / "data").write_bytes(b"x" * 123)
             return LaneResult(case.label, case.kind,
@@ -121,4 +178,5 @@ class ResourceTests(unittest.TestCase):
         self.assertEqual(summary["peak_disk_bytes"]["source"], "separate_resource_pass")
         self.assertEqual(len(json.loads((layout.root / "results.json").read_text())), 1)
         self.assertEqual(len(json.loads((layout.root / "resources.json").read_text())), 1)
-        self.assertEqual(seen, [(False, False), (True, True)])
+        self.assertEqual(seen, [(False, False, False), (True, True, True)])
+        self.assertIsNone(commands.disk_roots)
