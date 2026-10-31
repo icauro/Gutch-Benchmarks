@@ -26,7 +26,14 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.suite = self.root / "comparison_benchmark_suite"
-        shutil.copytree(ROOT, self.suite, ignore=shutil.ignore_patterns(".artifacts", "__pycache__", "fixtures"))
+        shutil.copytree(
+            ROOT,
+            self.suite,
+            ignore=shutil.ignore_patterns(
+                ".git", ".venv", ".artifacts", "__pycache__", "fixtures", "bin",
+                "AGENTS.override.md",
+            ),
+        )
         (self.suite / "fixtures").mkdir()
         builds = []
         for version in (1, 2):

@@ -334,8 +334,15 @@ optional repair. Batch/whole-product Gutch workflows, diagnostic reports, and
 the internal fixture catalog belong to the Gutch harness, which imports shared
 measurement and validation helpers from this package.
 
-Run the six core tests with `python -m unittest discover -s tests` from this
-folder. They cover portable execution, failure isolation, output validation,
+Install the checkout as a package before running development tests. This keeps
+imports independent of the checkout folder name:
+
+```text
+python -m pip install -e .
+python -m unittest discover -s tests
+```
+
+The tests cover portable execution, failure isolation, output validation,
 archive path boundaries, the interactive run flow, and cancellation.
 Tool-specific mock tests and narrow configuration checks are intentionally omitted.
 
