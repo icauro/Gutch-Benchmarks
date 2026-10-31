@@ -12,6 +12,8 @@ from .report import relative_metric
 
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
            ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
+# Keep references stable when chart rows are reordered or only one pair is rendered.
+PAIR_NOTES = {"borg": 1, "plakar": 2, "kopia": 3, "restic": 4, "rustic": 5, "bpt": 6}
 BLUE, ORANGE = "#2474f5", "#f78b32"
 
 
@@ -50,7 +52,7 @@ def render_svg(records: list[dict]) -> str:
     height = table_bottom + 28
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
              '<title id="title">Gutch benchmark comparisons</title>',
-             '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians.</desc>',
+             '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>',
              f'<rect width="{width}" height="{height}" fill="#000000"/>',
              '<g font-family="Segoe UI, Arial, sans-serif" fill="#edf2fa">']
 
@@ -81,7 +83,9 @@ def render_svg(records: list[dict]) -> str:
         other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
         title = "BuildPatchTool" if record["pair"] == "bpt" else record["pair"].title()
         text(margin + 12, y + 27, "Gutch vs", size=15, color="#a3afc2")
-        text(margin + 12, y + 51, title, size=18, weight=650)
+        reference = PAIR_NOTES.get(record["pair"])
+        label = f"{title} [{reference}]" if reference is not None else title
+        text(margin + 12, y + 51, label, size=16 if record["pair"] == "bpt" else 18, weight=650)
         status = record["status"]
         if status != "PASS":
             text(margin + 12, y + 91, status, size=15, color="#ffba78", weight=650)

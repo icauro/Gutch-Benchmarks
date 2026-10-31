@@ -69,6 +69,15 @@ class ChartTests(unittest.TestCase):
         self.assertIn("Restic&amp;&lt;Script&gt;", chart)
         self.assertFalse(list(root.iter("{http://www.w3.org/2000/svg}script")))
 
+    def test_chart_references_match_readme_notes_and_survive_row_reordering(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for pair, title, number in (("borg", "Borg", 1), ("plakar", "Plakar", 2),
+                                    ("kopia", "Kopia", 3), ("restic", "Restic", 4),
+                                    ("rustic", "Rustic", 5), ("bpt", "BuildPatchTool", 6)):
+            chart = render_svg([pair_record(pair)])
+            self.assertIn(f"{title} [{number}]", chart)
+            self.assertIn(f"{number}. **{title}:**", readme)
+
     def test_latest_selection_uses_numeric_run_order_and_keeps_bad_reports_visible(self):
         owner = ROOT / ".artifacts/tests"
         owner.mkdir(parents=True, exist_ok=True)
