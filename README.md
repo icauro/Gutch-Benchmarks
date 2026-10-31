@@ -11,16 +11,56 @@ SHA-256 output validation.
 
 UTC date: 2026-10-31. Suite: `add9a9e17089ac8ab5dec875784888b5d15117a7`. Gutch: `unknown`.
 
-| Pair | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
-|---|---|---|---:|---:|---:|---:|
-| Gutch vs borg | - | ERROR | - | - | - | - |
-| Gutch vs bpt | - | ERROR | - | - | - | - |
-| Gutch vs kopia | - | ERROR | - | - | - | - |
-| Gutch vs plakar | - | ERROR | - | - | - | - |
-| Gutch vs restic | - | ERROR | - | - | - | - |
-| Gutch vs rustic | - | ERROR | - | - | - | - |
+Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.
 
-Pair outcomes: borg: **ERROR**, bpt: **ERROR**, kopia: **ERROR**, plakar: **ERROR**, restic: **ERROR**, rustic: **ERROR**.
+### Gutch vs Borg (ERROR)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | NOT_RUN | - | - | - | - |
+| borg | NOT_RUN | - | - | - | - |
+| **Gutch relative** | - | - | - | - | - |
+
+### Gutch vs BuildPatchTool (ERROR)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | NOT_RUN | - | - | - | - |
+| buildpatchtool | NOT_RUN | - | - | - | - |
+| **Gutch relative** | - | - | - | - | - |
+
+### Gutch vs Kopia (ERROR)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | NOT_RUN | - | - | - | - |
+| kopia | NOT_RUN | - | - | - | - |
+| **Gutch relative** | - | - | - | - | - |
+
+### Gutch vs Plakar (ERROR)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | NOT_RUN | - | - | - | - |
+| plakar | NOT_RUN | - | - | - | - |
+| **Gutch relative** | - | - | - | - | - |
+
+### Gutch vs Restic (ERROR)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | NOT_RUN | - | - | - | - |
+| restic | NOT_RUN | - | - | - | - |
+| **Gutch relative** | - | - | - | - | - |
+
+### Gutch vs Rustic (ERROR)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | NOT_RUN | - | - | - | - |
+| rustic | NOT_RUN | - | - | - | - |
+| **Gutch relative** | - | - | - | - | - |
+
 <!-- latest-benchmarks:end -->
 
 ## Run on GitHub

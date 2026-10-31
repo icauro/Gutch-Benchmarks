@@ -40,7 +40,10 @@ build artifact lasts seven days. Nothing uploads repository/output payloads.
 
 Default-branch runs commit compact JSON reports and a Markdown report under
 `reports/<UTC-date>/<run-id>-<attempt>/`, then update the latest-results section
-above. Failed or missing pairs are shown explicitly. Runs from other branches
+above. Each pair has its own table and a Gutch-relative row computed from raw
+medians: times show faster/slower factors, and storage shows Gutch / other size.
+Failed pairs, missing/nonpositive measurements and unequal sample counts receive
+no ratio. Failed or missing pairs are shown explicitly. Runs from other branches
 retain Actions artifacts without updating the README. Repository rules must
 allow the workflow's `contents: write` token to push report commits; otherwise
 publication fails and the detailed reports remain downloadable from Actions.

@@ -4,6 +4,7 @@ import argparse
 import bz2
 from datetime import datetime, timezone
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -157,6 +158,44 @@ def collect(pair, outcome, root=ROOT):
     return compact
 
 
+def pair_overview(record):
+    """Render one pair; derive ratios from raw medians, never rounded cells."""
+    pair = record["pair"]
+    other = "buildpatchtool" if pair == "bpt" else pair
+    title = "BuildPatchTool" if pair == "bpt" else pair.title()
+    lines = [f"### Gutch vs {title} ({record['status']})", "",
+             "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |",
+             "|---|---|---:|---:|---:|---:|"]
+    rows = record["rows"] or [[label, "NOT_RUN", *("-" for _ in range(7))]
+                              for label in ("gutch", other)]
+    lines.extend("| " + " | ".join(row[i] for i in (0, 1, 2, 3, 4, 6)) + " |" for row in rows)
+    statuses = {row[0]: row[1] for row in rows}
+    comparable = record["status"] == "PASS" and all(statuses.get(label) == "PASS" for label in ("gutch", other))
+    summary = record.get("summary", {})
+    ratios = []
+    for metric in ("backup", "restore", "repair", "repo_size"):
+        gutch = summary.get("gutch", {}).get(metric, {})
+        peer = summary.get(other, {}).get(metric, {})
+        values = (gutch.get("median"), peer.get("median"))
+        if (not comparable or gutch.get("samples") != peer.get("samples") or
+                any(isinstance(value, bool) or not isinstance(value, (int, float))
+                    or not math.isfinite(value) or value <= 0 for value in values)):
+            ratios.append("-")
+            continue
+        gutch_value, peer_value = values
+        if metric == "repo_size":
+            cell = f"{gutch_value / peer_value:.2f}x size"
+        elif gutch_value == peer_value:
+            cell = "same"
+        elif gutch_value < peer_value:
+            cell = f"{peer_value / gutch_value:.2f}x faster"
+        else:
+            cell = f"{gutch_value / peer_value:.2f}x slower"
+        ratios.append(cell)
+    lines.extend(["| **Gutch relative** | - | " + " | ".join(ratios) + " |", ""])
+    return lines
+
+
 def publish(pair, inputs, run_id, attempt, root=ROOT):
     # IDs are used in tracked paths and URLs; reject arbitrary path fragments.
     if not run_id.isdecimal() or not attempt.isdecimal():
@@ -178,13 +217,10 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     overview = [f"[Full report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
                 f"UTC date: {stamp}. Suite: `{os.environ.get('GITHUB_SHA', 'unknown')}`. "
                 f"Gutch: `{next((item.get('provenance', {}).get('GUTCH_REVISION') for item in records if item.get('provenance')), 'unknown')}`.", "",
-                "| Pair | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |",
-                "|---|---|---|---:|---:|---:|---:|"]
+                "Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.", ""]
     for record in records:
         name = record["pair"]
-        rows = record["rows"] or [["-", record["status"], *("-" for _ in range(7))]]
-        for row in rows:
-            overview.append("| " + " | ".join([f"Gutch vs {name}", *(row[i] for i in (0, 1, 2, 3, 4, 6))]) + " |")
+        overview.extend(pair_overview(record))
         provenance = record.get("provenance", {})
         lines.extend([f"## Gutch vs {name}: {record['status']}", "", record.get("description", ""), "",
                       f"Suite commit: `{provenance.get('GITHUB_SHA', 'unknown')}`; Gutch commit: `{provenance.get('GUTCH_REVISION', 'unknown')}`.", "",
@@ -193,9 +229,6 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
                       "| " + " | ".join(COMPARISON_HEADERS) + " |", "|" + "---|" * len(COMPARISON_HEADERS)])
         lines.extend("| " + " | ".join(row) + " |" for row in record["rows"])
         lines.extend(["", *record.get("reasons", []), ""])
-    # Keep the latest table explicit about incomplete/failed pairs even when a
-    # failed job has some successful samples whose rows still say PASS.
-    overview.extend(["", "Pair outcomes: " + ", ".join(f"{record['pair']}: **{record['status']}**" for record in records) + "."])
     destination.mkdir(parents=True, exist_ok=True)
     (destination / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     readme = root / "README.md"

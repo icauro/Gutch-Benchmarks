@@ -179,7 +179,7 @@ class CiTests(unittest.TestCase):
         self.assertIn("Original intro", readme)
         self.assertIn("Original footer", readme)
         self.assertIn("1.250", readme)
-        self.assertIn("borg: **ERROR**", readme)
+        self.assertIn("### Gutch vs Borg (ERROR)", readme)
         self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 6)
         self.assertFalse(list((self.root / "reports").rglob("command.log")))
         with self.assertRaises(ValueError):
@@ -197,6 +197,33 @@ class CiTests(unittest.TestCase):
         self.assertEqual(jobs["publish"]["permissions"]["contents"], "write")
         composite = (ROOT / ".github/actions/blender-inputs/action.yml").read_text()
         self.assertNotIn("matrix.pair", composite)
+
+    def test_pair_ratios_use_raw_medians_and_show_direction(self):
+        record = {"pair": "restic", "status": "PASS", "rows": [
+            [label, "PASS", "0.000", "0.000", "0.000", "-", "0.000", "-", "-"]
+            for label in ("gutch", "restic")], "summary": {}}
+        for label, values in (("gutch", (0.00041, 10, 7, 100)), ("restic", (0.00082, 5, 7, 400))):
+            record["summary"][label] = {metric: {"median": value, "samples": 3}
+                for metric, value in zip(("backup", "restore", "repair", "repo_size"), values)}
+        table = "\n".join(ci.pair_overview(record))
+        self.assertIn("### Gutch vs Restic (PASS)", table)
+        self.assertIn("| **Gutch relative** | - | 2.00x faster | 2.00x slower | same | 0.25x size |", table)
+        record["summary"]["restic"]["backup"]["samples"] = 2
+        self.assertIn("| **Gutch relative** | - | - | 2.00x slower", "\n".join(ci.pair_overview(record)))
+        record["status"] = "ERROR"
+        self.assertIn("| **Gutch relative** | - | - | - | - | - |", "\n".join(ci.pair_overview(record)))
+
+    def test_pair_ratios_omit_missing_zero_nonfinite_and_failed_measurements(self):
+        for value in (None, 0, -1, float("nan"), float("inf")):
+            with self.subTest(value=value):
+                record = {"pair": "rustic", "status": "PASS", "rows": [
+                    [label, "PASS", *("-" for _ in range(7))] for label in ("gutch", "rustic")],
+                    "summary": {"gutch": {"backup": {"median": value}},
+                                "rustic": {"backup": {"median": 2}}}}
+                self.assertIn("| **Gutch relative** | - | - | - | - | - |", "\n".join(ci.pair_overview(record)))
+        record["summary"]["gutch"]["backup"]["median"] = 1
+        record["rows"][1][1] = "UNAVAILABLE"
+        self.assertNotIn("faster", "\n".join(ci.pair_overview(record)))
 
     def test_ci_fixture_keeps_pair_settings_and_records_selected_repetitions(self):
         shutil.copytree(ROOT / "fixtures", self.root / "fixtures",
