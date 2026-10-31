@@ -7,59 +7,59 @@ SHA-256 output validation.
 ## Latest Linux results
 
 <!-- latest-benchmarks:start -->
-[Full report](reports/2026-10-31/41198638034-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41198638034)
+[Full report](reports/2026-10-31/41200340952-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41200340952)
 
-UTC date: 2026-10-31. Suite: `add9a9e17089ac8ab5dec875784888b5d15117a7`. Gutch: `unknown`.
+UTC date: 2026-10-31. Suite: `aeccad4d48f6caab6650733958cf4f3e4a8dbe57`. Gutch: `c50285368c91d127e51d52f75aab37603d810682`.
 
 Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.
 
-### Gutch vs Borg (ERROR)
+### Gutch vs Borg (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - |
-| borg | NOT_RUN | - | - | - | - |
-| **Gutch relative** | - | - | - | - | - |
+| borg | PASS | 8.815 | 7.575 | 2.474 | 918.275 |
+| gutch | PASS | 10.708 | 1.945 | 0.514 | 913.570 |
+| **Gutch relative** | - | 1.21x slower | 3.89x faster | 4.81x faster | 0.99x size |
 
 ### Gutch vs BuildPatchTool (ERROR)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - |
-| buildpatchtool | NOT_RUN | - | - | - | - |
+| buildpatchtool | ERROR | - | - | - | - |
+| gutch | PASS | 5.668 | 2.333 | 0.721 | 689.362 |
 | **Gutch relative** | - | - | - | - | - |
 
-### Gutch vs Kopia (ERROR)
+### Gutch vs Kopia (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - |
-| kopia | NOT_RUN | - | - | - | - |
-| **Gutch relative** | - | - | - | - | - |
+| gutch | PASS | 5.621 | 1.557 | 0.650 | 1758.175 |
+| kopia | PASS | 4.685 | 7.262 | 7.666 | 1754.523 |
+| **Gutch relative** | - | 1.20x slower | 4.66x faster | 11.80x faster | 1.00x size |
 
-### Gutch vs Plakar (ERROR)
-
-| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
-|---|---|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - |
-| plakar | NOT_RUN | - | - | - | - |
-| **Gutch relative** | - | - | - | - | - |
-
-### Gutch vs Restic (ERROR)
+### Gutch vs Plakar (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - |
-| restic | NOT_RUN | - | - | - | - |
-| **Gutch relative** | - | - | - | - | - |
+| gutch | PASS | 5.988 | 2.034 | 0.419 | 913.907 |
+| plakar | PASS | 8.821 | 3.912 | 13.458 | 916.210 |
+| **Gutch relative** | - | 1.47x faster | 1.92x faster | 32.09x faster | 1.00x size |
 
-### Gutch vs Rustic (ERROR)
+### Gutch vs Restic (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - |
-| rustic | NOT_RUN | - | - | - | - |
-| **Gutch relative** | - | - | - | - | - |
+| gutch | PASS | 5.587 | 2.323 | 0.705 | 689.362 |
+| restic | PASS | 8.969 | 5.731 | 4.002 | 714.666 |
+| **Gutch relative** | - | 1.61x faster | 2.47x faster | 5.68x faster | 0.96x size |
+
+### Gutch vs Rustic (PASS)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| gutch | PASS | 5.687 | 2.353 | 0.726 | 689.362 |
+| rustic | PASS | 14.522 | 5.760 | 4.311 | 700.319 |
+| **Gutch relative** | - | 2.55x faster | 2.45x faster | 5.93x faster | 0.98x size |
 
 <!-- latest-benchmarks:end -->
 

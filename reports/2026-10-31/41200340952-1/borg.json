@@ -1,0 +1,288 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Borg 2 keeps default FastCDC (about 2 MiB, normalization 2), LZ4 and cache policy. Repository creation uses --encryption authenticated-sha256: payloads are unencrypted but authenticated, with a fixed local test passphrase protecting the key. Restore and recovery use --continue for the shared output directory; repository check uses --verify-data. Gutch uses unencrypted FastCDC with a 2 MiB target, LZ4 0 and 8 MiB bundles. Normalization, chunk bounds, hash algorithms, LZ4 framing and storage layout differ. Borg resume uses metadata checks; independent validation still checks contents. Fresh local repositories and isolated caches; automatic workers; noninteractive/output flags. One warm-up and 3 rotating measured repetitions, profiling off. Independent validation is outside timings; extra files are allowed.",
+  "executables": {
+    "borg": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/borg/borg",
+      "sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4"
+    },
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Borg 2 keeps default FastCDC (about 2 MiB, normalization 2), LZ4 and cache policy. Repository creation uses --encryption authenticated-sha256: payloads are unencrypted but authenticated, with a fixed local test passphrase protecting the key. Restore and recovery use --continue for the shared output directory; repository check uses --verify-data. Gutch uses unencrypted FastCDC with a 2 MiB target, LZ4 0 and 8 MiB bundles. Normalization, chunk bounds, hash algorithms, LZ4 framing and storage layout differ. Borg resume uses metadata checks; independent validation still checks contents. Fresh local repositories and isolated caches; automatic workers; noninteractive/output flags. One warm-up and 3 rotating measured repetitions, profiling off. Independent validation is outside timings; extra files are allowed.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_2MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "lz4",
+          "compression_level": 0,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "borg",
+        "profile": null,
+        "tool": "borg",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_2MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "lz4",
+          "compression_level": 0,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "borg",
+        "profile": null,
+        "tool": "borg",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_borg",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 3,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c50285368c91d127e51d52f75aab37603d810682",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "pair": "borg",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41200340952",
+    "GITHUB_SHA": "aeccad4d48f6caab6650733958cf4f3e4a8dbe57",
+    "GUTCH_REVISION": "c50285368c91d127e51d52f75aab37603d810682",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "borg",
+      "PASS",
+      "8.815",
+      "7.575",
+      "2.474",
+      "-",
+      "918.275",
+      "-",
+      "-"
+    ],
+    [
+      "gutch",
+      "PASS",
+      "10.708",
+      "1.945",
+      "0.514",
+      "-",
+      "913.570",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "borg": {
+      "backup": {
+        "maximum": 14.660903235999996,
+        "median": 8.815229031000001,
+        "minimum": 8.790141861999984,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.09815641499997696,
+        "median": 0.0020426199999974415,
+        "minimum": 0.0016906310000024405,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 2.504958562000013,
+        "median": 2.473664611000004,
+        "minimum": 2.469279379000028,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 30,
+        "median": 30,
+        "minimum": 30,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 963503461,
+        "median": 962880670,
+        "minimum": 959381221,
+        "samples": 3
+      },
+      "repository_check": {
+        "maximum": 4.130598936000013,
+        "median": 4.125100697000022,
+        "minimum": 4.10810233700002,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 7.729100512999992,
+        "median": 7.575161380000026,
+        "minimum": 7.406767484999989,
+        "samples": 3
+      }
+    },
+    "gutch": {
+      "backup": {
+        "maximum": 11.827795269999996,
+        "median": 10.70756314900001,
+        "minimum": 7.194345699999985,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.005280080000034104,
+        "median": 0.005271211999996694,
+        "minimum": 0.005195194999998876,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 0.5156390740000063,
+        "median": 0.5138052989999835,
+        "minimum": 0.5123154879999845,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 178,
+        "median": 178,
+        "minimum": 178,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 957947508,
+        "median": 957947508,
+        "minimum": 957947508,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 1.9550949850000023,
+        "median": 1.9450693729999955,
+        "minimum": 1.944457701999994,
+        "samples": 3
+      },
+      "verify": null
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4",
+      "minimum_glibc": "2.39",
+      "path": "linux-x64/borg/borg",
+      "platform": "linux-x64",
+      "prerelease": true,
+      "release_channel": "2.x prerelease; required by FastCDC fixtures",
+      "release_url": "https://github.com/borgbackup/borg/releases/tag/2.0.0b25",
+      "sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4",
+      "source_url": "https://github.com/borgbackup/borg/releases/download/2.0.0b25/borg-linux-glibc239-x86_64-gh",
+      "tool": "borg",
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "version": "2.0.0b25"
+    }
+  ]
+}

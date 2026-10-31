@@ -1,0 +1,291 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Rustic uses native Rabin chunking (about 1 MiB, 512 KiB minimum and 8 MiB maximum), default pack sizing, and repository Zstd level 3. Gutch uses FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles. Algorithms, chunk bounds, compression implementations and packing differ; Rustic remains encrypted. Backup paths and per-source tags select each version independently. Restore verifies existing bytes; recovery requests deletion only inside the selected version directory. A full repository data check and independent SHA-256 validation are separate from capture and restore timings. Fresh repositories, isolated profiles and caches, automatic workers and noninteractive commands. One warm-up and 3 rotating measured repetitions, profiling off. Extra files are allowed by the shared validator; native deletion is requested for recovery.",
+  "executables": {
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    },
+    "rustic": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/rustic/rustic",
+      "sha256": "c9edb8bff6682163fbe1ed0651bd1a6459159069ff680dbb8d4958a0d22f536e"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Rustic uses native Rabin chunking (about 1 MiB, 512 KiB minimum and 8 MiB maximum), default pack sizing, and repository Zstd level 3. Gutch uses FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles. Algorithms, chunk bounds, compression implementations and packing differ; Rustic remains encrypted. Backup paths and per-source tags select each version independently. Restore verifies existing bytes; recovery requests deletion only inside the selected version directory. A full repository data check and independent SHA-256 validation are separate from capture and restore timings. Fresh repositories, isolated profiles and caches, automatic workers and noninteractive commands. One warm-up and 3 rotating measured repetitions, profiling off. Extra files are allowed by the shared validator; native deletion is requested for recovery.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--set-compression",
+          "3"
+        ],
+        "configuration_label": "",
+        "label": "rustic",
+        "profile": null,
+        "tool": "rustic",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--set-compression",
+          "3"
+        ],
+        "configuration_label": "",
+        "label": "rustic",
+        "profile": null,
+        "tool": "rustic",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_rustic",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 3,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c50285368c91d127e51d52f75aab37603d810682",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "pair": "rustic",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41200340952",
+    "GITHUB_SHA": "aeccad4d48f6caab6650733958cf4f3e4a8dbe57",
+    "GUTCH_REVISION": "c50285368c91d127e51d52f75aab37603d810682",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "gutch",
+      "PASS",
+      "5.687",
+      "2.353",
+      "0.726",
+      "-",
+      "689.362",
+      "-",
+      "-"
+    ],
+    [
+      "rustic",
+      "PASS",
+      "14.522",
+      "5.760",
+      "4.311",
+      "-",
+      "700.319",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "gutch": {
+      "backup": {
+        "maximum": 5.7728214819999835,
+        "median": 5.687266987999976,
+        "minimum": 5.678111105000028,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.31233584099999234,
+        "median": 0.008482679999985976,
+        "minimum": 0.006422164000014163,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 0.7405499939999913,
+        "median": 0.7263382200000024,
+        "minimum": 0.7134456440000463,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 120,
+        "median": 120,
+        "minimum": 120,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 722847959,
+        "median": 722847959,
+        "minimum": 722847959,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 2.35338068599998,
+        "median": 2.3528108470000006,
+        "minimum": 2.320269430000053,
+        "samples": 3
+      },
+      "verify": null
+    },
+    "rustic": {
+      "backup": {
+        "maximum": 14.597610227000018,
+        "median": 14.521549641999968,
+        "minimum": 14.382840320000014,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.0025939100000869075,
+        "median": 0.00254812899999024,
+        "minimum": 0.00242676099998107,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 4.332546980000018,
+        "median": 4.310634248999918,
+        "minimum": 4.288664803000017,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 30,
+        "median": 30,
+        "minimum": 30,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 734548563,
+        "median": 734337624,
+        "minimum": 731408648,
+        "samples": 3
+      },
+      "repository_check": {
+        "maximum": 4.1050383730000135,
+        "median": 4.067792008000026,
+        "minimum": 4.0675336589999915,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 5.887727892999976,
+        "median": 5.760206807000031,
+        "minimum": 5.731370922000053,
+        "samples": 3
+      }
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "628b26785f3787fa1d52e61b3289493f483230a1ed6e86a84ae9c76d7a41a81e",
+      "path": "linux-x64/rustic/rustic",
+      "platform": "linux-x64",
+      "prerelease": false,
+      "release_url": "https://github.com/rustic-rs/rustic/releases/tag/v0.11.4",
+      "sha256": "c9edb8bff6682163fbe1ed0651bd1a6459159069ff680dbb8d4958a0d22f536e",
+      "source_url": "https://github.com/rustic-rs/rustic/releases/download/v0.11.4/rustic-v0.11.4-x86_64-unknown-linux-musl.tar.gz",
+      "tool": "rustic",
+      "verified_at": "2026-10-31",
+      "version": "0.11.4"
+    }
+  ]
+}

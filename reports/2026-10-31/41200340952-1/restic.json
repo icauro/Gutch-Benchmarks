@@ -1,0 +1,286 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Restic keeps default Rabin chunking (about 1 MiB) and Zstd auto. Encryption is mandatory and remains enabled. Restore adds --verify; recovery adds --overwrite always --delete, scoped to the selected build. Repository check uses --read-data. Gutch uses unencrypted FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles; chunk bounds, Zstd implementations, hashes and storage layout differ. Fresh local repositories and isolated caches; automatic workers; noninteractive/output flags. One warm-up and 3 rotating measured repetitions, profiling off. Independent validation is outside timings; extra files are allowed.",
+  "executables": {
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    },
+    "restic": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/restic/restic",
+      "sha256": "20d4142678d0d95ec11a4759def1b73fd9190abc9ca19e4b62d067c0b387e639"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Restic keeps default Rabin chunking (about 1 MiB) and Zstd auto. Encryption is mandatory and remains enabled. Restore adds --verify; recovery adds --overwrite always --delete, scoped to the selected build. Repository check uses --read-data. Gutch uses unencrypted FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles; chunk bounds, Zstd implementations, hashes and storage layout differ. Fresh local repositories and isolated caches; automatic workers; noninteractive/output flags. One warm-up and 3 rotating measured repetitions, profiling off. Independent validation is outside timings; extra files are allowed.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "restic",
+        "profile": null,
+        "tool": "restic",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "restic",
+        "profile": null,
+        "tool": "restic",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_restic",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 3,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c50285368c91d127e51d52f75aab37603d810682",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "pair": "restic",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41200340952",
+    "GITHUB_SHA": "aeccad4d48f6caab6650733958cf4f3e4a8dbe57",
+    "GUTCH_REVISION": "c50285368c91d127e51d52f75aab37603d810682",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "gutch",
+      "PASS",
+      "5.587",
+      "2.323",
+      "0.705",
+      "-",
+      "689.362",
+      "-",
+      "-"
+    ],
+    [
+      "restic",
+      "PASS",
+      "8.969",
+      "5.731",
+      "4.002",
+      "-",
+      "714.666",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "gutch": {
+      "backup": {
+        "maximum": 5.588816350000002,
+        "median": 5.587408490999991,
+        "minimum": 5.5857869460000416,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.006695546000003105,
+        "median": 0.0063522389999661755,
+        "minimum": 0.0060383480000041345,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 0.7153955220000512,
+        "median": 0.704841579999993,
+        "minimum": 0.7019274969999856,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 120,
+        "median": 120,
+        "minimum": 120,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 722847959,
+        "median": 722847959,
+        "minimum": 722847959,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 2.3550517909999655,
+        "median": 2.3232677589999184,
+        "minimum": 2.3098497739999857,
+        "samples": 3
+      },
+      "verify": null
+    },
+    "restic": {
+      "backup": {
+        "maximum": 9.018681668999989,
+        "median": 8.968947490999994,
+        "minimum": 8.903155570999985,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.0027989320000187945,
+        "median": 0.0026856069999894316,
+        "minimum": 0.0026853560000006382,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 4.100953045000011,
+        "median": 4.002107500999983,
+        "minimum": 3.9764076070000556,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 53,
+        "median": 53,
+        "minimum": 52,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 752302667,
+        "median": 749382129,
+        "minimum": 747945052,
+        "samples": 3
+      },
+      "repository_check": {
+        "maximum": 3.017979103999977,
+        "median": 2.9941628679999894,
+        "minimum": 2.983384925999985,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 5.735342269,
+        "median": 5.730691465999996,
+        "minimum": 5.709513896000004,
+        "samples": 3
+      }
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "f415415624dcc452f2a02b8c33641791a8c6d6d3b65bbb3543fcf9a25151585c",
+      "path": "linux-x64/restic/restic",
+      "platform": "linux-x64",
+      "prerelease": false,
+      "release_url": "https://github.com/restic/restic/releases/tag/v0.19.1",
+      "sha256": "20d4142678d0d95ec11a4759def1b73fd9190abc9ca19e4b62d067c0b387e639",
+      "source_url": "https://github.com/restic/restic/releases/download/v0.19.1/restic_0.19.1_linux_amd64.bz2",
+      "tool": "restic",
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "version": "0.19.1"
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "BuildPatchTool keeps its default 1 MiB chunk window and internal compression. Local ChunkBuildDirectory specifies FeatureLevel=Latest, artifact/version/launch metadata and manifest filenames; no upload, authentication or encryption is enabled. Recovery uses InstallManifest with PrevManifest. Gutch uses unencrypted FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles. BPT chunk windows are not CDC averages; compression codec/level and artifact formats are unmatched. There is no separate repository-check phase for BPT. Fresh local repositories and isolated caches; automatic workers; noninteractive/output flags. One warm-up and 3 rotating measured repetitions, profiling off. Independent validation is outside timings; extra files are allowed.",
+  "executables": {
+    "buildpatchtool": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a"
+    },
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/bin/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "BuildPatchTool keeps its default 1 MiB chunk window and internal compression. Local ChunkBuildDirectory specifies FeatureLevel=Latest, artifact/version/launch metadata and manifest filenames; no upload, authentication or encryption is enabled. Recovery uses InstallManifest with PrevManifest. Gutch uses unencrypted FastCDC with a 1 MiB target, Zstd 3 and 8 MiB bundles. BPT chunk windows are not CDC averages; compression codec/level and artifact formats are unmatched. There is no separate repository-check phase for BPT. Fresh local repositories and isolated caches; automatic workers; noninteractive/output flags. One warm-up and 3 rotating measured repetitions, profiling off. Independent validation is outside timings; extra files are allowed.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "buildpatchtool",
+        "profile": null,
+        "tool": "buildpatchtool",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": null,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "buildpatchtool",
+        "profile": null,
+        "tool": "buildpatchtool",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_bpt",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 3,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c50285368c91d127e51d52f75aab37603d810682",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "failure",
+  "pair": "bpt",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41200340952",
+    "GITHUB_SHA": "aeccad4d48f6caab6650733958cf4f3e4a8dbe57",
+    "GUTCH_REVISION": "c50285368c91d127e51d52f75aab37603d810682",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [
+    "output validation failed; see /home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/runs/2026.10.31-gutch_vs_bpt-comparison-001/lanes/buildpatchtool-sample-001/stats/validate-restored-v1.json: ['different: blender.exe']",
+    "output validation failed; see /home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/runs/2026.10.31-gutch_vs_bpt-comparison-001/lanes/buildpatchtool-sample-002/stats/validate-restored-v1.json: ['different: blender.exe']",
+    "output validation failed; see /home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/runs/2026.10.31-gutch_vs_bpt-comparison-001/lanes/buildpatchtool-sample-003/stats/validate-restored-v1.json: ['different: blender.exe']"
+  ],
+  "rows": [
+    [
+      "buildpatchtool",
+      "ERROR",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-"
+    ],
+    [
+      "gutch",
+      "PASS",
+      "5.668",
+      "2.333",
+      "0.721",
+      "-",
+      "689.362",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "failed",
+  "status": "ERROR",
+  "summary": {
+    "buildpatchtool": {},
+    "gutch": {
+      "backup": {
+        "maximum": 5.709986824000055,
+        "median": 5.667569730999958,
+        "minimum": 5.654884484000007,
+        "samples": 3
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 3
+      },
+      "corrupt": {
+        "maximum": 0.007519028999979582,
+        "median": 0.006641478000062762,
+        "minimum": 0.00646811600000774,
+        "samples": 3
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371,
+        "minimum": 1974999371,
+        "samples": 3
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346,
+        "minimum": 12346,
+        "samples": 3
+      },
+      "repair": {
+        "maximum": 0.7242977870000118,
+        "median": 0.7209763379999572,
+        "minimum": 0.7056700020000051,
+        "samples": 3
+      },
+      "repo_files": {
+        "maximum": 120,
+        "median": 120,
+        "minimum": 120,
+        "samples": 3
+      },
+      "repo_size": {
+        "maximum": 722847959,
+        "median": 722847959,
+        "minimum": 722847959,
+        "samples": 3
+      },
+      "restore": {
+        "maximum": 2.364812257999972,
+        "median": 2.3328365899999426,
+        "minimum": 2.3272274790000154,
+        "samples": 3
+      },
+      "verify": null
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "9d56626cc073c1c5f12134a43e5d3be9e4c68146ecbe882f1645f0d3435b2660",
+      "path": "linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "platform": "linux-x64",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a",
+      "source_url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip",
+      "tool": "buildpatchtool",
+      "verification": "matches current official package; publisher does not provide a separate checksum here",
+      "verified_at": "2026-10-31",
+      "version": "1.8.8"
+    }
+  ]
+}
