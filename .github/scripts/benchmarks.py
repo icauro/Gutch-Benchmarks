@@ -15,7 +15,7 @@ import yaml
 from comparison_benchmark_suite.datasets import extract_archive, prepare_dataset
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.support.retention import remove_owned
-from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric
+from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details
 from comparison_benchmark_suite.tools.chart import latest_records, render_svg
 
 
@@ -96,7 +96,7 @@ def write_fixture(pair, repetitions, root=ROOT):
     document["dataset"] = str((root / SOURCE / "fixtures/blender/dataset.yaml").resolve())
     document["repetitions"] = repetitions
     document["description"] = document["description"].replace(
-        "three rotating measured repetitions", f"{repetitions} rotating measured repetitions"
+        "six rotating measured repetitions", f"{repetitions} rotating measured repetitions"
     )
     document["open_perfetto"] = False
     path = root / ".artifacts/ci/fixture.yaml"
@@ -126,6 +126,8 @@ def collect(pair, outcome, root=ROOT):
             results = json.loads((run / "results.json").read_text(encoding="utf-8"))
             compact["rows"] = comparison_rows(summary, results)
             compact["summary"] = summary
+            compact["measurement_contract"] = 2
+            compact["operations"] = {item["metadata"]["case"]: item["metadata"].get("operations", {}) for item in results}
             compact["reasons"] = list(dict.fromkeys(item["metadata"]["reason"]
                                       for item in results if item["metadata"].get("reason")))
             if outcome == "success" and record.get("status") == "passed" and all(
@@ -172,6 +174,12 @@ def pair_overview(record):
     lines.extend("| " + " | ".join(row[i] for i in (0, 1, 2, 3, 4, 6)) + " |" for row in rows)
     ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size")]
     lines.extend(["| **Gutch relative** | - | " + " | ".join(ratios) + " |", ""])
+    if record.get("measurement_contract") == 2:
+        lines.extend(measurement_details(record.get("summary", {})))
+        for label, operations in record.get("operations", {}).items():
+            unsupported = [f"{name}: {status}" for name, status in operations.items() if status.startswith("UNSUPPORTED")]
+            if unsupported:
+                lines.extend([label + ": " + "; ".join(unsupported), ""])
     return lines
 
 
@@ -198,7 +206,8 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     lines = ["# Linux benchmark results", "", f"Run: [{run_id}, attempt {attempt}]({url}) | UTC date: {stamp}", "",
              "Each pair has its own settings. Hosted-runner timings are indicative; OS cache state is uncontrolled.", ""]
     dates = sorted({item["source_report"].split("/")[0] for item in latest if item.get("source_report")})
-    overview = ["Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · " + ", ".join(dates), "",
+    protocol_note = " · includes earlier measurement protocols" if any(item.get("measurement_contract") != 2 for item in latest) else " · measurement contract 2"
+    overview = ["Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · " + ", ".join(dates) + protocol_note, "",
                 f"[This run's report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
                 "Lower values are better. Pair settings differ; bars scale independently within each cell.",
                 "Hosted-runner timings are indicative; OS caches are uncontrolled.", "",
@@ -217,6 +226,8 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
                       f"[Machine-readable report]({name}.json)", "",
                       "| " + " | ".join(COMPARISON_HEADERS) + " |", "|" + "---|" * len(COMPARISON_HEADERS)])
         lines.extend("| " + " | ".join(row) + " |" for row in record["rows"])
+        if record.get("measurement_contract") == 2:
+            lines.extend(["", *measurement_details(record.get("summary", {}))])
         lines.extend(["", *record.get("reasons", []), ""])
     destination.mkdir(parents=True, exist_ok=True)
     (destination / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

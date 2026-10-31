@@ -7,11 +7,10 @@ import re
 from pathlib import Path
 import tempfile
 import shutil
-import time
 
-from comparison_benchmark_suite.support.command import CommandRunner, CommandError
+from comparison_benchmark_suite.support.command import CommandRunner
 from comparison_benchmark_suite.support.filesystem import remove_tree, scan_tree
-from comparison_benchmark_suite.support.recovery import apply_corruption_plan, build_corruption_plan
+from comparison_benchmark_suite.support.recovery import capture_metrics, recovery_checks, validate_installation
 from comparison_benchmark_suite.scheduling.dataset import DatasetSelection
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.tools.models import LaneResult, LaneSpec
@@ -84,6 +83,7 @@ def _plakar_command(
 ) -> list[str | Path]:
     return [
         executable,
+        "-concurrency", "4",
         "-quiet",
         "-cachedir",
         cache_directory,
@@ -127,9 +127,9 @@ def run_external(
         elapsed_commands.append(result.elapsed_seconds)
         return result
 
-    env = {}
+    env = {"GOMAXPROCS": "4", "RAYON_NUM_THREADS": "4"}
     if kind == "restic":
-        env = {
+        env = {"GOMAXPROCS": "4", "RAYON_NUM_THREADS": "4",
             "RESTIC_PASSWORD": "bench",
             "RESTIC_CACHE_DIR": str(lane_root / "restic-cache"),
         }
@@ -143,7 +143,7 @@ def run_external(
         # repository settings or filters. Caches and credentials are run-owned.
         profile = lane_root / "rustic-profile.toml"
         profile.write_text("", encoding="utf-8")
-        env = {"RUSTIC_PASSWORD": "bench"}
+        env = {"RUSTIC_PASSWORD": "bench", "RAYON_NUM_THREADS": "4"}
         rustic_command = [
             executable, "--use-profile", profile, "--repository", repo,
             "--cache-dir", lane_root / "rustic-cache", "--no-progress",
@@ -154,7 +154,7 @@ def run_external(
             description=f"{lane_spec.label} init", env=env,
         )
     elif kind == "kopia":
-        env = {
+        env = {"GOMAXPROCS": "4", "RAYON_NUM_THREADS": "4",
             "KOPIA_CONFIG_PATH": str(lane_root / "kopia.config"),
             "KOPIA_PASSWORD": "bench",
             "KOPIA_CACHE_DIRECTORY": str(lane_root / "kopia-cache"),
@@ -162,7 +162,7 @@ def run_external(
             "KOPIA_CHECK_FOR_UPDATES": "false",
         }
         execute(
-            [executable, "repository", "create", "filesystem", "--path", repo, "--no-persist-credentials", "--no-progress"],
+            [executable, "repository", "create", "filesystem", "--path", repo, "--no-persist-credentials", "--no-progress", "--object-splitter=DYNAMIC-4M-BUZHASH", "--encryption=AES256-GCM-HMAC-SHA256"],
             description=f"{lane_spec.label} init",
             env=env,
         )
@@ -173,14 +173,14 @@ def run_external(
                 env=env,
             )
     elif kind == "plakar":
-        env = {"PLAKAR_INSECURE_PLAINTEXT": "1"}
+        env = {"PLAKAR_INSECURE_PLAINTEXT": "1", "GOMAXPROCS": "4"}
         execute(
             _plakar_command(executable, repo, plakar_cache_directory, "create", "-plaintext"),
             description=f"{lane_spec.label} init",
             env=env,
         )
     else:
-        env = {
+        env = {"GOMAXPROCS": "4", "RAYON_NUM_THREADS": "4",
             "BORG_BASE_DIR": str(lane_root / "borg"),
             "BORG_CACHE_DIR": str(lane_root / "borg-cache"),
             # Borg 2.0.0b25 removed none-sha256. Payloads stay unencrypted;
@@ -196,10 +196,11 @@ def run_external(
     started = len(elapsed_commands)
     snapshot_metrics = dataset.snapshot_metrics()
     identifiers: dict[str, str] = {}
+    previous_size = scan_tree(repo).total_bytes
     for index, source in enumerate(sources, start=1):
         if kind == "restic":
             result = execute(
-                [executable, "backup", *lane_spec.arguments, "--json", "--repo", repo, source.name],
+                [executable, "backup", *lane_spec.arguments, "--read-concurrency", "4", "--json", "--repo", repo, source.name],
                 description=f"{lane_spec.label} backup {source.name}",
                 cwd=product,
                 env=env,
@@ -215,7 +216,7 @@ def run_external(
             )
             identifiers[source.name] = tag
         elif kind == "kopia":
-            execute([executable, "snapshot", "create", source, "--no-progress"], description=f"{lane_spec.label} create {source.name}", env=env)
+            execute([executable, "snapshot", "create", source, "--no-progress", "--parallel=4"], description=f"{lane_spec.label} create {source.name}", env=env)
             identifiers[source.name] = source.name
         elif kind == "plakar":
             tag = f"gutch-benchmark-{index:04d}"
@@ -236,14 +237,17 @@ def run_external(
             )
             identifiers[source.name] = archive
         snapshot_metrics[source.name]["backup"] = elapsed_commands[-1]
+        current_size = scan_tree(repo).total_bytes
+        snapshot_metrics[source.name]["repo_growth_bytes"] = current_size - previous_size
+        previous_size = current_size
     backup = sum(elapsed_commands[started:])
     repo_stats = scan_tree(repo)
 
-    def restore_output(record_snapshots: bool = False) -> float:
+    def restore_output(record_snapshots: bool = False, *, clean=False) -> float:
         restore_started = len(elapsed_commands)
         operation = "restore" if record_snapshots else "in-place recovery"
-        restic_options = [] if record_snapshots else ["--overwrite", "always", "--delete"]
-        kopia_options = [] if record_snapshots else ["--delete-extra"]
+        restic_options = [] if record_snapshots or clean else ["--overwrite", "always", "--delete"]
+        kopia_options = [] if record_snapshots or clean else ["--delete-extra"]
         # Borg 2.0.0b25 requires this even for the initial restore once another
         # version directory exists under the shared output root.
         borg_options = ["--continue"]
@@ -258,7 +262,7 @@ def run_external(
             elif kind == "rustic":
                 # Select a unique per-source tag and restore its named subtree.
                 # Recovery deletion must not touch other versions in output/.
-                rustic_options = [] if record_snapshots else ["--delete"]
+                rustic_options = [] if record_snapshots or clean else ["--delete"]
                 execute(
                     [*rustic_command, "restore", f"latest:{source.name}",
                      output / source.name, "--filter-tags", identifiers[source.name],
@@ -267,7 +271,7 @@ def run_external(
                 )
             elif kind == "kopia":
                 execute(
-                    [executable, "snapshot", "restore", source, output / source.name, "--snapshot-time=latest", "--no-progress", *kopia_options],
+                    [executable, "snapshot", "restore", source, output / source.name, "--snapshot-time=latest", "--no-progress", "--parallel=4", *kopia_options],
                     description=f"{lane_spec.label} {operation} {source.name}",
                     env=env,
                 )
@@ -292,29 +296,12 @@ def run_external(
         return elapsed
 
     restore = restore_output(record_snapshots=True)
-    for source in sources:
-        dataset.validate(source, output / source.name, lane.stats / f"validate-restored-{source.name}.json")
-    corrupt_seconds = 0.0
-    repair_seconds = 0.0
-    recovery_error = None
+    validation_seconds = validate_installation(dataset, output, lane.stats, "restored")
+    recovery, operations = {}, {}
     if recovery_enabled:
-        recovery_destinations = [output / source.name for source in reversed(sources)]
-        plans = [
-            build_corruption_plan(
-                destination,
-                lane_root / "stats" / f"corruption-{index:03d}.json",
-                index,
-            )
-            for index, destination in enumerate(recovery_destinations, start=1)
-        ]
-        corrupt_started = time.perf_counter()
-        for destination, plan in zip(recovery_destinations, plans, strict=True):
-            apply_corruption_plan(destination, plan)
-        corrupt_seconds = time.perf_counter() - corrupt_started
-        try:
-            repair_seconds = restore_output()
-        except CommandError as error:
-            recovery_error = str(error)
+        recovery, operations = recovery_checks(dataset, lane, output, lambda operation: restore_output(),
+            lambda: restore_output(clean=True),
+            delete_extra=kind in {"restic", "rustic", "kopia"}, hidden_damage=kind != "borg")
 
     verify_started = len(elapsed_commands)
     if kind == "restic":
@@ -338,12 +325,8 @@ def run_external(
     else:
         execute([executable, "check", "--repo", repo, "--verify-data"], description=f"{lane_spec.label} check", env=env)
     verify = sum(elapsed_commands[verify_started:])
-    if recovery_error is None:
-        try:
-            for source in sources:
-                dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
-        except RuntimeError as error:
-            recovery_error = str(error)
+    if kind == "plakar":
+        remove_tree(plakar_cache_directory)
     return LaneResult(
         lane_spec.label,
         lane_spec.kind,
@@ -351,17 +334,18 @@ def run_external(
             "backup": backup,
             "restore": restore,
             "repository_check": verify,
-            **({"compare": 0.0} if recovery_error is None else {}),
-            "corrupt": corrupt_seconds,
-            **({"repair": repair_seconds} if recovery_enabled and recovery_error is None else {}),
+            "compare": 0.0,
+            "restore_validated": restore + validation_seconds,
+            **capture_metrics(snapshot_metrics),
+            **recovery,
             "repo_size": repo_stats.total_bytes,
             "repo_files": repo_stats.file_count,
         },
         {},
         {
-            "status": "ERROR" if recovery_error else "PASS",
-            "reason": recovery_error,
-            "recovery_error": recovery_error,
+            "status": "PASS",
+            "operations": operations,
+            "measurement_contract": 2,
             "recovery_mode": "restore_existing",
             "extra_file_policy": "native_delete" if kind in {"restic", "rustic", "kopia"} else "no_native_delete_option",
             "snapshot_metrics": snapshot_metrics,
@@ -370,6 +354,6 @@ def run_external(
             "verify_invocations": len(sources) if kind == "kopia" else 1,
             "verify_position": "after_recovery",
             "corrupt_repair_after_reconstruct": recovery_enabled,
-            **({"differences": []} if recovery_error is None else {}),
+            "differences": [],
         },
     )

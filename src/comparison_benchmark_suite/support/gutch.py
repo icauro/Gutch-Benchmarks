@@ -8,8 +8,7 @@ from typing import Any
 from comparison_benchmark_suite.support.commands import GutchCli
 from comparison_benchmark_suite.support.command import CommandRunner
 from comparison_benchmark_suite.support.models import GutchProfile
-from comparison_benchmark_suite.support.artifacts import LaneLayout, safe_component
-from comparison_benchmark_suite.support.recovery import build_corruption_plan
+from comparison_benchmark_suite.support.artifacts import LaneLayout
 
 def snapshot_version(name: str) -> str:
     if re.fullmatch(r"v[1-9][0-9]*", name):
@@ -118,75 +117,13 @@ class GutchOperations:
         )
         return result.elapsed_seconds, read_stats(stats_path)
 
-    def corrupt_and_repair(
-        self,
-        lane: LaneLayout,
-        repo: Path,
-        snapshots: list[tuple[str, str, Path]],
-        profile: GutchProfile,
-        label: str,
-    ) -> dict[str, float | list[str]]:
-        corrupt_seconds = 0.0
-        repair_seconds = 0.0
-        corrupt_traces: list[str] = []
-        repair_traces: list[str] = []
-        plans = []
-        for index, (name, snapshot_id, destination) in enumerate(snapshots, start=1):
-            plan = build_corruption_plan(
-                destination,
-                lane.stats / f"corruption-{safe_component(label)}-{index:03d}.json",
-                index,
-            )
-            plans.append((name, snapshot_id, destination, plan))
-        for index, (name, _snapshot_id, destination, plan) in enumerate(plans, start=1):
-            stats = lane.stats / f"corrupt-{safe_component(label)}-{index:03d}.json"
-            trace = lane.traces / f"corrupt-{safe_component(label)}-{index:03d}" / "trace.json"
-            result = self.commands.run(
-                self.cli.command(
-                    "debug",
-                    "corrupt-installation",
-                    "--destination",
-                    destination,
-                    "--plan",
-                    plan,
-                    "--json", "--output",
-                    stats,
-                    "--yes",
-                    "--profile-dir",
-                    trace.parent,
-                ),
-                description=f"{label} corrupt {name}",
-            )
-            corrupt_seconds += result.elapsed_seconds
-            corrupt_traces.append(str(trace))
-        for index, (name, snapshot_id, destination, _plan) in enumerate(plans, start=1):
-            stats = lane.stats / f"repair-{safe_component(label)}-{index:03d}.json"
-            trace = lane.traces / f"repair-{safe_component(label)}-{index:03d}" / "trace.json"
-            result = self.commands.run(
-                self.cli.command(
-                    "installation",
-                    "repair",
-                    "--repo",
-                    repo,
-                    "--snapshot",
-                    snapshot_id,
-                    "--destination",
-                    destination,
-                    "--remove-extra-files",
-                    "--yes",
-                    *GutchCli.runtime_args(profile),
-                    "--json", "--output",
-                    stats,
-                    "--profile-dir",
-                    trace.parent,
-                ),
-                description=f"{label} repair {name}",
-            )
-            repair_seconds += result.elapsed_seconds
-            repair_traces.append(str(trace))
-        return {
-            "corrupt": corrupt_seconds,
-            "repair": repair_seconds,
-            "corrupt_traces": corrupt_traces,
-            "repair_traces": repair_traces,
-        }
+    def repair(self, lane, repo, snapshots, profile, label, operation):
+        total = 0.0
+        for index, (name, snapshot, destination) in enumerate(snapshots, 1):
+            result = self.commands.run(self.cli.command(
+                "installation", "repair", "--repo", repo, "--snapshot", snapshot,
+                "--destination", destination, "--remove-extra-files", "--yes",
+                *GutchCli.runtime_args(profile), "--json", "--output", lane.stats / f"{operation}-{index}.json",
+                "--profile-dir", lane.traces / f"{operation}-{index}"), description=f"{label} {operation} {name}")
+            total += result.elapsed_seconds
+        return total

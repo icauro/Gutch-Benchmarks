@@ -41,7 +41,7 @@ build artifact lasts seven days. Nothing uploads repository/output payloads.
 Default-branch runs commit compact JSON reports and a Markdown report under
 `reports/<UTC-date>/<run-id>-<attempt>/`, then update the latest-results section
 above. Each pair has its own table and a Gutch-relative row computed from raw
-medians: times show faster/slower factors, and storage shows Gutch / other size.
+medians: times show faster/slower factors, and storage shows percentage size differences.
 Failed pairs, missing/nonpositive measurements and unequal sample counts receive
 no ratio. Failed or missing pairs are shown explicitly. Runs from other branches
 retain Actions artifacts without updating the README. Repository rules must
@@ -89,7 +89,7 @@ benchmark those same files as data; Blender is never executed. Missing inputs
 are downloaded from Blender's official server, SHA-256 checked and extracted
 under `.artifacts/`. Existing prepared inputs are inventoried before reuse.
 Use local `path` builds in a custom fixture to work without downloading inputs.
-Each fixture runs one warm-up and three measured repetitions, rotating tool order.
+Each fixture runs one warm-up and six measured repetitions, rotating tool order.
 Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
 
@@ -137,7 +137,7 @@ gutch-bench --fixture gutch_vs_plakar
 gutch-bench --fixture gutch_vs_bpt
 ```
 
-These fixtures use one warm-up, three measured repetitions, rotating order and
+These fixtures use one warm-up, six measured repetitions, rotating order and
 profiling off. Each references the bundled `blender/dataset.yaml` for inputs, reusing the
 cache rather than duplicating the Blender input definitions. This shared file
 defines inputs only; every shipped runnable fixture compares Gutch with one tool.
@@ -149,12 +149,12 @@ Nested dataset references are not supported.
 |---|---|---|
 | Kopia 0.23.1 | Buzhash 4 MiB target; file compression off | `chunk_4MiB`, compression `none`, `bundle_16MiB` |
 | Restic 0.19.1 | Rabin approximately 1 MiB; Zstd `auto` | `chunk_1MiB`, Zstd 3 |
-| Rustic 0.11.4 | Rabin approximately 1 MiB; repository Zstd level 3 selected | `chunk_1MiB`, Zstd 3 |
+| Rustic 0.11.4 | Rabin approximately 1 MiB; Zstd 3; 8 MiB data/tree packs | `chunk_1MiB`, Zstd 3 |
 | Borg 2.0.0b25 | FastCDC approximately 2 MiB, normalization 2; LZ4 | `chunk_2MiB`, LZ4 0 |
 | Plakar 1.1.8 | FastCDC approximately 1 MiB; default LZ4 stream writer | `chunk_1MiB`, LZ4 0 |
 | BPT 1.8.8 | 1 MiB window; internal compression | `chunk_1MiB`, Zstd 3 (codec unmatched) |
 
-Gutch keeps automatic workers and its native FastCDC algorithm. Bundles use the
+Gutch uses four workers and its native FastCDC algorithm. Bundles use the
 8 MiB profile except the Kopia pair, which requires the 16 MiB profile because
 its 4 MiB chunk profile allows chunks up to 16 MiB.
 Chunk bounds, normalization, codec implementations, metadata compression and
@@ -165,13 +165,8 @@ not treated as equivalent to Gutch LZ4 high compression level 9.
 Fixture descriptions explain command overrides and differences from Gutch. They
 are printed before execution and included in `summary.md` and `run.json`.
 
-External tool releases were verified on 2026-10-31; URLs and archive SHA-256
-values are recorded in [the local tool manifest](../src/comparison_benchmark_suite/resources/tools.json). Borg tracks
-the latest 2.x prerelease because the fixtures require Borg 2 FastCDC; other
-external tools track stable releases. The five pre-existing Windows adapters were
-checked with two small deterministic builds. Rustic command construction is covered by mocked tests only; its capture,
-restore, verification and recovery have not been executed. Linux assets were
-checksum-verified but not executed during this refresh.
+External tool versions and checksums are pinned in [the tool manifest](../src/comparison_benchmark_suite/resources/tools.json).
+Borg tracks a 2.x prerelease because this pair requires Borg 2 FastCDC.
 
 Borg 2.0.0b25 removed `none-sha256`. The suite uses `authenticated-sha256`, with
 unencrypted authenticated payloads and a fixed local test passphrase protecting
@@ -186,7 +181,7 @@ plaintext mode.
 Existing operational choices remain: isolated repositories/caches, no encryption
 for Borg/Plakar, encryption for Kopia/Restic/Rustic, independent validation, and native
 recovery options. Thus these preserve performance defaults where practical;
-they are not unmodified default invocations. Extra files remain nonfatal.
+they are not unmodified default invocations. Contract 2 validates supported recovery outcomes strictly.
 Use detailed profiling only in a separate diagnostic run.
 Each pair selects its own approximate match. There is no all-tools preset:
 chunking algorithms, bounds, compression work, encryption and packing differ.
@@ -200,7 +195,35 @@ and disables ownership restoration. Recovery adds `--delete` only within that
 build's destination. The adapter uses an explicit empty profile and run-owned
 cache, then checks all repository data separately from backup/restore timings.
 These commands target [Rustic 0.11.4](https://github.com/rustic-rs/rustic/releases/tag/v0.11.4).
-Actual runtime compatibility and performance still need a user-selected run.
+Local compatibility is checked separately from performance runs; smoke-test results do not replace Blender measurements.
+
+## Measurement contract 2
+
+New runs use six measured repetitions plus one warm-up, rotating tool order.
+A one-repetition, zero-warm-up local fixture is suitable for compatibility checks.
+The existing saved public results use the earlier contract and are not rewritten.
+
+- First capture, later-version capture and later-version repository byte growth are recorded separately.
+- Capture and native restore/repair timers retain native integrity checks. Repository creation and the full repository check remain separate.
+- Every native adapter uses the same strict output inventory and SHA-256 validator. Validation-inclusive metrics add its duration to native command time; native verification work is not subtracted.
+- A source-derived corruption plan flips bytes in the smallest and largest writable nonempty files, and deletes a distinct file when available. The same source paths are selected for every tool.
+- Content repair and preserved-mtime repair are separate. The latter keeps file length and mtime unchanged. Borg resume cannot detect that damage and receives an explicit unsupported outcome.
+- Extra-file cleanup is a separate exact-directory check. Borg, Plakar and BPT have no native deletion in these adapters and receive unsupported outcomes; the harness does not delete extras on their behalf.
+- Full restore recovery removes the owned destination before native restoration. Strict validation follows every supported operation. Wrong bytes or unexpected files fail the case.
+- Detailed tables show medians, minimum, maximum and sample counts. These ranges are descriptive, not confidence intervals.
+
+Gutch uses four workers. Go tools use `GOMAXPROCS=4`; Rustic uses
+`RAYON_NUM_THREADS=4`; Kopia file/restore parallelism and Plakar concurrency are
+explicitly four. Borg/BPT keep native scheduling; these controls are not identical
+CPU or memory limits. Encryption remains disabled where supported.
+
+Borg explicitly selects `fastcdc,19,23,21,2` and LZ4. Kopia explicitly selects
+`DYNAMIC-4M-BUZHASH`, no content compression and AES256-GCM-HMAC-SHA256.
+Restic selects Zstd auto and an 8 MiB pack target. Rustic selects Rabin with a
+1 MiB average, 512 KiB minimum and 8 MiB maximum, Zstd 3, and 8 MiB data/tree
+pack targets with growth disabled. BPT explicitly selects a 1 MiB chunk window.
+Gutch bundle compression and native peer compression units still differ.
+Actual commands, binary checksums and fixture settings are recorded with each run.
 
 ## Use your own builds
 
@@ -315,32 +338,28 @@ optional developer diagnostics; the simple command does not require those tools.
 
 ## Native recovery and extra files
 
-Recovery changes bytes, leaves permissions unchanged, deletes a writable file
-when possible, and adds
-an unexpected file. The installation is retained for the tool to repair. The
-harness does not chmod damaged files or remove extras on the tool's behalf.
+Contract 2 changes file content without changing permissions. Content damage,
+preserved-mtime damage, unexpected files, and full restoration are separate
+checks. The harness does not identify damaged files for the tool or remove extras
+on its behalf. Strict validation follows every supported check.
 
-| Tool | Recovery command options | Extra files and tested Windows outcome |
-|---|---|---|
-| Gutch | Existing installation repair | Existing native repair path; independent validation remains required. |
-| Restic | `restore --overwrite always --delete --verify` | Native extra deletion. Real small-fixture and Blender recovery passed. Individual restores retain `--include <build>` to protect other builds. |
-| Rustic | `restore --verify-existing --no-ownership --delete` | Native deletion requested within one build directory. Command construction is mock-tested; runtime recovery is unverified. |
-| Kopia | `snapshot restore --delete-extra` | Native extra deletion requested. Installed 0.23.1 failed replacing a read-only damaged file; atomic writes also failed in a separate probe. |
-| Borg | `extract --continue` (Borg 2 only) | No native extra deletion option. An earlier Windows Borg 2 probe failed on the read-only file. Resume skips based on metadata, so it is not a content-integrity guarantee. |
-| Plakar | `restore` into the existing destination | No native extra deletion option established. The earlier 1.1.5 probe left an extra file and a content mismatch. |
-| BuildPatchTool | `InstallManifest -PrevManifest=...` | No native extra deletion option advertised. Installed 1.8.8 left the unexpected file. |
+| Tool | Native recovery | Preserved-mtime damage | Extra-file cleanup |
+|---|---|---|---|
+| Gutch | Installation repair | Supported | Supported |
+| Restic | `restore --overwrite always --delete --verify` | Supported | Supported, scoped to selected build |
+| Rustic | `restore --verify-existing --no-ownership --delete` | Supported | Supported, scoped to selected build |
+| Kopia | `snapshot restore --delete-extra` | Supported | Supported |
+| Borg | `extract --continue` | Unsupported: trusts matching size/mtime | Unsupported in adapter |
+| Plakar | Restore over existing destination | Supported | Unsupported in adapter |
+| BuildPatchTool | `InstallManifest -PrevManifest=...` | Supported | Unsupported in adapter |
 
-The historical outcomes above (excluding the unexecuted Rustic adapter) are
-from the earlier probe that also changed read-only attributes. Current corruption
-plans no longer change permissions; those results need a new run before comparison. They are not claims
-about every platform. Recovery errors retain successful capture/restore metrics,
-mark the run `ERROR`, omit a successful repair timing, and preserve evidence.
-No full-rebuild fallback masks a native recovery failure. Independent validation
-requires every expected entry, matching content and supported metadata. Extra
-files are allowed and recorded in each validation JSON's `extra_files` list;
-they do not fail a run. Native deletion flags remain enabled where available.
-The older probe outcomes in the table used strict extra-file validation and do
-not describe the current pass criterion.
+All six pairs passed a Windows functional smoke test on 2026-10-31 using two
+small deterministic synthetic builds, one measured repetition and no warm-up.
+These checks validate command compatibility and supported outcomes, not Blender
+performance, Linux behavior, read-only-file recovery or statistical significance.
+The older public Blender results retain their original measurement protocol.
+Unexpected command failures or incorrect output fail the case; no fallback masks
+a native repair failure. Other scheduled lanes can still run.
 
 ## BuildPatchTool
 

@@ -1,15 +1,14 @@
 name: gutch_vs_plakar
-description: Plakar keeps default FastCDC (about 1 MiB), LZ4 stream compression and
-  backup-cache policy. Repository creation disables encryption with -plaintext; the
-  adapter uses -stdio, -quiet and -no-progress. Recovery restores over existing output;
-  repository check is separate. Gutch uses unencrypted FastCDC with a 1 MiB target,
-  LZ4 0 and 8 MiB bundles. Chunk bounds, LZ4 implementation/framing, metadata and
-  storage layout differ; stored Plakar level 9 is not passed to its stream writer.
-  Fresh local repositories and isolated caches; automatic workers; noninteractive/output
-  flags. One warm-up and three rotating measured repetitions, profiling off. Independent
-  validation is outside timings; extra files are allowed.
+description: Plakar uses native FastCDC around 1 MiB and LZ4 stream compression, with plaintext storage.
+  Gutch uses a nominal 1 MiB FastCDC target, LZ4 0 and 8 MiB compressed bundles. Bounds, compression
+  units/framing and packing differ. Plakar restores over existing output; this adapter has no native
+  extra-file deletion. Fresh repositories and isolated caches. Four workers where exposed; native
+  Borg/BPT scheduling. One warm-up and six rotating measured repetitions; profiling off. Measurement
+  contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration.
+  Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive
+  durations are reported. Unsupported operations receive no timing.
 dataset: blender/dataset.yaml
-repetitions: 3
+repetitions: 6
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true
@@ -26,5 +25,6 @@ lanes:
     compression:
       algorithm: lz4
       level: 0
+    jobs: 4
 - label: plakar
   tool: plakar

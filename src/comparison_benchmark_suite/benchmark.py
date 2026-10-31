@@ -145,9 +145,8 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
                                           recovery_enabled=fixture.corrupt_repair)
             result = runners[label].run_lane(product, lane, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit, dataset=dataset)
             result.metadata.setdefault("status", "PASS")
-            result.metadata["operations"] = operation_statuses(
-                lane.tool, fixture.corrupt_repair, bool(result.metadata.get("recovery_error")),
-            )
+            defaults = operation_statuses(lane.tool, fixture.corrupt_repair, bool(result.metadata.get("recovery_error")))
+            result.metadata["operations"] = {**defaults, **result.metadata.get("operations", {})}
             return result
         except Exception as error:
             return LaneResult(lane.label, lane.kind, metadata={"status": "ERROR", "reason": redact_output(str(error))})

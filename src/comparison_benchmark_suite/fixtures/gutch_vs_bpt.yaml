@@ -1,15 +1,15 @@
 name: gutch_vs_bpt
-description: BuildPatchTool keeps its default 1 MiB chunk window and internal compression.
-  Local ChunkBuildDirectory specifies FeatureLevel=Latest, artifact/version/launch
-  metadata with empty AppLaunch and manifest filenames; no upload, authentication or encryption is enabled.
-  Recovery uses InstallManifest with PrevManifest. Gutch uses unencrypted FastCDC
-  with a 1 MiB target, Zstd 3 and 8 MiB bundles. BPT chunk windows are not CDC averages;
-  compression codec/level and artifact formats are unmatched. There is no separate
-  repository-check phase for BPT. Fresh local repositories and isolated caches; automatic
-  workers; noninteractive/output flags. One warm-up and three rotating measured repetitions,
-  profiling off. Independent validation is outside timings; extra files are allowed.
+description: BuildPatchTool uses a 1 MiB chunk window and its internal compression with FeatureLevel=Latest.
+  Local InstallManifest recovery uses PrevManifest. Gutch uses a nominal 1 MiB FastCDC target, Zstd
+  3 and 8 MiB compressed bundles. Chunk windows are not CDC averages; codecs and formats are unmatched.
+  No native extra-file cleanup or separate repository check is available in this adapter. Fresh repositories
+  and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and six
+  rotating measured repetitions; profiling off. Measurement contract 2 separates content repair,
+  preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256
+  validation follows every supported operation; both native and validation-inclusive durations are
+  reported. Unsupported operations receive no timing.
 dataset: blender/dataset.yaml
-repetitions: 3
+repetitions: 6
 warmups: 1
 profile_mode: 'off'
 corrupt_repair: true
@@ -26,5 +26,8 @@ lanes:
     compression:
       algorithm: zstd
       level: 3
+    jobs: 4
 - label: buildpatchtool
   tool: buildpatchtool
+  arguments:
+  - -ChunkWindowSize=1048576

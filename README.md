@@ -5,8 +5,24 @@ using shared Blender inputs, pair-specific settings and SHA-256 output validatio
 
 ![Latest per-pair benchmark comparisons](reports/comparison.svg)
 
+<details>
+<summary>Comparison differences and limits</summary>
+
+- Same input bytes and strict SHA-256 checks; these compare complete tool workflows.
+- **Borg:** FastCDC/LZ4 is approximate; resume trusts metadata, so preserved-mtime repair is unsupported.
+- **Plakar:** approximate FastCDC/LZ4 match; restore-over-existing is distinct from selective repair.
+- **Kopia:** compression off on both; Buzhash versus FastCDC, with encryption only on Kopia.
+- **Restic / Rustic:** Rabin versus FastCDC and mandatory encryption. Restic Zstd auto differs from Gutch Zstd 3; Rustic uses level 3. Matching pack targets does not match compression units.
+- **BuildPatchTool:** chunk windows and internal compression differ; installation recovery uses a previous manifest.
+- New runs separate content repair, preserved-mtime damage, extra-file cleanup and full restoration. Unsupported operations have no timing.
+- Chart times include native checks; detailed reports also show common validation-inclusive times and sample ranges. Native verification, metadata and durability work still differ.
+- Six measured repetitions balance tool order. OS caches are uncontrolled; one-sample local smoke tests establish compatibility only.
+- Historical runs retain their original methodology; consult each source report before comparing runs.
+
+</details>
+
 <!-- latest-benchmarks:start -->
-Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31
+Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31 · earlier measurement protocol
 
 [All-pairs report](reports/2026-10-31/41200340952-1/README.md) · [BPT rerun](reports/2026-10-31/41201391345-1/README.md)
 
@@ -84,7 +100,7 @@ Hosted-runner timings are indicative; OS caches are uncontrolled.
 
 Open **Actions > Manual Linux benchmarks > Run workflow**. Choose `all` or one
 pair, the Gutch revision, and repetitions. Defaults: Ubuntu 24.04, all six pairs,
-one warm-up and three measured repetitions.
+one warm-up and six measured repetitions.
 All six pairs can run concurrently, each on its own runner.
 
 All jobs share a validated Blender input cache. Repositories and restored outputs

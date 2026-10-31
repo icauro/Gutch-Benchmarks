@@ -1,11 +1,9 @@
 """Local BuildPatchTool capture, installation, and independently verified recovery."""
 
-import time
-
 from ..scheduling.dataset import DatasetSelection
 from ..support.command import CommandError
 from ..support.filesystem import file_sha256, scan_tree
-from ..support.recovery import build_corruption_plan, apply_corruption_plan
+from ..support.recovery import capture_metrics, recovery_checks, validate_installation
 from .models import LaneResult
 
 
@@ -58,7 +56,7 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
     stored = scan_tree(cloud)
     output = lane.payload / "installation"
 
-    def restore(record_snapshots):
+    def restore(record_snapshots, *, clean=False):
         total = 0.0
         operation = "restore" if record_snapshots else "in-place recovery"
         for source in reversed(dataset.sources):
@@ -67,7 +65,7 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
                 executable, "-mode=InstallManifest",
                 f"-Manifest={manifests[source.name].as_posix()}",
                 f"-CloudDirs={cloud.as_posix()}", f"-OutputDir={destination.as_posix()}",
-                *([] if record_snapshots else [f"-PrevManifest={manifests[source.name].as_posix()}"]),
+                *([] if record_snapshots or clean else [f"-PrevManifest={manifests[source.name].as_posix()}"]),
             ], description=f"BuildPatchTool {operation} {source.name}", cwd=lane.root)
             total += result.elapsed_seconds
             if record_snapshots:
@@ -75,34 +73,17 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
         return total
 
     restored = restore(True)
-    for source in dataset.sources:
-        dataset.validate(source, output / source.name, lane.stats / f"validate-restored-{source.name}.json")
-    recovery = {}
-    recovery_error = None
+    validation_seconds = validate_installation(dataset, output, lane.stats, "restored")
+    recovery, operations = {}, {}
     if recovery_enabled:
-        plans = [(output / source.name, build_corruption_plan(
-            output / source.name, lane.stats / f"corruption-{index:03d}.json", index,
-        )) for index, source in enumerate(reversed(dataset.sources), 1)]
-        started = time.perf_counter()
-        for destination, plan in plans:
-            apply_corruption_plan(destination, plan)
-        recovery["corrupt"] = time.perf_counter() - started
-        try:
-            repair_seconds = restore(False)
-            for source in dataset.sources:
-                dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
-            recovery["repair"] = repair_seconds
-        except (CommandError, RuntimeError) as error:
-            recovery_error = str(error)
+        recovery, operations = recovery_checks(dataset, lane, output, lambda operation: restore(False),
+                                               lambda: restore(False, clean=True), delete_extra=False)
     return LaneResult(specification.label, specification.kind,
                       metrics={"backup": elapsed, "restore": restored, "repo_size": stored.total_bytes,
-                               "repo_files": stored.file_count, **recovery},
-                      metadata={**dataset.metadata(), "status": "ERROR" if recovery_error else "PASS",
-                                "reason": recovery_error, "recovery_error": recovery_error,
+                               "repo_files": stored.file_count, "restore_validated": restored + validation_seconds,
+                               **capture_metrics(snapshots), **recovery},
+                      metadata={**dataset.metadata(), "status": "PASS", "measurement_contract": 2,
                                 "recovery_mode": "restore_existing",
                                 "extra_file_policy": "no_native_delete_option",
                                 "snapshot_metrics": snapshots, "binary_sha256": file_sha256(executable),
-                                "operations": {"capture": "PASS", "clean_restore": "PASS",
-                                               "full_restore_recovery": "NOT_RUN",
-                                               "in_place_repair": ("FAIL" if recovery_error else "PASS") if recovery_enabled else "NOT_RUN", "update": "NOT_RUN",
-                                               "rollback": "NOT_RUN", "no_op_restore": "NOT_RUN"}})
+                                "operations": {"capture": "PASS", "clean_restore": "PASS", **operations}})

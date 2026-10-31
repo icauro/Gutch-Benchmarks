@@ -36,15 +36,18 @@ class RusticTests(unittest.TestCase):
         lane = SimpleNamespace(root=self.root, payload=self.root / "payload", stats=self.root / "stats")
         sources = tuple(self.root / "product" / name for name in ("v1", "v2"))
         dataset = Mock(sources=sources)
-        dataset.snapshot_metrics.return_value = {source.name: {} for source in sources}
+        dataset.snapshot_metrics.return_value = {source.name: {"repo_growth_bytes": 0} for source in sources}
         commands = Mock()
         commands.run.return_value = CommandResult((), 0.25, 0, "", "")
         return binary, lane, dataset, commands
 
     def test_commands_isolate_state_select_versions_and_scope_recovery(self):
         binary, lane, dataset, commands = self.adapter_inputs()
-        with patch("comparison_benchmark_suite.tools.external.build_corruption_plan"), patch(
-            "comparison_benchmark_suite.tools.external.apply_corruption_plan"
+        def recovery(dataset, lane, output, repair, restore, **options):
+            self.assertTrue(options["delete_extra"])
+            return {"repair": repair("repair")}, {"repair": "PASS"}
+        with patch("comparison_benchmark_suite.tools.external.recovery_checks", side_effect=recovery), patch(
+            "comparison_benchmark_suite.tools.external.validate_installation", return_value=0.0
         ):
             result = run_external(
                 ExternalTools(commands, rustic=binary), lane, self.root / "product",
@@ -59,7 +62,7 @@ class RusticTests(unittest.TestCase):
                   "--cache-dir", self.root / "rustic-cache", "--no-progress", "--log-level", "warn"]
         self.assertEqual(calls[0].args[0], [*prefix, "init", "--set-compression", "3"])
         for call in calls:
-            self.assertEqual(call.kwargs["env"], {"RUSTIC_PASSWORD": "bench"})
+            self.assertEqual(call.kwargs["env"], {"RUSTIC_PASSWORD": "bench", "RAYON_NUM_THREADS": "4"})
         for index, source in enumerate(dataset.sources, start=1):
             self.assertEqual(calls[index].args[0], [*prefix, "backup", "--as-path", source.name,
                              "--tag", f"gutch-benchmark-{index:04d}", source.name])
@@ -72,9 +75,6 @@ class RusticTests(unittest.TestCase):
                                  f"latest:{source.name}", output / source.name, "--filter-tags", tag,
                                  "--verify-existing", "--no-ownership", *(["--delete"] if recovery else [])])
         self.assertEqual(calls[-1].args[0], [*prefix, "check", "--read-data"])
-        self.assertEqual(dataset.validate.call_count, 4)
-        self.assertEqual([call.args[:2] for call in dataset.validate.call_args_list],
-                         [(source, output / source.name) for source in dataset.sources] * 2)
         self.assertEqual(result.metadata["status"], "PASS")
         self.assertEqual(result.metrics["backup"], 0.5)
         self.assertEqual(result.metrics["restore"], 0.5)
@@ -106,7 +106,8 @@ class RusticTests(unittest.TestCase):
             document = yaml.safe_load(path.read_text(encoding="utf-8"))
             self.assertEqual(document["dataset"], "blender/dataset.yaml")
         rustic = load_fixture(fixtures / "gutch_vs_rustic.yaml")
-        self.assertEqual(rustic.lanes[1].arguments, ("--set-compression", "3"))
+        self.assertIn("--set-compression", rustic.lanes[1].arguments)
+        self.assertIn("--set-datapack-size", rustic.lanes[1].arguments)
 
     def test_local_rustic_discovery_on_both_platforms(self):
         for system, folder, name in (("Windows", "windows-x64", "rustic.exe"),

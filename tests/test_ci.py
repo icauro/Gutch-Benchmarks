@@ -285,6 +285,16 @@ class CiTests(unittest.TestCase):
         record["rows"][1][1] = "UNAVAILABLE"
         self.assertNotIn("faster", "\n".join(ci.pair_overview(record)))
 
+    def test_new_report_keeps_ranges_common_validation_and_unsupported_outcomes(self):
+        record = {"pair": "borg", "status": "PASS", "rows": [], "measurement_contract": 2,
+                  "summary": {"gutch": {"repair_validated": {"median": 2, "minimum": 1, "maximum": 3, "samples": 6}},
+                              "borg": {}},
+                  "operations": {"borg": {"hidden_repair": "UNSUPPORTED: metadata-only resume"}}}
+        rendered = "\n".join(ci.pair_overview(record))
+        self.assertIn("2.000 (1.000–3.000; n=6)", rendered)
+        self.assertIn("Content repair + validation s", rendered)
+        self.assertIn("UNSUPPORTED: metadata-only resume", rendered)
+
     def test_ci_fixture_keeps_pair_settings_and_records_selected_repetitions(self):
         shutil.copytree(ROOT / ci.SOURCE / "fixtures", self.package / "fixtures",
                         ignore=shutil.ignore_patterns("builds", "__pycache__"))

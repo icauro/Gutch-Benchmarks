@@ -13,7 +13,7 @@ import time
 from comparison_benchmark_suite.support.artifacts import LaneLayout, RunLayout
 from comparison_benchmark_suite.support.command import CommandRunner
 from comparison_benchmark_suite.support.filesystem import remove_tree, scan_tree
-from comparison_benchmark_suite.support.recovery import apply_corruption_plan, build_corruption_plan
+from comparison_benchmark_suite.support.recovery import apply_corruption_plan, build_corruption_plan, capture_metrics, recovery_checks, validate_installation
 from comparison_benchmark_suite.support.commands import GutchCli
 from comparison_benchmark_suite.tools.external import ExternalTools, run_external
 from comparison_benchmark_suite.tools.models import LaneResult, LaneSpec
@@ -54,12 +54,16 @@ class LocalFixtureRunner:
         backup_times: list[float] = []
         snapshots: list[tuple[str, str, Path]] = []
         capture_traces: list[str] = []
+        previous_size = scan_tree(repo).total_bytes
         for index, source in enumerate(sources, start=1):
             capture_stats = lane.stats / f"capture-{index:03d}.json"
             capture_trace = lane.traces / f"capture-{index:03d}" / "trace.json"
             elapsed, stats = self.gutch.capture(repo, source, lane_spec.profile, capture_stats, capture_trace, lane_spec.label)
             backup_times.append(elapsed)
             snapshot_metrics[source.name]["backup"] = elapsed
+            current_size = scan_tree(repo).total_bytes
+            snapshot_metrics[source.name]["repo_growth_bytes"] = current_size - previous_size
+            previous_size = current_size
             capture_traces.append(str(capture_trace))
             destination = output / source.name
             snapshots.append((source.name, _snapshot_id(stats), destination))
@@ -105,15 +109,19 @@ class LocalFixtureRunner:
             verify_seconds = _add_optional(verify_seconds, _verify_seconds(stats))
             traces["reconstruct"].append(str(reconstruct_trace))
             reconstructed.append((name, snapshot_id, destination))
-        for source in sources:
-            dataset.validate(source, output / source.name, lane.stats / f"validate-restored-{source.name}.json")
-        recovery: dict[str, float | list[str]] = {}
+        validation_seconds = validate_installation(dataset, output, lane.stats, "restored")
+        recovery, operations = {}, {}
         if recovery_enabled:
-            recovery = self.gutch.corrupt_and_repair(lane, repo, reconstructed, lane_spec.profile, lane_spec.label)
-            traces["corrupt"].extend(recovery["corrupt_traces"])  # type: ignore[arg-type]
-            traces["repair"].extend(recovery["repair_traces"])  # type: ignore[arg-type]
-        for source in sources:
-            dataset.validate(source, output / source.name, lane.stats / f"validate-final-{source.name}.json")
+            def restore_clean():
+                total = 0.0
+                for index, (name, snapshot, destination) in enumerate(reconstructed, 1):
+                    elapsed, _ = self.gutch.reconstruct(repo, snapshot, destination, lane_spec.profile,
+                        lane.stats / f"full-restore-{index}.json", lane.traces / f"full-restore-{index}/trace.json", name)
+                    total += elapsed
+                return total
+            recovery, operations = recovery_checks(dataset, lane, output,
+                lambda operation: self.gutch.repair(lane, repo, reconstructed, lane_spec.profile, lane_spec.label, operation),
+                restore_clean, delete_extra=True)
         return LaneResult(
             lane_spec.label,
             lane_spec.kind,
@@ -122,8 +130,9 @@ class LocalFixtureRunner:
                 "restore": restore_seconds,
                 "verify": verify_seconds,
                 "compare": 0.0,
-                "corrupt": float(recovery.get("corrupt", 0.0)),
-                "repair": float(recovery.get("repair", 0.0)),
+                "restore_validated": restore_seconds + validation_seconds,
+                **capture_metrics(snapshot_metrics),
+                **recovery,
                 "repo_size": repo_stats.total_bytes,
                 "repo_files": repo_stats.file_count,
             },
@@ -131,6 +140,8 @@ class LocalFixtureRunner:
             {
                 "snapshot_metrics": snapshot_metrics,
                 "verify_source": "reconstruct_stats.verify_timings.total_seconds",
+                "operations": operations,
+                "measurement_contract": 2,
                 "verify_invocations": len(sources),
                 "corrupt_repair_after_reconstruct": recovery_enabled,
                 "differences": [],

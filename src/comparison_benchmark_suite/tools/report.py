@@ -67,6 +67,30 @@ def ascii_comparison_table(rows: list[list[str]]) -> str:
                        *(line(row, numeric=True) for row in rows), border])
 
 
+DETAIL_METRICS = (("initial_capture", "Initial capture s"), ("incremental_capture", "Later-version capture s"),
+                  ("repo_growth_bytes", "Later-version stored growth bytes"),
+                  ("restore_validated", "Restore + independent validation s"),
+                  ("repair_validated", "Content repair + validation s"),
+                  ("hidden_repair_validated", "Preserved-mtime repair + validation s"),
+                  ("exact_recovery_validated", "Extra-file cleanup + validation s"),
+                  ("full_restore_recovery_validated", "Full restore recovery + validation s"))
+
+
+def measurement_details(summary):
+    """Display medians and observed ranges without implying statistical confidence."""
+    labels = list(summary)
+    lines = ["| Measurement | " + " | ".join(labels) + " |",
+             "|---|" + "---:|" * len(labels)]
+    for metric, title in DETAIL_METRICS:
+        cells = []
+        for label in labels:
+            value = summary[label].get(metric)
+            cells.append("-" if not value else
+                         f"{value['median']:.3f} ({value['minimum']:.3f}–{value['maximum']:.3f}; n={value['samples']})")
+        lines.append("| " + title + " | " + " | ".join(cells) + " |")
+    return ["Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.", "", *lines, ""]
+
+
 def write_comparison_report(directory: Path, description: str, results: list[LaneResult]) -> None:
     utilization_note = "CPU/RSS: detailed mode only, direct tool processes; 100% CPU = one core. Child processes and harness excluded."
     summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
@@ -79,6 +103,10 @@ def write_comparison_report(directory: Path, description: str, results: list[Lan
     reasons = dict.fromkeys(result.metadata["reason"] for result in results if result.metadata.get("reason"))
     lines.extend(["", *reasons, "", "Restore includes the tool's own verification. Independent SHA-256 validation is outside command timing.",
                   "", "Raw samples and operation semantics: results.json. Aggregate medians and ranges: summary.json. Perfetto overview: trace.json (compacted tool time; harness gaps omitted, not concurrent execution)."])
+    if any(result.metadata.get("measurement_contract") == 2 for result in results):
+        lines.extend(["", "## Common outcomes and variability", "", *measurement_details(summary)])
+        for result in results:
+            lines.extend([f"{result.label} operations: `{result.metadata.get('operations', {})}`", ""])
     lines.extend(["", utilization_note])
     (directory / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\nComparison: median seconds across measured runs; warm-ups excluded.")
