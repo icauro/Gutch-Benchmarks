@@ -64,7 +64,7 @@ Hosted-runner timings are indicative; OS caches are uncontrolled.
 
 **Resources by operation (MiB)**
 
-| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | gutch | 103.5 | — | 96.7 | — | 69.9 | — | 127.4 | — |
 | borg | 251.9 | — | 245.2 | — | 346.5 | — | 282.3 | — |
@@ -75,7 +75,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | borg | gutch |
 |---|---:|---:|
-| Initial capture s | 5.781 (5.781–5.781; n=1) | 3.543 (3.543–3.543; n=1) |
+| First capture s | 5.781 (5.781–5.781; n=1) | 3.543 (3.543–3.543; n=1) |
 | Later-version capture s | 5.697 (5.697–5.697; n=1) | 3.528 (3.528–3.528; n=1) |
 | Later-version stored growth bytes | 439779527.000 (439779527.000–439779527.000; n=1) | 437891774.000 (437891774.000–437891774.000; n=1) |
 | Restore + independent validation s | 13.511 (13.511–13.511; n=1) | 5.515 (5.515–5.515; n=1) |
@@ -98,7 +98,7 @@ borg: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
 **Resources by operation (MiB)**
 
-| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | gutch | 140.2 | — | 132.9 | — | 124.4 | — | 140.3 | — |
 | buildpatchtool | 383.0 | — | 520.7 | — | 228.9 | — | 131.5 | — |
@@ -109,7 +109,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | buildpatchtool | gutch |
 |---|---:|---:|
-| Initial capture s | 13.503 (13.503–13.503; n=1) | 2.311 (2.311–2.311; n=1) |
+| First capture s | 13.503 (13.503–13.503; n=1) | 2.311 (2.311–2.311; n=1) |
 | Later-version capture s | 23.325 (23.325–23.325; n=1) | 2.228 (2.228–2.228; n=1) |
 | Later-version stored growth bytes | 344645850.000 (344645850.000–344645850.000; n=1) | 322167243.000 (322167243.000–322167243.000; n=1) |
 | Restore + independent validation s | 31.828 (31.828–31.828; n=1) | 5.606 (5.606–5.606; n=1) |
@@ -132,7 +132,7 @@ buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in th
 
 **Resources by operation (MiB)**
 
-| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | gutch | 223.9 | — | 241.0 | — | 110.3 | — | 153.7 | — |
 | kopia | 186.6 | — | 172.3 | — | 251.8 | — | 295.8 | — |
@@ -143,7 +143,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | gutch | kopia |
 |---|---:|---:|
-| Initial capture s | 2.734 (2.734–2.734; n=1) | 2.398 (2.398–2.398; n=1) |
+| First capture s | 2.734 (2.734–2.734; n=1) | 2.398 (2.398–2.398; n=1) |
 | Later-version capture s | 2.677 (2.677–2.677; n=1) | 2.244 (2.244–2.244; n=1) |
 | Later-version stored growth bytes | 887308595.000 (887308595.000–887308595.000; n=1) | 883237091.000 (883237091.000–883237091.000; n=1) |
 | Restore + independent validation s | 5.175 (5.175–5.175; n=1) | 11.777 (11.777–11.777; n=1) |
@@ -164,7 +164,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 **Resources by operation (MiB)**
 
-| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | gutch | 72.4 | — | 70.3 | — | 48.5 | — | 182.6 | — |
 | plakar | 334.2 | — | 338.7 | — | 416.3 | — | 392.1 | — |
@@ -175,7 +175,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | gutch | plakar |
 |---|---:|---:|
-| Initial capture s | 3.406 (3.406–3.406; n=1) | 6.221 (6.221–6.221; n=1) |
+| First capture s | 3.406 (3.406–3.406; n=1) | 6.221 (6.221–6.221; n=1) |
 | Later-version capture s | 3.247 (3.247–3.247; n=1) | 5.067 (5.067–5.067; n=1) |
 | Later-version stored growth bytes | 438186069.000 (438186069.000–438186069.000; n=1) | 438096892.000 (438096892.000–438096892.000; n=1) |
 | Restore + independent validation s | 4.055 (4.055–4.055; n=1) | 7.711 (7.711–7.711; n=1) |
@@ -198,7 +198,7 @@ plakar: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapt
 
 **Resources by operation (MiB)**
 
-| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | gutch | 144.1 | — | 133.8 | — | 129.4 | — | 127.3 | — |
 | restic | 204.0 | — | 207.5 | — | 120.3 | — | 66.8 | — |
@@ -209,7 +209,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | gutch | restic |
 |---|---:|---:|
-| Initial capture s | 2.813 (2.813–2.813; n=1) | 3.683 (3.683–3.683; n=1) |
+| First capture s | 2.813 (2.813–2.813; n=1) | 3.683 (3.683–3.683; n=1) |
 | Later-version capture s | 2.450 (2.450–2.450; n=1) | 3.462 (3.462–3.462; n=1) |
 | Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 332225646.000 (332225646.000–332225646.000; n=1) |
 | Restore + independent validation s | 3.211 (3.211–3.211; n=1) | 6.340 (6.340–6.340; n=1) |
@@ -230,7 +230,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 **Resources by operation (MiB)**
 
-| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | gutch | 137.4 | — | 131.1 | — | 136.6 | — | 196.7 | — |
 | rustic | 136.6 | — | 136.6 | — | 299.3 | — | 136.6 | — |
@@ -241,7 +241,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | gutch | rustic |
 |---|---:|---:|
-| Initial capture s | 3.040 (3.040–3.040; n=1) | 5.560 (5.560–5.560; n=1) |
+| First capture s | 3.040 (3.040–3.040; n=1) | 5.560 (5.560–5.560; n=1) |
 | Later-version capture s | 2.635 (2.635–2.635; n=1) | 4.864 (4.864–4.864; n=1) |
 | Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 327162415.000 (327162415.000–327162415.000; n=1) |
 | Restore + independent validation s | 3.481 (3.481–3.481; n=1) | 6.462 (6.462–6.462; n=1) |

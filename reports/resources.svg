@@ -10,22 +10,22 @@
 <text x="1223" y="34" font-size="16" font-weight="400" fill="#edf2fa" text-anchor="start">Paired tool</text>
 <rect x="8" y="52" width="1348.00" height="586" rx="10" fill="#161b22"/>
 <text x="14" y="80" font-size="13" font-weight="700" fill="#a3afc2" text-anchor="start">COMPARISON</text>
-<text x="163" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Initial RAM</text>
-<text x="163" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="313" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Initial disk</text>
-<text x="313" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="463" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Next RAM</text>
-<text x="463" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="613" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Next disk</text>
-<text x="613" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="763" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restore RAM</text>
-<text x="763" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="913" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restore disk</text>
-<text x="913" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="1063" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Repair RAM</text>
-<text x="1063" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
-<text x="1213" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Repair disk</text>
-<text x="1213" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
+<text x="163" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">First capture</text>
+<text x="163" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">RAM · MiB</text>
+<text x="313" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">First capture</text>
+<text x="313" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">disk · MiB</text>
+<text x="463" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Second capture</text>
+<text x="463" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">RAM · MiB</text>
+<text x="613" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Second capture</text>
+<text x="613" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">disk · MiB</text>
+<text x="763" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restore</text>
+<text x="763" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">RAM · MiB</text>
+<text x="913" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Restore</text>
+<text x="913" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">disk · MiB</text>
+<text x="1063" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Repair</text>
+<text x="1063" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">RAM · MiB</text>
+<text x="1213" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">Repair</text>
+<text x="1213" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">disk · MiB</text>
 <rect x="8" y="98" width="1348.00" height="90" rx="0" fill="#000000"/>
 <path d="M8 98H1356" stroke="#29313d"/>
 <text x="14" y="121" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>

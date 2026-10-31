@@ -74,7 +74,7 @@ def operation_resource_table(record):
         return []
     other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
     lines = ["**Resources by operation (MiB)**", "",
-             "| Tool | Initial RAM | Initial disk | Next RAM | Next disk | Restore RAM | Restore disk | Repair RAM | Repair disk |",
+             "| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |",
              "|---|" + "---:|" * 8]
     for label in ("gutch", other):
         cells = []
@@ -88,7 +88,7 @@ def operation_resource_table(record):
                   "whole-workflow disk peaks are not reused here.", ""])
     return lines
 
-DETAIL_METRICS = (("initial_capture", "Initial capture s"), ("incremental_capture", "Later-version capture s"),
+DETAIL_METRICS = (("initial_capture", "First capture s"), ("incremental_capture", "Later-version capture s"),
                   ("repo_growth_bytes", "Later-version stored growth bytes"),
                   ("restore_validated", "Restore + independent validation s"),
                   ("repair_validated", "Content repair + validation s"),

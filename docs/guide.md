@@ -346,7 +346,7 @@ CI retains both evidence and compact resource results. The first SVG shows speed
 and stored size. `reports/resources.svg` is a second SVG directly below it, using
 the same paired-bar template and eight RAM/disk columns across four operations. CI refreshes and
 archives both images. Text resource tables remain below each pair’s speed table.
-Rows are comparisons with Gutch/peer bars; the eight columns are initial-capture RAM/disk, next-capture
+Rows are comparisons with Gutch/peer bars; the eight columns are first-capture RAM/disk, second-capture
 RAM/disk, restore RAM/disk and content-repair RAM/disk. Operation RAM is the maximum
 across its commands; restore and repair cover both versions. Per-command disk
 values remain unavailable until recorded. The latest run’s RAM breakdown is

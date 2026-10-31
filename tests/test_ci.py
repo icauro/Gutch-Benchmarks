@@ -267,7 +267,7 @@ class CiTests(unittest.TestCase):
         self.assertEqual(json.loads(report.read_text())["status"], "PASS")
         self.assertNotIn(b"\r", report.read_bytes())
         readme = (self.root / "README.md").read_text(encoding="utf-8")
-        self.assertIn("Initial RAM | Initial disk | Next RAM | Next disk", readme)
+        self.assertIn("First capture RAM | First capture disk | Second capture RAM | Second capture disk", readme)
         self.assertIn("gutch | 2.0 | —", readme)
         self.assertIn("rustic | 4.0 | —", readme)
 

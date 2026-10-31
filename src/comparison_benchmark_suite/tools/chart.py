@@ -13,8 +13,8 @@ from .report import relative_metric
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
            ("repair", "Repair", "seconds"), ("repo_size", "Stored size", "MiB"))
 RESOURCE_METRICS = tuple(
-    (f"{operation}_{kind}", f"{title} {kind.upper() if kind == 'ram' else 'disk'}", "MiB")
-    for operation, title in (("initial_capture", "Initial"), ("incremental_capture", "Next"),
+    (f"{operation}_{kind}", f"{title}\n{kind.upper() if kind == 'ram' else 'disk'}", "MiB")
+    for operation, title in (("initial_capture", "First capture"), ("incremental_capture", "Second capture"),
                              ("restore", "Restore"), ("repair", "Repair"))
     for kind in ("ram", "disk")
 )
@@ -84,8 +84,9 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
     text(margin + 6, table_top + 28, "COMPARISON", size=13, color="#a3afc2", weight=700)
     for index, (_, title, unit) in enumerate(metrics):
         x = margin + pair_width + index * cell_width
-        text(x + 7, table_top + 21, title, size=17, weight=650)
-        text(x + 7, table_top + 38, unit, size=13, color="#a3afc2")
+        heading, _, detail = title.partition("\n")
+        text(x + 7, table_top + 21, heading, size=17, weight=650)
+        text(x + 7, table_top + 38, f"{detail} · {unit}" if detail else unit, size=13, color="#a3afc2")
     for index, record in enumerate(records):
         y = table_top + header_height + index * row_height
         rect(margin, y, width - 2 * margin, row_height, "#000000" if index % 2 == 0 else "#0d1117")

@@ -78,8 +78,10 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(chart, render_resources_svg([record]))
         root = ET.fromstring(chart)
         labels = [node.text for node in root.iter("{http://www.w3.org/2000/svg}text")]
-        self.assertEqual(sum(label.endswith(" RAM") for label in labels), 4)
-        self.assertEqual(sum(label.endswith(" disk") for label in labels), 4)
+        self.assertEqual(labels.count("RAM · MiB"), 4)
+        self.assertIn("First capture", labels)
+        self.assertIn("Second capture", labels)
+        self.assertEqual(labels.count("disk · MiB"), 4)
         self.assertIn("Gutch", labels)
         self.assertIn("Restic [4]", labels)
         self.assertIn("1.0", labels)
