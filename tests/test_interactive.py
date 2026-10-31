@@ -44,6 +44,15 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
                 "lanes": [{"label": tool, "tool": tool}], "executables": {"gutch": sys.executable},
             }))
 
+    async def wait_for_preview(self, app, pilot, index):
+        # Focus posts a Preview message to the app. One idle barrier need not
+        # drain messages posted by other queued messages, especially on fast CI.
+        async def wait():
+            while (app.selected != index or app.fixtures[index].name not in
+                   str(app.query_one("#description", Static).content)):
+                await pilot.pause()
+        await asyncio.wait_for(wait(), timeout=3)
+
     async def test_hover_run_summary_perfetto_and_run_another(self):
         app = BenchmarkApp(self.suite)
         opened = []
@@ -51,21 +60,22 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
                    side_effect=lambda path, log: opened.append(path) or True):
             async with app.run_test(size=(80, 24)) as pilot:
                 await pilot.press("down")
-                await pilot.pause()
+                await self.wait_for_preview(app, pilot, 1)
                 self.assertEqual(app.selected, 1)
                 await pilot.hover("#fixture-1")
                 await pilot.pause()
                 self.assertIn("Second fixture", str(app.query_one("#description", Static).content))
                 # Keep mouse hover from overriding the keyboard selection under test.
-                await pilot.hover("#description")
+                self.assertTrue(await pilot.hover("#description"))
                 app.query_one("#fixture-0").focus()
-                await pilot.pause()
+                await self.wait_for_preview(app, pilot, 0)
                 self.assertEqual(app.selected, 0)
                 await pilot.click("#run")
                 await pilot.pause()
                 await asyncio.wait_for(app.workers.wait_for_complete(), 30)
                 await pilot.pause()  # Let the results view finish layout before clicking it.
                 self.assertFalse(app.busy)
+                self.assertIn("Run completed.", str(app.query_one("#outcome", Static).content))
                 self.assertEqual(app.query_one("#table", DataTable).row_count, 1)
                 self.assertTrue(app.report_path.is_file())
                 self.assertEqual(app.query_one("#progress").progress, 1)
@@ -77,7 +87,7 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
                 await pilot.pause()
                 self.assertTrue(app.query_one("#picker").display)
                 app.query_one("#fixture-1").focus()
-                await pilot.pause()
+                await self.wait_for_preview(app, pilot, 1)
                 await pilot.click("#run")
                 await pilot.pause()
                 await asyncio.wait_for(app.workers.wait_for_complete(), 30)
