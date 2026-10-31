@@ -28,6 +28,8 @@ class ResourceTests(unittest.TestCase):
         payload = lane / "payload"
         payload.mkdir(parents=True)
         (payload / "repo.bin").write_bytes(b"x" * 200)
+        (payload / "stats").mkdir()
+        (payload / "stats/dataset-file").write_bytes(b"x" * 50)
         (lane / "cache").mkdir()
         (lane / "cache/index").write_bytes(b"x" * 100)
         for name in ("commands", "stats", "traces", "kopia-logs"):
@@ -37,10 +39,10 @@ class ResourceTests(unittest.TestCase):
         (self.root / "input.bin").write_bytes(b"x" * 5000)
         sampler = DiskSpaceSampler([lane])
         sampler.sample()
-        self.assertEqual(sampler.result["peak_disk_bytes"], 300)
+        self.assertEqual(sampler.result["peak_disk_bytes"], 350)
         (payload / "repo.bin").unlink()
         sampler.sample()
-        self.assertEqual(sampler.result["peak_disk_bytes"], 300)
+        self.assertEqual(sampler.result["peak_disk_bytes"], 350)
 
     def test_memory_sums_parent_and_descendants_in_one_sample(self):
         parent = Mock()

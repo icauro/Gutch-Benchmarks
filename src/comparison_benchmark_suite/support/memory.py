@@ -130,7 +130,8 @@ class DiskSpaceSampler:
                 def fail(error):
                     raise error
                 for directory, dirs, files in os.walk(root, followlinks=False, onerror=fail):
-                    dirs[:] = [name for name in dirs if name not in {"commands", "stats", "traces", "kopia-logs"}
+                    excluded = {"commands", "stats", "traces", "kopia-logs"} if Path(directory) == self.roots[0] else set()
+                    dirs[:] = [name for name in dirs if name not in excluded
                                and not (Path(directory) / name).is_symlink()]
                     for name in files:
                         path = Path(directory) / name
