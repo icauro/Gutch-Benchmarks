@@ -151,6 +151,42 @@ class CiTests(unittest.TestCase):
         self.assertEqual((engine / "Config/settings.ini").read_bytes(), b"mock settings")
         self.assertEqual((engine / "Binaries/Linux/support.so").read_bytes(), b"mock support")
 
+    def test_bpt_data_capture_does_not_mark_a_payload_file_as_launch_executable(self):
+        from comparison_benchmark_suite.scheduling.dataset import DatasetSelection
+        from comparison_benchmark_suite.support.command import CommandResult
+        from comparison_benchmark_suite.tools.buildpatchtool import run_buildpatchtool
+
+        product = self.root / "product"
+        for name in ("v1", "v2"):
+            source = product / name
+            source.mkdir(parents=True)
+            (source / "blender.exe").write_bytes(b"Windows executable used only as data")
+        dataset = DatasetSelection.resolve(product)
+        executable = self.root / "mock-bpt"
+        executable.touch()
+        lane = RunLayout(self.root / "run").lane("bpt")
+        calls = []
+
+        def command(args, **kwargs):
+            calls.append(args)
+            if "-help" in args:
+                help_text = "BuildRoot CloudDir ArtifactId FeatureLevel ChunkWindowSize BuildVersion AppLaunch AppArgs"
+                return CommandResult((), 0, 0, help_text, "")
+            options = dict(str(arg).split("=", 1) for arg in args[1:] if "=" in str(arg))
+            if options["-mode"] == "ChunkBuildDirectory":
+                self.assertEqual(options["-AppLaunch"], "")
+                (Path(options["-CloudDir"]) / options["-OutputFilename"]).touch()
+            else:
+                version = Path(options["-Manifest"]).stem
+                shutil.copytree(product / version, options["-OutputDir"])
+            return CommandResult((), 0.1, 0, "", "")
+
+        result = run_buildpatchtool(executable, SimpleNamespace(run=command), lane, product,
+                                   LaneSpec("bpt", "buildpatchtool"), dataset=dataset)
+        self.assertEqual(result.metadata["status"], "PASS")
+        self.assertEqual(len(calls), 5)
+        self.assertEqual(dataset.inventories, DatasetSelection.resolve(product).inventories)
+
     def test_collection_excludes_payload_and_publication_marks_missing_pair(self):
         run = self.root / ".artifacts/runs/test"
         run.mkdir(parents=True)

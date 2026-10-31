@@ -1,7 +1,7 @@
 name: gutch_vs_bpt
 description: BuildPatchTool keeps its default 1 MiB chunk window and internal compression.
   Local ChunkBuildDirectory specifies FeatureLevel=Latest, artifact/version/launch
-  metadata and manifest filenames; no upload, authentication or encryption is enabled.
+  metadata with empty AppLaunch and manifest filenames; no upload, authentication or encryption is enabled.
   Recovery uses InstallManifest with PrevManifest. Gutch uses unencrypted FastCDC
   with a 1 MiB target, Zstd 3 and 8 MiB bundles. BPT chunk windows are not CDC averages;
   compression codec/level and artifact formats are unmatched. There is no separate

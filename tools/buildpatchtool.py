@@ -1,6 +1,5 @@
 """Local BuildPatchTool capture, installation, and independently verified recovery."""
 
-from pathlib import Path
 import time
 
 from ..scheduling.dataset import DatasetSelection
@@ -40,12 +39,13 @@ def run_buildpatchtool(executable, commands, lane, product, specification, *, da
         files = [name for name, item in dataset.inventories[source.name].items() if item["kind"] == "file"]
         if not files:
             raise ValueError("BuildPatchTool generation requires a nonempty build.")
-        launch = next((name for name in files if Path(name).name in {"blender", "blender.exe"}), files[0])
         before = scan_tree(cloud).total_bytes
         result = commands.run([
             executable, "-mode=ChunkBuildDirectory", f"-BuildRoot={source.as_posix()}",
             f"-CloudDir={cloud.as_posix()}", "-ArtifactId=ComparisonBenchmark", "-FeatureLevel=Latest",
-            f"-BuildVersion={source.name}", f"-AppLaunch={launch}", "-AppArgs=",
+            # These are data-only comparisons. BPT automatically marks AppLaunch
+            # executable, which would change metadata on Windows ZIP inputs.
+            f"-BuildVersion={source.name}", "-AppLaunch=", "-AppArgs=",
             *specification.arguments, f"-OutputFilename={source.name}.manifest",
         ], description=f"BuildPatchTool generate {source.name}", cwd=lane.root)
         elapsed += result.elapsed_seconds

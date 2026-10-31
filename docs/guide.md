@@ -332,6 +332,10 @@ The adapter probes `-mode=ChunkBuildDirectory -help` and
 runs only the supported local generation interface. Epic Store upload-only
 interfaces are reported as `UNSUPPORTED`; no upload or authentication is attempted.
 Each build gets an explicit manifest in a shared cloud directory. The adapter
+passes an empty `AppLaunch` for these data-only workloads: BPT otherwise marks
+the chosen launch file executable, changing metadata on Windows ZIP inputs
+when restored on Linux. Independent validation still checks executable bits.
+The adapter
 restores each build with `InstallManifest` into a fresh destination, then checks
 its contents against the frozen source inventory. With `corrupt_repair: true`,
 it applies the same corruption plan as the other tools and calls `InstallManifest`
