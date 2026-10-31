@@ -68,6 +68,9 @@ class BenchmarkApp(App):
     def __init__(self, root: Path):
         super().__init__()
         self.root = root.resolve()
+        # Focus messages can arrive during composition or teardown.
+        self.description_widget = Static("Hover or focus a fixture to preview its description.",
+                                         id="description", markup=False)
         self.fixtures = []
         self.fixture_errors = []
         for path in sorted(FIXTURES.rglob("*.yaml")):
@@ -93,7 +96,7 @@ class BenchmarkApp(App):
                 for index, fixture in enumerate(self.fixtures):
                     yield FixtureButton(fixture.name, index)
             with VerticalScroll(id="description-box"):
-                yield Static("Hover or focus a fixture to preview its description.", id="description", markup=False)
+                yield self.description_widget
         with Horizontal(id="controls"):
             yield Button("Run fixture", id="run", variant="primary", disabled=not self.fixtures)
             yield Button("Quit", id="quit")
@@ -123,7 +126,7 @@ class BenchmarkApp(App):
         if self.fixtures:
             self.preview(0)
         else:
-            self.query_one("#description", Static).update("No bundled fixtures found. Use --fixture PATH for custom inputs.")
+            self.description_widget.update("No bundled fixtures found. Use --fixture PATH for custom inputs.")
         for error in self.fixture_errors:
             self.notify(error, severity="error", timeout=15)
         self.set_interval(1, self.update_elapsed)
@@ -131,7 +134,7 @@ class BenchmarkApp(App):
     def preview(self, index):
         self.selected = index
         fixture = self.fixtures[index]
-        self.query_one("#description", Static).update(
+        self.description_widget.update(
             f"{fixture.name}\n\n{fixture.description}\n\n{fixture.source_path}\n\nClick Run fixture to start."
         )
 

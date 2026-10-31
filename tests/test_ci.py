@@ -5,6 +5,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -38,6 +39,13 @@ class CiTests(unittest.TestCase):
         blocked = patch("subprocess.Popen", side_effect=AssertionError("tools must not run"))
         blocked.start()
         self.addCleanup(blocked.stop)
+        # platform.platform() may invoke uname on Linux; it is not a tool run.
+        platform_probe = patch("platform.platform", return_value="mock-platform")
+        platform_probe.start()
+        self.addCleanup(platform_probe.stop)
+        summary = patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": ""})
+        summary.start()
+        self.addCleanup(summary.stop)
 
     def test_every_pair_and_relocated_checkout_reuse_downloaded_inputs(self):
         buffer = io.BytesIO()
