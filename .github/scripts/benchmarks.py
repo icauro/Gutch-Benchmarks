@@ -36,7 +36,7 @@ def selected_pairs(pair):
 
 def write_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
 
 
 def prepare_inputs(root=ROOT):
@@ -101,7 +101,7 @@ def write_fixture(pair, repetitions, root=ROOT):
     document["open_perfetto"] = False
     path = root / ".artifacts/ci/fixture.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8", newline="\n")
 
 
 def collect(pair, outcome, root=ROOT):
@@ -201,6 +201,9 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     records = []
     for name in selected_pairs(pair):
         source = inputs / f"benchmark-{name}" / name / "compact.json"
+        if not source.is_file():
+            # Download-artifact extracts a single matching artifact directly.
+            source = inputs / name / "compact.json"
         record = json.loads(source.read_text(encoding="utf-8")) if source.exists() else {
             "pair": name, "status": "ERROR", "rows": [], "reasons": ["Job produced no report; see Actions logs."]}
         records.append(record)
@@ -238,15 +241,15 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
             lines.extend(["", *measurement_details(record.get("summary", {}))])
         lines.extend(["", *record.get("reasons", []), ""])
     destination.mkdir(parents=True, exist_ok=True)
-    (destination / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (destination / "README.md").write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8", newline="\n")
     readme = root / "README.md"
     text = readme.read_text(encoding="utf-8")
     before, rest = text.split(START, 1)
     _, after = rest.split(END, 1)
-    readme.write_text(before + START + "\n" + "\n".join(overview) + "\n" + END + after, encoding="utf-8")
+    readme.write_text(before + START + "\n" + "\n".join(overview) + "\n" + END + after, encoding="utf-8", newline="\n")
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
-        Path(summary).write_text("\n".join(lines) + "\n", encoding="utf-8")
+        Path(summary).write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8", newline="\n")
 
 
 def main():

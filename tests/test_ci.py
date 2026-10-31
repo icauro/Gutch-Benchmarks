@@ -245,6 +245,25 @@ class CiTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ci.publish("all", self.root / "incoming", "../escape", "1", self.root)
 
+    def test_single_downloaded_artifact_without_artifact_name_directory_publishes(self):
+        incoming = self.root / "incoming/rustic"
+        incoming.mkdir(parents=True)
+        record = {"pair": "rustic", "status": "PASS", "rows": [
+            [label, "PASS", *("1.000" for _ in range(8))] for label in ("gutch", "rustic")],
+            "summary": {label: {metric: {"median": value, "minimum": value, "maximum": value, "samples": 1}
+                        for metric in ("peak_rss_bytes", "peak_disk_bytes")}
+                        for label, value in (("gutch", 2097152), ("rustic", 4194304))}}
+        (incoming / "compact.json").write_text(json.dumps(record))
+        (self.root / "README.md").write_text(f"{ci.START}\nold\n{ci.END}")
+        ci.publish("rustic", self.root / "incoming", "123", "1", self.root)
+        report = next((self.root / "reports").glob("*/123-1/rustic.json"))
+        self.assertEqual(json.loads(report.read_text())["status"], "PASS")
+        self.assertNotIn(b"\r", report.read_bytes())
+        readme = (self.root / "README.md").read_text()
+        self.assertIn("Peak RAM MiB | Peak disk MiB", readme)
+        self.assertIn("2.0 | 2.0", readme)
+        self.assertIn("4.0 | 4.0", readme)
+
     def test_workflow_is_manual_only_and_pairs_share_one_cache_action(self):
         workflow = yaml.load((ROOT / ".github/workflows/benchmarks.yml").read_text(), Loader=yaml.BaseLoader)
         self.assertEqual(set(workflow["on"]), {"workflow_dispatch"})

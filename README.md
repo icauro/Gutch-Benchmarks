@@ -39,7 +39,7 @@ miss short spikes; older results show `—` until measured.
 </details>
 
 <!-- latest-benchmarks:start -->
-Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31 · includes earlier measurement protocols
+Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31 · measurement contract 2
 
 [This run's report](reports/2026-10-31/41211389156-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41211389156)
 
@@ -172,13 +172,26 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 [Source: Gutch vs rustic](reports/2026-10-31/41211389156-1/rustic.json)
 
-### Gutch vs Rustic (ERROR)
+### Gutch vs Rustic (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB | Peak RAM MiB | Peak disk MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| gutch | NOT_RUN | - | - | - | - | - | - |
-| rustic | NOT_RUN | - | - | - | - | - | - |
-| **Gutch relative** | - | - | - | - | - | - | - |
+| gutch | PASS | 5.290 | 1.114 | 0.610 | 689.361 | 217.6 | 2572.6 |
+| rustic | PASS | 9.856 | 3.920 | 3.313 | 694.532 | 321.7 | 2583.6 |
+| **Gutch relative** | - | 1.86x faster | 3.52x faster | 5.43x faster | 0.7% smaller | 32.4% smaller | 0.4% smaller |
+
+Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
+
+| Measurement | gutch | rustic |
+|---|---:|---:|
+| Initial capture s | 2.714 (2.714–2.714; n=1) | 5.264 (5.264–5.264; n=1) |
+| Later-version capture s | 2.576 (2.576–2.576; n=1) | 4.593 (4.593–4.593; n=1) |
+| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 322367611.000 (322367611.000–322367611.000; n=1) |
+| Restore + independent validation s | 3.304 (3.304–3.304; n=1) | 6.065 (6.065–6.065; n=1) |
+| Content repair + validation s | 2.639 (2.639–2.639; n=1) | 5.407 (5.407–5.407; n=1) |
+| Preserved-mtime repair + validation s | 2.633 (2.633–2.633; n=1) | 5.383 (5.383–5.383; n=1) |
+| Extra-file cleanup + validation s | 2.330 (2.330–2.330; n=1) | 5.266 (5.266–5.266; n=1) |
+| Full restore recovery + validation s | 3.301 (3.301–3.301; n=1) | 6.216 (6.216–6.216; n=1) |
 
 </details>
 
