@@ -11,11 +11,11 @@ runs:
       id: cache
       with:
         path: .artifacts/datasets
-        key: blender-inputs-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('fixtures/blender/dataset.yaml', 'datasets.py', 'support/filesystem.py') }}
+        key: blender-inputs-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src/comparison_benchmark_suite/fixtures/blender/dataset.yaml', 'src/comparison_benchmark_suite/datasets.py', 'src/comparison_benchmark_suite/support/filesystem.py') }}
         fail-on-cache-miss: ${{ inputs.populate != 'true' }}
     - name: Prepare or validate immutable inputs
       shell: bash
-      run: python ci/benchmarks.py dataset
+      run: python .github/scripts/benchmarks.py dataset
     - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       if: inputs.populate == 'true' && steps.cache.outputs.cache-hit != 'true'
       with:

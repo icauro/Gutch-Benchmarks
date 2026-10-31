@@ -78,13 +78,13 @@ for 30 days. Hosted-runner timings are indicative; OS caches are uncontrolled.
 ## Run locally
 
 Requires Python 3.12+ and the selected tool executables on PATH or in the ignored
-`bin/<platform>/<tool>/` folders.
+`.artifacts/tools/<platform>/<tool>/` folders.
 
 ```sh
 python -m pip install -e .
-python run.py
+gutch-bench
 # Or select one pair:
-python run.py --fixture gutch_vs_rustic --no-open-perfetto --discard-outputs
+gutch-bench --fixture gutch_vs_rustic --no-open-perfetto --discard-outputs
 ```
 
 Selecting a shipped fixture downloads and checksum-verifies the pinned Blender
@@ -93,7 +93,7 @@ Local runs retain failed outputs unless `--discard-outputs` is selected.
 
 See the [benchmark guide](docs/guide.md) for settings, custom inputs, recovery,
 report interpretation and development instructions. Tool versions and checksums
-are recorded in the [manifest](bin/manifest.json).
+are recorded in the [manifest](src/comparison_benchmark_suite/resources/tools.json).
 
 [MIT licensed](LICENSE). External tools and workloads retain their own licenses;
-see [third-party notices](THIRD_PARTY_NOTICES.md).
+see [third-party notices](docs/third-party-notices.md).

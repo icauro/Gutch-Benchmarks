@@ -1,7 +1,7 @@
 # Third-party notices
 
 Original comparison-suite code, fixtures and documentation are licensed under
-the [MIT License](LICENSE), copyright (c) 2026 icauro. External programs,
+the [MIT License](../LICENSE), copyright (c) 2026 icauro. External programs,
 downloaded datasets, package dependencies and retained upstream notices keep
 their own licenses. The project license does not grant rights to those works.
 
@@ -15,15 +15,15 @@ this project or a complete set of notices for a particular binary distribution.
 
 | Program | Upstream | Retained notice |
 | --- | --- | --- |
-| Borg | [borgbackup/borg](https://github.com/borgbackup/borg) | BSD-3-Clause; [notice](bin/licenses/borg.txt). |
-| Restic | [restic/restic](https://github.com/restic/restic) | BSD-2-Clause; [notice](bin/licenses/restic.txt). |
-| Rustic | [rustic-rs/rustic](https://github.com/rustic-rs/rustic) | MIT OR Apache-2.0; [MIT notice](bin/licenses/rustic-MIT.txt), [Apache license](bin/licenses/rustic-APACHE.txt). |
-| Kopia | [kopia/kopia](https://github.com/kopia/kopia) | Apache-2.0; [license](bin/licenses/kopia.txt). |
-| Plakar | [PlakarKorp/plakar](https://github.com/PlakarKorp/plakar) | ISC; [notice](bin/licenses/plakar.txt). |
+| Borg | [borgbackup/borg](https://github.com/borgbackup/borg) | BSD-3-Clause; [notice](../src/comparison_benchmark_suite/resources/licenses/borg.txt). |
+| Restic | [restic/restic](https://github.com/restic/restic) | BSD-2-Clause; [notice](../src/comparison_benchmark_suite/resources/licenses/restic.txt). |
+| Rustic | [rustic-rs/rustic](https://github.com/rustic-rs/rustic) | MIT OR Apache-2.0; [MIT notice](../src/comparison_benchmark_suite/resources/licenses/rustic-MIT.txt), [Apache license](../src/comparison_benchmark_suite/resources/licenses/rustic-APACHE.txt). |
+| Kopia | [kopia/kopia](https://github.com/kopia/kopia) | Apache-2.0; [license](../src/comparison_benchmark_suite/resources/licenses/kopia.txt). |
+| Plakar | [PlakarKorp/plakar](https://github.com/PlakarKorp/plakar) | ISC; [notice](../src/comparison_benchmark_suite/resources/licenses/plakar.txt). |
 | BuildPatchTool | Epic Games | Supplied and licensed by Epic Games under its applicable terms; this project supplies no Epic executable, runtime files or redistribution permission. |
 | Gutch | User-supplied executable | Original Gutch code is MIT; included third-party code and linked dependencies carry additional terms. Preserve the notices accompanying the executable you use. |
 
-`bin/manifest.json` records a previously tested local toolset, not the contents
+`src/comparison_benchmark_suite/resources/tools.json` records a previously tested local toolset, not the contents
 of a clone or Python package. These reference notices do not replace the notices
 that accompany the actual versions you install. Redistribution of a tool or its
 runtime requires checking that distribution's own terms and dependencies.

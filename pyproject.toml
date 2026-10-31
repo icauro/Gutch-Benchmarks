@@ -6,18 +6,23 @@ build-backend = "setuptools.build_meta"
 name = "comparison-benchmark-suite"
 version = "0.1.0"
 description = "Portable storage tool comparison benchmarks"
+readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "bin/licenses/*.txt"]
-dynamic = ["dependencies"]
+license-files = ["LICENSE", "docs/third-party-notices.md", "src/comparison_benchmark_suite/resources/licenses/*.txt"]
+dependencies = ["PyYAML>=6,<7", "psutil>=6,<8", "textual>=8.2.8,<9"]
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+[project.scripts]
+gutch-bench = "comparison_benchmark_suite.cli:main"
 
 [tool.setuptools]
-packages = ["comparison_benchmark_suite", "comparison_benchmark_suite.support", "comparison_benchmark_suite.scheduling", "comparison_benchmark_suite.tools"]
-package-dir = {comparison_benchmark_suite = "."}
+package-dir = {"" = "src"}
 include-package-data = false
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["comparison_benchmark_suite*"]
+namespaces = false
+
 [tool.setuptools.package-data]
-comparison_benchmark_suite = ["fixtures/*.yaml", "fixtures/blender/dataset.yaml", "requirements.txt"]
+comparison_benchmark_suite = ["fixtures/*.yaml", "fixtures/blender/dataset.yaml", "resources/tools.json", "resources/licenses/*.txt"]

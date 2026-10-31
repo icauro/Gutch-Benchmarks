@@ -1,20 +1,8 @@
-"""Run a portable comparison: python run.py [--fixture NAME_OR_PATH]."""
+"""Terminal entrypoint: gutch-bench [--fixture NAME_OR_PATH]."""
 
 import argparse
 from pathlib import Path
 import sys
-
-ROOT = Path(__file__).resolve().parent
-if __package__ in {None, ""}:
-    # Load this checkout directly, even when its containing folder was renamed.
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("comparison_benchmark_suite", ROOT / "__init__.py",
-                                                submodule_search_locations=[str(ROOT)])
-    package = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = package
-    spec.loader.exec_module(package)
-    __package__ = "comparison_benchmark_suite"
-
 
 def main(arguments=None) -> int:
     parser = argparse.ArgumentParser(description="Compare build storage tools. Results go to .artifacts/runs/.")
@@ -29,18 +17,18 @@ def main(arguments=None) -> int:
         try:
             from .interactive import BenchmarkApp
         except ImportError as error:
-            print(f"Missing dependency: {error}. Run: python -m pip install -r requirements.txt", file=sys.stderr)
+            print(f"Missing dependency: {error}. Reinstall comparison-benchmark-suite.", file=sys.stderr)
             return 2
-        BenchmarkApp(ROOT).run()
+        BenchmarkApp(Path.cwd()).run()
         return 0
     try:
         import yaml
         from .benchmark import run_benchmark
     except ImportError as error:
-        print(f"Missing dependency: {error}. Run: python -m pip install -r requirements.txt", file=sys.stderr)
+        print(f"Missing dependency: {error}. Reinstall comparison-benchmark-suite.", file=sys.stderr)
         return 2
     try:
-        return run_benchmark(ROOT, args.fixture, open_perfetto=False if args.no_open_perfetto else None,
+        return run_benchmark(Path.cwd(), args.fixture, open_perfetto=False if args.no_open_perfetto else None,
                              discard_outputs=args.discard_outputs)
     except (OSError, ValueError, RuntimeError, yaml.YAMLError) as error:
         print(f"Comparison benchmark: {error}", file=sys.stderr)

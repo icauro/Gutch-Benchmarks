@@ -1,2 +1,2 @@
-include ci/benchmarks.py
-recursive-include .github *.yml
+recursive-include .github *.yml *.py
+recursive-include docs *.md

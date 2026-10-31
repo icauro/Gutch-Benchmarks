@@ -1,7 +1,7 @@
 # Benchmark guide
 
 Original project code is [MIT licensed](../LICENSE). External tools, workloads and
-dependencies retain their own terms; see [third-party notices](../THIRD_PARTY_NOTICES.md).
+dependencies retain their own terms; see [third-party notices](third-party-notices.md).
 
 Compare storage tools using the same builds and independent SHA-256 checks.
 This root project works on its own: copy it anywhere, with any folder name. It does not need the Gutch
@@ -29,7 +29,7 @@ dependency notices produced by Gutch's `tools/package_cli.py`. While Gutch is
 private, source checkout uses the
 read-only deploy key stored as the `GUTCH_DEPLOY_KEY` Actions secret in this
 repository. External tools are explicitly downloaded for CI
-from `bin/manifest.json`, with archive and executable checksum verification.
+from `src/comparison_benchmark_suite/resources/tools.json`, with archive and executable checksum verification.
 BPT retains its accompanying Engine files. Tools and datasets never enter Git.
 Input restoration, validation, downloads and builds are outside benchmark timing.
 
@@ -60,8 +60,8 @@ The first real workflow execution is a separate manual action.
 Install Python 3.12 or newer, then run these commands in this folder:
 
 ```text
-python -m pip install -r requirements.txt
-python run.py
+python -m pip install -e .
+gutch-bench
 ```
 
 The command opens an interactive terminal screen. Hover or focus a fixture to
@@ -76,15 +76,15 @@ partial evidence. Afterward, the summary stays open with **Run another**,
 For scripts and noninteractive terminals, select a fixture explicitly:
 
 ```text
-python run.py --fixture gutch_vs_rustic
+gutch-bench --fixture gutch_vs_rustic
 ```
 
 The `--fixture` form runs once and exits. `--no-open-perfetto` suppresses automatic
 browser opening; the interactive screen uses this and opens Perfetto only when
-requested. Install updated requirements to get the Textual terminal dependency.
+requested. Reinstall the package after dependency changes to update the terminal UI.
 
 Selecting a shipped pair explicitly prepares the pinned Blender 5.0.0 and 5.1.0
-Windows x64 ZIP inputs in `fixtures/blender/dataset.yaml`. Both Linux and Windows
+Windows x64 ZIP inputs in `src/comparison_benchmark_suite/fixtures/blender/dataset.yaml`. Both Linux and Windows
 benchmark those same files as data; Blender is never executed. Missing inputs
 are downloaded from Blender's official server, SHA-256 checked and extracted
 under `.artifacts/`. Existing prepared inputs are inventoried before reuse.
@@ -94,8 +94,8 @@ Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
 
 Comparison executables are supplied locally. Install tools on PATH, set their
-paths in the fixture, or place them in the ignored `bin/windows-x64/` or
-`bin/linux-x64/` folders. Executables and vendor runtime distributions are not
+paths in the fixture, or place them in the ignored `.artifacts/tools/windows-x64/` or
+`.artifacts/tools/linux-x64/` folders. Executables and vendor runtime distributions are not
 tracked. The local runner never downloads tools automatically; CI provisions
 them explicitly. For example:
 
@@ -106,8 +106,8 @@ executables:
   buildpatchtool: C:/tools/BuildPatchTool.exe
 ```
 
-Local tools are discovered automatically under `bin/windows-x64/`
-or `bin/linux-x64/`, before searching PATH. Each tool has its own
+Local tools are discovered automatically under `.artifacts/tools/windows-x64/`
+or `.artifacts/tools/linux-x64/`, before searching PATH. Each tool has its own
 folder: `restic/restic.exe` on Windows or `restic/restic` on Linux, likewise for
 Borg, Rustic, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
 BuildPatchTool keeps its Engine layout under `buildpatchtool/Engine/Binaries/`,
@@ -129,16 +129,16 @@ their lanes distinct labels and put each executable under its label in `executab
 Run one pair with the same shared Blender inputs:
 
 ```text
-python run.py --fixture gutch_vs_kopia
-python run.py --fixture gutch_vs_restic
-python run.py --fixture gutch_vs_rustic
-python run.py --fixture gutch_vs_borg
-python run.py --fixture gutch_vs_plakar
-python run.py --fixture gutch_vs_bpt
+gutch-bench --fixture gutch_vs_kopia
+gutch-bench --fixture gutch_vs_restic
+gutch-bench --fixture gutch_vs_rustic
+gutch-bench --fixture gutch_vs_borg
+gutch-bench --fixture gutch_vs_plakar
+gutch-bench --fixture gutch_vs_bpt
 ```
 
 These fixtures use one warm-up, three measured repetitions, rotating order and
-profiling off. Each references `blender/dataset.yaml` for inputs, reusing the
+profiling off. Each references the bundled `blender/dataset.yaml` for inputs, reusing the
 cache rather than duplicating the Blender input definitions. This shared file
 defines inputs only; every shipped runnable fixture compares Gutch with one tool.
 Set executable paths in the selected fixture as needed. Custom fixtures may use `dataset: file.yaml`
@@ -166,7 +166,7 @@ Fixture descriptions explain command overrides and differences from Gutch. They
 are printed before execution and included in `summary.md` and `run.json`.
 
 External tool releases were verified on 2026-10-31; URLs and archive SHA-256
-values are recorded in [the local tool manifest](../bin/manifest.json). Borg tracks
+values are recorded in [the local tool manifest](../src/comparison_benchmark_suite/resources/tools.json). Borg tracks
 the latest 2.x prerelease because the fixtures require Borg 2 FastCDC; other
 external tools track stable releases. The five pre-existing Windows adapters were
 checked with two small deterministic builds. Rustic command construction is covered by mocked tests only; its capture,
@@ -235,7 +235,7 @@ lanes:
 ```
 
 ```text
-python run.py --fixture my_product
+gutch-bench --fixture fixtures/my_product
 ```
 
 You can also pass a fixture directory or YAML path. List at least two builds,
@@ -374,16 +374,20 @@ Its command is excluded from benchmark timings, utilization and Perfetto tracks.
 
 Other benchmark harnesses can install this checkout with
 `python -m pip install -e <suite-checkout>` and import
-`comparison_benchmark_suite`. This is optional for `python run.py`. The package
+`comparison_benchmark_suite`. This is optional for `gutch-bench`. The package
 contains the same runtime and bundled fixtures; it has no parent-repository
 imports, build steps, or configuration. Tool binaries remain explicit inputs or
 are resolved from PATH. Downloads, fixtures, and reports belong to this project.
 
 ## Maintaining the suite
 
-Start at `run.py` for CLI and terminal selection, and `benchmark.py` for a single
-comparison run. `interactive.py` launches the same CLI and displays its progress.
-`tools/report.py` owns the shared summary cells and report presentation.
+Python code lives under `src/comparison_benchmark_suite/`. `cli.py` owns command
+entry, `benchmark.py` owns a comparison run, and `interactive.py` launches that
+same installed module. `tools/report.py` owns summary cells and presentation.
+Presets live in the package's `fixtures/`; the tool manifest and upstream notices
+live in `resources/`. `.github/scripts/benchmarks.py` owns CI preparation and
+publication. Tests, documentation and published reports have their own root
+folders. Dependencies and the `gutch-bench` entrypoint are in `pyproject.toml`.
 
 Tool workflows live in `tools/`; scheduling and aggregate measurements live in
 `scheduling/`; process execution, validation, and traces live in `support/`.
@@ -393,7 +397,9 @@ the internal fixture catalog belong to the Gutch harness, which imports shared
 measurement and validation helpers from this package.
 
 Install the checkout as a package before running development tests. This keeps
-imports independent of the checkout folder name:
+imports independent of the checkout folder name. Installed runs write caches,
+tools and reports under `.artifacts/` in the current working directory. Use
+`python -m comparison_benchmark_suite` as an alternative to `gutch-bench`:
 
 ```text
 python -m pip install -e .
@@ -413,4 +419,5 @@ Plakar-compatible jump chunking, or `vram256` for RAM with AVX2/scalar dispatch;
 Alternate lane mappings, string profiles, and external bulk
 workloads are not supported. Plain-terminal progress uses start/completion
 lines; the interactive screen owns live progress. Borg commands use Borg 2
-syntax directly. Executables resolve only from explicit paths or PATH.
+syntax directly. Executables resolve from explicit paths, the working directory's
+`.artifacts/tools/` folders, or PATH.

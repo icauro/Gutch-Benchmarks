@@ -22,7 +22,7 @@ from comparison_benchmark_suite.tools.models import FixtureSpec, LaneResult, Lan
 
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("ci_benchmarks", ROOT / "ci/benchmarks.py")
+spec = importlib.util.spec_from_file_location("ci_benchmarks", ROOT / ".github/scripts/benchmarks.py")
 ci = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ci)
 
@@ -34,6 +34,7 @@ class CiTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(dir=owner)
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name).resolve()
+        self.package = self.root / ci.SOURCE
         blocked = patch("subprocess.Popen", side_effect=AssertionError("tools must not run"))
         blocked.start()
         self.addCleanup(blocked.stop)
@@ -71,15 +72,15 @@ class CiTests(unittest.TestCase):
     def test_tool_install_verifies_archive_and_executable_without_launching(self):
         binary = b"synthetic executable"
         archive = bz2.compress(binary)
-        (self.root / "bin").mkdir()
+        (self.package / "resources").mkdir(parents=True)
         manifest = {"executables": [{"platform": "linux-x64", "tool": "restic",
                     "path": "linux-x64/restic/restic", "source_url": "https://example.test/restic.bz2",
                     "archive_sha256": hashlib.sha256(archive).hexdigest(), "sha256": hashlib.sha256(binary).hexdigest()}]}
-        (self.root / "bin/manifest.json").write_text(json.dumps(manifest))
+        (self.package / "resources/tools.json").write_text(json.dumps(manifest))
         with patch.object(ci, "urlopen", return_value=io.BytesIO(b"bad checksum")):
             with self.assertRaisesRegex(ValueError, "Archive checksum"):
                 ci.install_tool("restic", self.root)
-        target = self.root / "bin/linux-x64/restic/restic"
+        target = self.root / ".artifacts/tools/linux-x64/restic/restic"
         self.assertFalse(target.exists())
         with patch.object(ci, "urlopen", return_value=io.BytesIO(archive)) as download:
             ci.install_tool("restic", self.root)
@@ -139,15 +140,15 @@ class CiTests(unittest.TestCase):
             archive.writestr("Engine/Binaries/Linux/support.so", b"mock support")
             archive.writestr("Engine/Config/settings.ini", b"mock settings")
         data = buffer.getvalue()
-        (self.root / "bin").mkdir()
+        (self.package / "resources").mkdir(parents=True)
         record = {"platform": "linux-x64", "tool": "buildpatchtool",
                   "path": "linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
                   "source_url": "https://example.test/bpt.zip", "sha256": hashlib.sha256(b"mock bpt").hexdigest(),
                   "archive_sha256": hashlib.sha256(data).hexdigest()}
-        (self.root / "bin/manifest.json").write_text(json.dumps({"executables": [record]}))
+        (self.package / "resources/tools.json").write_text(json.dumps({"executables": [record]}))
         with patch.object(ci, "urlopen", return_value=io.BytesIO(data)):
             ci.install_tool("bpt", self.root)
-        engine = self.root / "bin/linux-x64/buildpatchtool/Engine"
+        engine = self.root / ".artifacts/tools/linux-x64/buildpatchtool/Engine"
         self.assertEqual((engine / "Config/settings.ini").read_bytes(), b"mock settings")
         self.assertEqual((engine / "Binaries/Linux/support.so").read_bytes(), b"mock support")
 
@@ -190,8 +191,8 @@ class CiTests(unittest.TestCase):
     def test_collection_excludes_payload_and_publication_marks_missing_pair(self):
         run = self.root / ".artifacts/runs/test"
         run.mkdir(parents=True)
-        (self.root / "bin").mkdir()
-        (self.root / "bin/manifest.json").write_text('{"executables": []}')
+        (self.package / "resources").mkdir(parents=True)
+        (self.package / "resources/tools.json").write_text('{"executables": []}')
         row = {"metadata": {"case": "gutch", "status": "PASS"}}
         for name, value in {"run.json": {"status": "passed", "fixture": {"description": "Test settings"}},
                             "results.json": [row], "summary.json": {"gutch": {"backup": {"median": 1.25}}}}.items():
@@ -262,14 +263,14 @@ class CiTests(unittest.TestCase):
         self.assertNotIn("faster", "\n".join(ci.pair_overview(record)))
 
     def test_ci_fixture_keeps_pair_settings_and_records_selected_repetitions(self):
-        shutil.copytree(ROOT / "fixtures", self.root / "fixtures",
+        shutil.copytree(ROOT / ci.SOURCE / "fixtures", self.package / "fixtures",
                         ignore=shutil.ignore_patterns("builds", "__pycache__"))
         ci.write_fixture("rustic", 5, self.root)
         fixture = yaml.safe_load((self.root / ".artifacts/ci/fixture.yaml").read_text())
         self.assertEqual(fixture["repetitions"], 5)
         self.assertIn("5 rotating measured repetitions", fixture["description"])
         self.assertEqual([lane["tool"] for lane in fixture["lanes"]], ["gutch", "rustic"])
-        self.assertEqual(Path(fixture["dataset"]), self.root / "fixtures/blender/dataset.yaml")
+        self.assertEqual(Path(fixture["dataset"]), self.package / "fixtures/blender/dataset.yaml")
 
 
 if __name__ == "__main__":

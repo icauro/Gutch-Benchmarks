@@ -10,6 +10,7 @@ import time
 
 import psutil
 import yaml
+from . import FIXTURES
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -69,7 +70,7 @@ class BenchmarkApp(App):
         self.root = root.resolve()
         self.fixtures = []
         self.fixture_errors = []
-        for path in sorted((self.root / "fixtures").rglob("*.yaml")):
+        for path in sorted(FIXTURES.rglob("*.yaml")):
             try:
                 values = yaml.safe_load(path.read_text(encoding="utf-8"))
                 if isinstance(values, dict) and "lanes" in values:
@@ -122,7 +123,7 @@ class BenchmarkApp(App):
         if self.fixtures:
             self.preview(0)
         else:
-            self.query_one("#description", Static).update("No runnable fixtures found. Add a fixture YAML under fixtures/.")
+            self.query_one("#description", Static).update("No bundled fixtures found. Use --fixture PATH for custom inputs.")
         for error in self.fixture_errors:
             self.notify(error, severity="error", timeout=15)
         self.set_interval(1, self.update_elapsed)
@@ -218,7 +219,7 @@ class BenchmarkApp(App):
         try:
             env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
             self.process = await asyncio.create_subprocess_exec(
-                sys.executable, str(self.root / "run.py"), "--fixture", str(fixture),
+                sys.executable, "-m", "comparison_benchmark_suite", "--fixture", str(fixture),
                 "--no-open-perfetto", cwd=self.root, env=env,
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,

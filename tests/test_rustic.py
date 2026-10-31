@@ -92,7 +92,7 @@ class RusticTests(unittest.TestCase):
         dataset.validate.assert_not_called()
 
     def test_shipped_catalog_has_only_gutch_versus_one_tool(self):
-        fixtures = ROOT / "fixtures"
+        fixtures = ROOT / "src/comparison_benchmark_suite/fixtures"
         expected = {"borg", "bpt", "kopia", "plakar", "restic", "rustic"}
         self.assertEqual({p.stem.removeprefix("gutch_vs_") for p in fixtures.glob("*.yaml")}, expected)
         shared = yaml.safe_load((fixtures / "blender/dataset.yaml").read_text(encoding="utf-8"))

@@ -14,7 +14,6 @@ import zipfile
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT.parent))
 
 from comparison_benchmark_suite.datasets import extract_archive
 
@@ -60,10 +59,10 @@ class SuiteTests(unittest.TestCase):
 
     def test_copied_suite_runs_without_repository_and_preserves_inputs(self):
         standalone = self.root / "exported-suite"
-        shutil.copytree(ROOT, standalone, ignore=shutil.ignore_patterns(".artifacts", "__pycache__", ".venv", "bin", "builds"))
+        shutil.copytree(ROOT, standalone, ignore=shutil.ignore_patterns(".git", ".artifacts", "__pycache__", ".venv", "*.egg-info", "build", "AGENTS.override.md"))
         builds = self.inputs()
         fixture = standalone / "fixtures" / "custom" / "fixture.yaml"
-        fixture.parent.mkdir()
+        fixture.parent.mkdir(parents=True)
         fixture.write_text(yaml.safe_dump({
             "name": "custom", "description": "Fixture settings and limitations.", "builds": builds, "warmups": 1, "repetitions": 2,
             "corrupt_repair": True, "lane_wait_seconds": 0, "step_wait_seconds": 0,
@@ -71,10 +70,10 @@ class SuiteTests(unittest.TestCase):
                       {"label": "not-installed", "tool": "gutch"}],
             "executables": {"not-installed": str(self.root / "missing-tool")},
         }), encoding="utf-8")
-        env = dict(os.environ, PYTHONPATH="")
+        env = dict(os.environ, PYTHONPATH=str(standalone / "src"))
         env.pop("GUTCH_EXECUTABLE", None)
-        result = subprocess.run([sys.executable, standalone / "run.py", "--fixture", "custom"],
-                                cwd=self.root, env=env, capture_output=True, text=True, timeout=30)
+        result = subprocess.run([sys.executable, "-m", "comparison_benchmark_suite", "--fixture", str(fixture)],
+                                cwd=standalone, env=env, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Fixture settings and limitations.", result.stdout)
         self.assertIn("| Tool", result.stdout)
@@ -97,7 +96,7 @@ class SuiteTests(unittest.TestCase):
             self.assertEqual((Path(build["path"]) / "file.txt").read_text(), f"version {index}")
 
     def test_failed_candidate_retains_evidence_and_does_not_stop_copy(self):
-        from comparison_benchmark_suite import run
+        from comparison_benchmark_suite import cli
         from unittest.mock import patch
         fixture = self.root / "fixture.yaml"
         fixture.write_text(yaml.safe_dump({
@@ -106,8 +105,8 @@ class SuiteTests(unittest.TestCase):
             "executables": {"broken": sys.executable},
             "lanes": [{"label": "broken", "tool": "gutch"}, {"label": "copy", "tool": "filesystem"}],
         }))
-        with patch.object(run, "ROOT", self.root):
-            self.assertEqual(run.main(["--fixture", str(fixture)]), 1)
+        with patch("comparison_benchmark_suite.cli.Path.cwd", return_value=self.root):
+            self.assertEqual(cli.main(["--fixture", str(fixture)]), 1)
         output = next((self.root / ".artifacts/runs").iterdir())
         results = json.loads((output / "results.json").read_text())
         self.assertEqual([r["metadata"]["status"] for r in results], ["ERROR", "PASS"])

@@ -11,6 +11,8 @@ import shutil
 
 import yaml
 
+from . import PACKAGE_ROOT, FIXTURES
+
 from .datasets import prepare_dataset
 from .scheduling.runner import execute_cases
 from .scheduling.dataset import DatasetSelection
@@ -48,7 +50,8 @@ def resolve_executable(value: str, fixture: Path, tools_root: Path) -> Path | No
     return Path(found).resolve() if found else None
 
 
-def suite_source_hash(root: Path) -> str:
+def suite_source_hash() -> str:
+    root = PACKAGE_ROOT
     source_hash = hashlib.sha256()
     runtime_files = list(root.glob("*.py"))
     for directory in ("support", "scheduling", "tools"):
@@ -74,7 +77,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
                   discard_outputs: bool = False) -> int:
     fixture_path = Path(fixture_name).expanduser()
     if not fixture_path.exists():
-        fixture_path = root / "fixtures" / fixture_name
+        fixture_path = FIXTURES / fixture_name
         if not fixture_path.exists() and fixture_path.suffix == "":
             fixture_path = fixture_path.with_suffix(".yaml")
     if fixture_path.is_dir():
@@ -95,7 +98,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         configured = executables.get(lane.label, executables.get(lane.tool, lane.tool))
         if lane.tool == "gutch" and configured in {"gutch", "gutch-cli"}:
             configured = os.environ.get("GUTCH_EXECUTABLE", configured)
-        executable = resolve_executable(configured, fixture_path, root / "bin")
+        executable = resolve_executable(configured, fixture_path, root / ".artifacts/tools")
         if executable is None:
             unavailable[lane.label] = f"Cannot find {configured!r}; set executables.{lane.label} in {fixture_path} or add it to PATH."
             print(f"UNAVAILABLE {lane.label}: {unavailable[lane.label]}", flush=True)
@@ -116,7 +119,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
     print(f"Running {fixture.name}. Results: {layout.root}", flush=True)
     if fixture.description:
         print(fixture.description, flush=True)
-    layout.write_manifest("preparing", suite_source_sha256=suite_source_hash(root), dataset=dataset_metadata,
+    layout.write_manifest("preparing", suite_source_sha256=suite_source_hash(), dataset=dataset_metadata,
                           executables={label: {"path": str(path), "sha256": file_sha256(path)} for label, path in resolved.items()})
     commands = CommandRunner(memory_profile=fixture.profile_mode == "detailed",
                              on_step=lambda description: print(f"Step: {description}", flush=True))

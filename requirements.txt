@@ -1,3 +1,0 @@
-PyYAML>=6,<7
-psutil>=6,<8
-textual>=8.2.8,<9

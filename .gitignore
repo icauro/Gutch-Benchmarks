@@ -1,6 +1,4 @@
 .artifacts/
-bin/windows-x64/
-bin/linux-x64/
 __pycache__/
 *.pyc
 .venv/
@@ -8,7 +6,3 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-fixtures/*/*
-!fixtures/*/fixture.yaml
-!fixtures/blender/dataset.yaml
-!fixtures/*/README.md

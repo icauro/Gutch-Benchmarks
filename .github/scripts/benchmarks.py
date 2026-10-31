@@ -19,7 +19,8 @@ from comparison_benchmark_suite.support.retention import remove_owned
 from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+SOURCE = Path("src/comparison_benchmark_suite")
 PAIRS = ("borg", "bpt", "kopia", "plakar", "restic", "rustic")
 START = "<!-- latest-benchmarks:start -->"
 END = "<!-- latest-benchmarks:end -->"
@@ -39,7 +40,7 @@ def write_json(path, value):
 
 
 def prepare_inputs(root=ROOT):
-    recipe = root / "fixtures/blender/dataset.yaml"
+    recipe = root / SOURCE / "fixtures/blender/dataset.yaml"
     values = yaml.safe_load(recipe.read_text(encoding="utf-8"))
     return prepare_dataset(values, recipe, root / ".artifacts")
 
@@ -47,10 +48,10 @@ def prepare_inputs(root=ROOT):
 def install_tool(pair, root=ROOT):
     """Provision only the explicitly selected tool, checking archive AND executable."""
     tool = "buildpatchtool" if pair == "bpt" else pair
-    manifest = json.loads((root / "bin/manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((root / SOURCE / "resources/tools.json").read_text(encoding="utf-8"))
     record = next(item for item in manifest["executables"]
                   if item["platform"] == "linux-x64" and item["tool"] == tool)
-    target = root / "bin" / record["path"]
+    target = root / ".artifacts/tools" / record["path"]
     if target.is_file() and file_sha256(target) == record["sha256"]:
         return
     work = root / ".artifacts/provision" / tool
@@ -60,8 +61,8 @@ def install_tool(pair, root=ROOT):
         shutil.copyfileobj(response, output)
     if file_sha256(archive) != record["archive_sha256"]:
         raise ValueError(f"Archive checksum mismatch: {tool}")
-    destination = root / "bin/linux-x64" / tool
-    remove_owned(destination, root / "bin")
+    destination = root / ".artifacts/tools/linux-x64" / tool
+    remove_owned(destination, root / ".artifacts/tools")
     target.parent.mkdir(parents=True, exist_ok=True)
     if tool == "borg":
         shutil.copyfile(archive, target)
@@ -91,8 +92,8 @@ def install_tool(pair, root=ROOT):
 def write_fixture(pair, repetitions, root=ROOT):
     if not 1 <= repetitions <= 10:
         raise ValueError("Repetitions must be between 1 and 10")
-    document = yaml.safe_load((root / f"fixtures/gutch_vs_{pair}.yaml").read_text(encoding="utf-8"))
-    document["dataset"] = str((root / "fixtures/blender/dataset.yaml").resolve())
+    document = yaml.safe_load((root / SOURCE / f"fixtures/gutch_vs_{pair}.yaml").read_text(encoding="utf-8"))
+    document["dataset"] = str((root / SOURCE / "fixtures/blender/dataset.yaml").resolve())
     document["repetitions"] = repetitions
     document["description"] = document["description"].replace(
         "three rotating measured repetitions", f"{repetitions} rotating measured repetitions"
@@ -146,7 +147,7 @@ def collect(pair, outcome, root=ROOT):
     if cpuinfo.is_file():
         compact["host"]["cpu_model"] = next((line.split(":", 1)[1].strip()
             for line in cpuinfo.read_text().splitlines() if line.startswith("model name")), "unknown")
-    compact["tools"] = [record for record in json.loads((root / "bin/manifest.json").read_text())["executables"]
+    compact["tools"] = [record for record in json.loads((root / SOURCE / "resources/tools.json").read_text())["executables"]
                         if record["platform"] == "linux-x64" and record["tool"] == ("buildpatchtool" if pair == "bpt" else pair)]
     build = root / ".artifacts/build/provenance.json"
     if build.exists():

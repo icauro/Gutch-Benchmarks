@@ -14,7 +14,6 @@ import yaml
 from textual.widgets import DataTable, Static
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT.parent))
 from comparison_benchmark_suite.interactive import BenchmarkApp
 
 
@@ -26,14 +25,10 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.suite = self.root / "comparison_benchmark_suite"
-        shutil.copytree(
-            ROOT,
-            self.suite,
-            ignore=shutil.ignore_patterns(
-                ".git", ".venv", ".artifacts", "__pycache__", "fixtures", "bin",
-                "AGENTS.override.md",
-            ),
-        )
+        self.suite.mkdir()
+        fixture_patch = patch("comparison_benchmark_suite.interactive.FIXTURES", self.suite / "fixtures")
+        fixture_patch.start()
+        self.addCleanup(fixture_patch.stop)
         (self.suite / "fixtures").mkdir()
         builds = []
         for version in (1, 2):
@@ -85,7 +80,7 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_stop_terminates_only_owned_process_tree(self):
         marker = self.suite / "child.pid"
-        (self.suite / "run.py").write_text(
+        (self.suite / "simulate_stop.py").write_text(
             "import subprocess, sys, time\n"
             "from pathlib import Path\n"
             "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
@@ -96,6 +91,14 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
             "print('Step: waiting', flush=True)\n"
             "time.sleep(60)\n"
         )
+        create_process = asyncio.create_subprocess_exec
+
+        async def simulate(*args, **kwargs):
+            return await create_process(sys.executable, str(self.suite / "simulate_stop.py"), **kwargs)
+
+        launcher = patch("comparison_benchmark_suite.interactive.asyncio.create_subprocess_exec", side_effect=simulate)
+        launcher.start()
+        self.addCleanup(launcher.stop)
         app = BenchmarkApp(self.suite)
         async with app.run_test(size=(120, 40)) as pilot:
             await pilot.click("#run")
