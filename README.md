@@ -7,9 +7,9 @@ SHA-256 output validation.
 ## Latest Linux results
 
 <!-- latest-benchmarks:start -->
-[Full report](reports/2026-10-31/41198571245-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41198571245)
+[Full report](reports/2026-10-31/41198638034-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41198638034)
 
-UTC date: 2026-10-31. Suite: `ac6c48c09c8f78d16a6018f4064448e036814c3d`. Gutch: `unknown`.
+UTC date: 2026-10-31. Suite: `add9a9e17089ac8ab5dec875784888b5d15117a7`. Gutch: `unknown`.
 
 | Pair | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---|---:|---:|---:|---:|
