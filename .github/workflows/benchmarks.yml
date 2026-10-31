@@ -73,11 +73,13 @@ jobs:
         run: |
           rustup update stable --no-self-update
           rustup default stable
-          cargo build --locked --release --package gutch-cli
+          cargo build --locked --release --package gutch-cli --target x86_64-unknown-linux-gnu
+          python3 tools/package_cli.py --target x86_64-unknown-linux-gnu --toolchain stable
       - name: Package executable
         run: |
           mkdir -p .artifacts/build
-          gzip -c .artifacts/gutch-source/.builds/compiler-cache/cargo/release/gutch-cli > .artifacts/build/gutch-cli.gz
+          cp -a .artifacts/gutch-source/.builds/releases/x86_64-unknown-linux-gnu/. .artifacts/build/
+          gzip .artifacts/build/gutch-cli
           python3 - <<'PY'
           import json, subprocess
           from pathlib import Path

@@ -24,7 +24,9 @@ GitHub caches are repository-scoped; a different repository cannot directly
 restore this cache. Synthetic unit tests still generate their own tiny inputs.
 
 Gutch is built once from the selected revision with the locked Rust dependencies;
-all pairs use that executable. While Gutch is private, source checkout uses the
+all pairs use that executable. The build artifact includes the source and
+dependency notices produced by Gutch's `tools/package_cli.py`. While Gutch is
+private, source checkout uses the
 read-only deploy key stored as the `GUTCH_DEPLOY_KEY` Actions secret in this
 repository. External tools are explicitly downloaded for CI
 from `bin/manifest.json`, with archive and executable checksum verification.
