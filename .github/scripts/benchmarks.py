@@ -4,7 +4,6 @@ import argparse
 import bz2
 from datetime import datetime, timezone
 import json
-import math
 import os
 from pathlib import Path
 import platform
@@ -16,7 +15,8 @@ import yaml
 from comparison_benchmark_suite.datasets import extract_archive, prepare_dataset
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.support.retention import remove_owned
-from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows
+from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric
+from comparison_benchmark_suite.tools.chart import latest_records, render_svg
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -170,29 +170,7 @@ def pair_overview(record):
     rows = record["rows"] or [[label, "NOT_RUN", *("-" for _ in range(7))]
                               for label in ("gutch", other)]
     lines.extend("| " + " | ".join(row[i] for i in (0, 1, 2, 3, 4, 6)) + " |" for row in rows)
-    statuses = {row[0]: row[1] for row in rows}
-    comparable = record["status"] == "PASS" and all(statuses.get(label) == "PASS" for label in ("gutch", other))
-    summary = record.get("summary", {})
-    ratios = []
-    for metric in ("backup", "restore", "repair", "repo_size"):
-        gutch = summary.get("gutch", {}).get(metric, {})
-        peer = summary.get(other, {}).get(metric, {})
-        values = (gutch.get("median"), peer.get("median"))
-        if (not comparable or gutch.get("samples") != peer.get("samples") or
-                any(isinstance(value, bool) or not isinstance(value, (int, float))
-                    or not math.isfinite(value) or value <= 0 for value in values)):
-            ratios.append("-")
-            continue
-        gutch_value, peer_value = values
-        if metric == "repo_size":
-            cell = f"{gutch_value / peer_value:.2f}x size"
-        elif gutch_value == peer_value:
-            cell = "same"
-        elif gutch_value < peer_value:
-            cell = f"{peer_value / gutch_value:.2f}x faster"
-        else:
-            cell = f"{gutch_value / peer_value:.2f}x slower"
-        ratios.append(cell)
+    ratios = [relative_metric(record, metric) for metric in ("backup", "restore", "repair", "repo_size")]
     lines.extend(["| **Gutch relative** | - | " + " | ".join(ratios) + " |", ""])
     return lines
 
@@ -211,11 +189,15 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
             "pair": name, "status": "ERROR", "rows": [], "reasons": ["Job produced no report; see Actions logs."]}
         records.append(record)
         write_json(destination / f"{name}.json", record)
+    (destination / "comparison.svg").write_text(
+        render_svg(latest_records(root / "reports")), encoding="utf-8", newline="\n",
+    )
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")
     url = f"https://github.com/{repository}/actions/runs/{run_id}"
     lines = ["# Linux benchmark results", "", f"Run: [{run_id}, attempt {attempt}]({url}) | UTC date: {stamp}", "",
              "Each pair has its own settings. Hosted-runner timings are indicative; OS cache state is uncontrolled.", ""]
     overview = [f"[Full report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
+                f"![Latest per-pair benchmark comparisons]({relative.as_posix()}/comparison.svg)", "",
                 f"UTC date: {stamp}. Suite: `{os.environ.get('GITHUB_SHA', 'unknown')}`. "
                 f"Gutch: `{next((item.get('provenance', {}).get('GUTCH_REVISION') for item in records if item.get('provenance')), 'unknown')}`.", "",
                 "Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.", ""]

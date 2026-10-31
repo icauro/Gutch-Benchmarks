@@ -225,6 +225,8 @@ class CiTests(unittest.TestCase):
         self.assertIn("Original footer", readme)
         self.assertIn("1.250", readme)
         self.assertIn("### Gutch vs Borg (ERROR)", readme)
+        self.assertIn("![Latest per-pair benchmark comparisons]", readme)
+        self.assertEqual(len(list((self.root / "reports").rglob("comparison.svg"))), 1)
         self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 6)
         self.assertFalse(list((self.root / "reports").rglob("command.log")))
         with self.assertRaises(ValueError):

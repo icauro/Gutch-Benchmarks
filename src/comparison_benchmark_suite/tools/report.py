@@ -1,11 +1,36 @@
 """Shared comparison summary for the CLI, Markdown, and interactive UI."""
 
 import json
+import math
 from pathlib import Path
 from .models import LaneResult
 
 
 COMPARISON_HEADERS = ["Tool", "Status", "Capture s", "Restore s", "Repair s", "Recovery s", "Stored MiB", "CPU %", "Peak RSS MiB"]
+
+
+def relative_metric(record: dict, metric: str) -> str:
+    """Compare valid, equally sampled raw medians for a successful pair."""
+    other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
+    statuses = {row[0]: row[1] for row in record.get("rows", [])}
+    if record["status"] != "PASS" or any(statuses.get(label) != "PASS" for label in ("gutch", other)):
+        return "-"
+    summary = record.get("summary", {})
+    gutch = summary.get("gutch", {}).get(metric) or {}
+    peer = summary.get(other, {}).get(metric) or {}
+    values = (gutch.get("median"), peer.get("median"))
+    if (gutch.get("samples") != peer.get("samples") or
+            any(isinstance(value, bool) or not isinstance(value, (int, float))
+                or not math.isfinite(value) or value <= 0 for value in values)):
+        return "-"
+    gutch_value, peer_value = values
+    if metric == "repo_size":
+        return f"{gutch_value / peer_value:.2f}x size"
+    if gutch_value == peer_value:
+        return "same"
+    if gutch_value < peer_value:
+        return f"{peer_value / gutch_value:.2f}x faster"
+    return f"{gutch_value / peer_value:.2f}x slower"
 
 
 def comparison_rows(summary: dict, results: list[dict]) -> list[list[str]]:

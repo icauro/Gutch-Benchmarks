@@ -246,6 +246,19 @@ without a built-in Blender download.
 
 ## Results
 
+The final CI publishing step generates a paired-bar `comparison.svg` from the
+latest saved result for each pair and embeds it in the README. Each cell has
+its own linear scale; blue is Gutch and orange is the paired tool. Values and
+relative factors use the same source medians as the Markdown tables. Failed
+pairs stay visible without blocking other rows. The SVG needs no plotting or
+image-generation dependency.
+
+Generate a local image from saved reports without running benchmarks:
+
+```sh
+python -m comparison_benchmark_suite.tools.chart --reports reports --output .artifacts/charts/latest.svg
+```
+
 The command prints an ASCII comparison table with status, median capture/restore
 and repair/recovery seconds, stored MiB, CPU usage, and peak RSS MiB. Missing measurements show `-`;
 failure and capability reasons appear below the table. It also prints the report
