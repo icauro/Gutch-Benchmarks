@@ -9,6 +9,7 @@ __init__.py
 ci/benchmarks.py
 benchmark.py
 datasets.py
+docs/guide.md
 fixtures/
 fixtures/blender/
 fixtures/blender/dataset.yaml
