@@ -7,6 +7,8 @@ name = "comparison-benchmark-suite"
 version = "0.1.0"
 description = "Portable storage tool comparison benchmarks"
 requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "bin/licenses/*.txt"]
 dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]

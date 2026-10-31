@@ -1,5 +1,8 @@
 # Comparison benchmark suite
 
+Original project code is [MIT licensed](LICENSE). External tools, workloads and
+dependencies retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md).
+
 Compare storage tools using the same builds and independent SHA-256 checks.
 This root project works on its own: copy it anywhere, with any folder name. It does not need the Gutch
 repository, Rust, Docker, or cloud credentials.

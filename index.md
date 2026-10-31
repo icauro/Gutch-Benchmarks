@@ -14,6 +14,8 @@ fixtures/gutch_vs_bpt.yaml
 fixtures/gutch_vs_kopia.yaml
 fixtures/gutch_vs_plakar.yaml
 fixtures/gutch_vs_restic.yaml
+LICENSE
+THIRD_PARTY_NOTICES.md
 index.md
 interactive.py
 pyproject.toml
