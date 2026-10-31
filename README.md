@@ -257,7 +257,8 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 <!-- latest-benchmarks:end -->
 
-## Run on GitHub
+<details>
+<summary>Run on GitHub</summary>
 
 Open **Actions > Manual Linux benchmarks > Run workflow**. Choose `all` or one
 pair, the Gutch revision, and repetitions. Defaults: Ubuntu 24.04, all six pairs,
@@ -269,7 +270,10 @@ are discarded after each sample. Runs on the default branch save compact reports
 in Git and update this page; detailed logs and traces remain Actions artifacts
 for 30 days. Hosted-runner timings are indicative; OS caches are uncontrolled.
 
-## Run locally
+</details>
+
+<details>
+<summary>Run locally</summary>
 
 Requires Python 3.12+ and the selected tool executables on PATH or in the ignored
 `.artifacts/tools/<platform>/<tool>/` folders.
@@ -284,6 +288,8 @@ gutch-bench --fixture gutch_vs_rustic --no-open-perfetto --discard-outputs
 Selecting a shipped fixture downloads and checksum-verifies the pinned Blender
 5.0.0 and 5.1.0 inputs if missing. Reports are written under `.artifacts/runs/`.
 Local runs retain failed outputs unless `--discard-outputs` is selected.
+
+</details>
 
 See the [benchmark guide](docs/guide.md) for settings, custom inputs, recovery,
 report interpretation and development instructions. Tool versions and checksums
