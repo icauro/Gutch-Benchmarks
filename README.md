@@ -40,9 +40,10 @@ The fixture runs one warm-up and three measured repetitions, rotating tool order
 Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
 
-The tracked `bin/` directory includes the comparison executables for Windows and
-Linux x86-64. No tool downloads or builds are needed. Override a bundled executable
-in `fixtures/blender/fixture.yaml` when testing another version:
+Comparison executables are supplied locally. Install tools on PATH, set their
+paths in the fixture, or place them in the ignored `bin/windows-x64/` or
+`bin/linux-x64/` folders. Executables and vendor runtime distributions are not
+tracked. The suite never downloads tools automatically. For example:
 
 ```yaml
 executables:
@@ -51,18 +52,18 @@ executables:
   buildpatchtool: C:/tools/BuildPatchTool.exe
 ```
 
-Bundled tools are discovered automatically under `bin/windows-x64/`
+Local tools are discovered automatically under `bin/windows-x64/`
 or `bin/linux-x64/`, before searching PATH. Each tool has its own
 folder: `restic/restic.exe` on Windows or `restic/restic` on Linux, likewise for
 Borg, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
 BuildPatchTool keeps its Engine layout under `buildpatchtool/Engine/Binaries/`,
 with `Win64/BuildPatchTool.exe` or `Linux/BuildPatchTool`. Preserve its accompanying
 Engine files. Explicit fixture paths and `GUTCH_EXECUTABLE` still take precedence.
-Only x86-64 hosts use these bundles. The shipped Linux Borg 2 binary requires
-glibc 2.43 or newer (for example the tested Debian unstable image); this is the
-minimum Linux requirement for running every bundled lane. Older binaries and download archives belong under `.artifacts/`, outside the
-shipped `bin/` directory. Refresh the bundled Gutch executable
-after rebuilding it; the suite never reads a sibling project's build directory.
+Only x86-64 hosts use these platform folders. Check the system requirements of
+the binaries you install. The previously tested Linux Borg 2 build required
+glibc 2.43 or newer. Download archives and smoke-test logs belong under
+`.artifacts/`. Refresh your local Gutch executable after rebuilding it; the suite
+never reads a sibling project's build directory.
 
 Missing tools are clearly reported as `UNAVAILABLE`; available tools still run.
 Paths in a fixture are relative to that fixture's folder. No tool is downloaded

@@ -1,12 +1,14 @@
-# Bundled comparison executables
+# Local comparison executables
 
-These files ship with the repository. Runtime discovery selects windows-x64 or
-linux-x64 without downloading tools. manifest.json records executable versions,
-SHA-256 checksums and the Gutch source revision used for these builds.
+Executable distributions are not tracked. Install tools on PATH, configure their
+paths explicitly, or place local copies under the ignored windows-x64 and
+linux-x64 folders. Runtime discovery never downloads tools. manifest.json records
+versions, checksums and source provenance for a previously tested local toolset;
+it is a reference, not an inventory of files included in a clone.
 
-Keep BuildPatchTool's Engine files beside each binary. Linux executable modes
-are tracked in Git. Linux Borg 2 requires glibc 2.43 or newer; all six Linux tools
-were smoke-tested in Debian unstable. Windows tools target x86-64.
+Keep BuildPatchTool's Engine files beside its binary. On Linux, ensure installed
+tools are executable and meet your host's system requirements. The previously
+tested Borg 2 build required glibc 2.43 or newer. Platform folders target x86-64.
 
 Upstreams and notices:
 
@@ -18,9 +20,6 @@ Upstreams and notices:
   https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip
 - Gutch: built from the source revision recorded in manifest.json.
 
-Old versions, archives and smoke-test logs stay in .artifacts/ and do not ship.
-After refreshing a binary, update its checksum and version in manifest.json.
-
-The suite does not ship BPT’s optional GUI or PDF guide, or Plakar man pages.
-Runtime support files and CLI binaries remain intact. Identical platform license
-texts share one copy. The repository file index excludes this vendor directory.
+Archives and smoke-test logs stay in .artifacts/. Retain upstream licenses with
+your local distributions. Existing notices under licenses/ remain for attribution.
+The repository file index excludes this local tool directory.
