@@ -224,6 +224,8 @@ class CiTests(unittest.TestCase):
         self.assertIn("Original intro", readme)
         self.assertIn("Original footer", readme)
         self.assertIn("1.250", readme)
+        self.assertIn("<summary>Detailed results and source reports</summary>", readme)
+        self.assertNotIn("Suite commit:", readme)
         self.assertIn("### Gutch vs Borg (ERROR)", readme)
         self.assertIn("![Latest per-pair benchmark comparisons]", readme)
         charts = list((self.root / "reports").rglob("comparison.svg"))
@@ -231,7 +233,11 @@ class CiTests(unittest.TestCase):
         self.assertEqual(charts[0].read_bytes(), charts[1].read_bytes())
         self.assertLess(readme.index("![Latest per-pair"), readme.index(ci.START))
         ci.publish("restic", self.root / "incoming", "124", "1", self.root)
-        self.assertEqual((self.root / "README.md").read_text().count("![Latest per-pair"), 1)
+        updated = (self.root / "README.md").read_text()
+        self.assertEqual(updated.count("![Latest per-pair"), 1)
+        self.assertIn("/123-2/borg.json", updated)
+        self.assertIn("/124-1/restic.json", updated)
+        self.assertIn("### Gutch vs Borg (ERROR)", updated)
         self.assertEqual((self.root / "reports/comparison.svg").read_bytes(),
                          next((self.root / "reports").glob("*/124-1/comparison.svg")).read_bytes())
         self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 7)
@@ -261,7 +267,7 @@ class CiTests(unittest.TestCase):
                 for metric, value in zip(("backup", "restore", "repair", "repo_size"), values)}
         table = "\n".join(ci.pair_overview(record))
         self.assertIn("### Gutch vs Restic (PASS)", table)
-        self.assertIn("| **Gutch relative** | - | 2.00x faster | 2.00x slower | same | 0.25x size |", table)
+        self.assertIn("| **Gutch relative** | - | 2.00x faster | 2.00x slower | ~same | 75% smaller |", table)
         record["summary"]["restic"]["backup"]["samples"] = 2
         self.assertIn("| **Gutch relative** | - | - | 2.00x slower", "\n".join(ci.pair_overview(record)))
         record["status"] = "ERROR"

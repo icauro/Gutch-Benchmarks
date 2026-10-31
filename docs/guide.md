@@ -248,9 +248,13 @@ without a built-in Blender download.
 
 The final CI publishing step generates a paired-bar `comparison.svg` from the
 latest saved result for each pair, and updates `reports/comparison.svg` shown
-at the top of the README. The chart uses a black background. Each cell has
+near the top of the README. Detailed tables are collapsed and link to each
+pair’s source report, including older runs when only one pair was rerun.
+The chart uses a black background. Each cell has
 its own linear scale; blue is Gutch and orange is the paired tool. Values and
-relative factors use the same source medians as the Markdown tables. Failed
+relative factors use the same source medians as the Markdown tables. Storage
+differences show percentages relative to the paired tool; timing ratios below
+1.005× show `~same`. These are display rounding rules, not significance tests. Failed
 pairs stay visible without blocking other rows. The SVG needs no plotting or
 image-generation dependency.
 

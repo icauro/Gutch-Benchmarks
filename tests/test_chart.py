@@ -36,7 +36,7 @@ class ChartTests(unittest.TestCase):
         for gutch, other in zip(lengths[BLUE], lengths[ORANGE]):
             self.assertAlmostEqual(gutch / other, 0.5)
         self.assertIn("2.00×", chart)
-        self.assertIn("0.50×", chart)
+        self.assertIn("50% smaller", chart)
 
     def test_failed_or_null_measurements_do_not_block_other_pairs(self):
         failed = pair_record("borg", "ERROR")
@@ -49,6 +49,19 @@ class ChartTests(unittest.TestCase):
         self.assertIn("ERROR", chart)
         self.assertIn("Restic", chart)
         self.assertEqual(chart.count("2.00×"), 3)  # Only the successful pair's timings.
+
+    def test_small_differences_are_not_misleading_one_times_factors(self):
+        record = pair_record()
+        record["summary"]["gutch"]["repo_size"]["median"] = 2.008
+        record["summary"]["gutch"]["backup"]["median"] = 2.008
+        chart = render_svg([record])
+        self.assertIn("0.4% larger", chart)
+        self.assertIn("~same", chart)
+        self.assertNotIn("1.00×", chart)
+        record["summary"]["gutch"]["repo_size"]["median"] = 1.992
+        self.assertIn("0.4% smaller", render_svg([record]))
+        record["summary"]["gutch"]["repo_size"]["median"] = 2
+        self.assertIn("same size", render_svg([record]))
 
     def test_report_text_is_xml_escaped(self):
         chart = render_svg([pair_record("restic&<script>")])

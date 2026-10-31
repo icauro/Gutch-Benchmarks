@@ -25,9 +25,12 @@ def relative_metric(record: dict, metric: str) -> str:
         return "-"
     gutch_value, peer_value = values
     if metric == "repo_size":
-        return f"{gutch_value / peer_value:.2f}x size"
-    if gutch_value == peer_value:
-        return "same"
+        percent = round(100 * (gutch_value / peer_value - 1), 1)
+        if percent == 0:
+            return "same size"
+        return f"{abs(percent):g}% {'smaller' if percent < 0 else 'larger'}"
+    if max(gutch_value, peer_value) / min(gutch_value, peer_value) < 1.005:
+        return "~same"
     if gutch_value < peer_value:
         return f"{peer_value / gutch_value:.2f}x faster"
     return f"{gutch_value / peer_value:.2f}x slower"

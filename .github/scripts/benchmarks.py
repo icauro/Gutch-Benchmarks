@@ -189,20 +189,27 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
             "pair": name, "status": "ERROR", "rows": [], "reasons": ["Job produced no report; see Actions logs."]}
         records.append(record)
         write_json(destination / f"{name}.json", record)
-    chart = render_svg(latest_records(root / "reports"))
+    latest = latest_records(root / "reports")
+    chart = render_svg(latest)
     for path in (destination / "comparison.svg", root / "reports/comparison.svg"):
         path.write_text(chart, encoding="utf-8", newline="\n")
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")
     url = f"https://github.com/{repository}/actions/runs/{run_id}"
     lines = ["# Linux benchmark results", "", f"Run: [{run_id}, attempt {attempt}]({url}) | UTC date: {stamp}", "",
              "Each pair has its own settings. Hosted-runner timings are indicative; OS cache state is uncontrolled.", ""]
-    overview = [f"[Full report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
-                f"UTC date: {stamp}. Suite: `{os.environ.get('GITHUB_SHA', 'unknown')}`. "
-                f"Gutch: `{next((item.get('provenance', {}).get('GUTCH_REVISION') for item in records if item.get('provenance')), 'unknown')}`.", "",
-                "Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.", ""]
+    dates = sorted({item["source_report"].split("/")[0] for item in latest if item.get("source_report")})
+    overview = ["Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · " + ", ".join(dates), "",
+                f"[This run's report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
+                "Lower values are better. Pair settings differ; bars scale independently within each cell.",
+                "Hosted-runner timings are indicative; OS caches are uncontrolled.", "",
+                "<details>", "<summary>Detailed results and source reports</summary>", ""]
+    for item in latest:
+        if item.get("source_report"):
+            overview.extend([f"[Source: Gutch vs {item['pair']}](reports/{item['source_report']})", ""])
+        overview.extend(pair_overview(item))
+    overview.extend(["</details>", ""])
     for record in records:
         name = record["pair"]
-        overview.extend(pair_overview(record))
         provenance = record.get("provenance", {})
         lines.extend([f"## Gutch vs {name}: {record['status']}", "", record.get("description", ""), "",
                       f"Suite commit: `{provenance.get('GITHUB_SHA', 'unknown')}`; Gutch commit: `{provenance.get('GUTCH_REVISION', 'unknown')}`.", "",

@@ -1,19 +1,22 @@
 # Gutch benchmarks
 
+Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic and Rustic
+using shared Blender inputs, pair-specific settings and SHA-256 output validation.
+
 ![Latest per-pair benchmark comparisons](reports/comparison.svg)
 
-Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic or Rustic.
-Each pair uses the same Blender inputs, pair-specific settings and independent
-SHA-256 output validation.
-
-## Latest Linux results
-
 <!-- latest-benchmarks:start -->
-[Original all-pairs report](reports/2026-10-31/41200340952-1/README.md) · [Verified BPT rerun](reports/2026-10-31/41201391345-1/README.md)
+Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31
 
-UTC date: 2026-10-31. Gutch: `c50285368c91d127e51d52f75aab37603d810682`. Results combine the linked runs; suite commits are recorded in each report.
+[All-pairs report](reports/2026-10-31/41200340952-1/README.md) · [BPT rerun](reports/2026-10-31/41201391345-1/README.md)
 
-Relative rows compare unrounded medians. Storage is Gutch / other size; '-' means no valid comparison.
+Lower values are better. Pair settings differ; bars scale independently within each cell.
+Hosted-runner timings are indicative; OS caches are uncontrolled.
+
+<details>
+<summary>Detailed results and source reports</summary>
+
+[Source: Gutch vs borg](reports/2026-10-31/41200340952-1/borg.json)
 
 ### Gutch vs Borg (PASS)
 
@@ -21,7 +24,9 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 |---|---|---:|---:|---:|---:|
 | borg | PASS | 8.815 | 7.575 | 2.474 | 918.275 |
 | gutch | PASS | 10.708 | 1.945 | 0.514 | 913.570 |
-| **Gutch relative** | - | 1.21x slower | 3.89x faster | 4.81x faster | 0.99x size |
+| **Gutch relative** | - | 1.21x slower | 3.89x faster | 4.81x faster | 0.5% smaller |
+
+[Source: Gutch vs bpt](reports/2026-10-31/41201391345-1/bpt.json)
 
 ### Gutch vs BuildPatchTool (PASS)
 
@@ -29,7 +34,9 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 |---|---|---:|---:|---:|---:|
 | buildpatchtool | PASS | 25.488 | 25.503 | 1.198 | 732.343 |
 | gutch | PASS | 6.018 | 1.526 | 0.446 | 689.362 |
-| **Gutch relative** | - | 4.24x faster | 16.72x faster | 2.69x faster | 0.94x size |
+| **Gutch relative** | - | 4.24x faster | 16.72x faster | 2.69x faster | 5.9% smaller |
+
+[Source: Gutch vs kopia](reports/2026-10-31/41200340952-1/kopia.json)
 
 ### Gutch vs Kopia (PASS)
 
@@ -37,7 +44,9 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 |---|---|---:|---:|---:|---:|
 | gutch | PASS | 5.621 | 1.557 | 0.650 | 1758.175 |
 | kopia | PASS | 4.685 | 7.262 | 7.666 | 1754.523 |
-| **Gutch relative** | - | 1.20x slower | 4.66x faster | 11.80x faster | 1.00x size |
+| **Gutch relative** | - | 1.20x slower | 4.66x faster | 11.80x faster | 0.2% larger |
+
+[Source: Gutch vs plakar](reports/2026-10-31/41200340952-1/plakar.json)
 
 ### Gutch vs Plakar (PASS)
 
@@ -45,7 +54,9 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 |---|---|---:|---:|---:|---:|
 | gutch | PASS | 5.988 | 2.034 | 0.419 | 913.907 |
 | plakar | PASS | 8.821 | 3.912 | 13.458 | 916.210 |
-| **Gutch relative** | - | 1.47x faster | 1.92x faster | 32.09x faster | 1.00x size |
+| **Gutch relative** | - | 1.47x faster | 1.92x faster | 32.09x faster | 0.3% smaller |
+
+[Source: Gutch vs restic](reports/2026-10-31/41200340952-1/restic.json)
 
 ### Gutch vs Restic (PASS)
 
@@ -53,7 +64,9 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 |---|---|---:|---:|---:|---:|
 | gutch | PASS | 5.587 | 2.323 | 0.705 | 689.362 |
 | restic | PASS | 8.969 | 5.731 | 4.002 | 714.666 |
-| **Gutch relative** | - | 1.61x faster | 2.47x faster | 5.68x faster | 0.96x size |
+| **Gutch relative** | - | 1.61x faster | 2.47x faster | 5.68x faster | 3.5% smaller |
+
+[Source: Gutch vs rustic](reports/2026-10-31/41200340952-1/rustic.json)
 
 ### Gutch vs Rustic (PASS)
 
@@ -61,7 +74,9 @@ Relative rows compare unrounded medians. Storage is Gutch / other size; '-' mean
 |---|---|---:|---:|---:|---:|
 | gutch | PASS | 5.687 | 2.353 | 0.726 | 689.362 |
 | rustic | PASS | 14.522 | 5.760 | 4.311 | 700.319 |
-| **Gutch relative** | - | 2.55x faster | 2.45x faster | 5.93x faster | 0.98x size |
+| **Gutch relative** | - | 2.55x faster | 2.45x faster | 5.93x faster | 1.6% smaller |
+
+</details>
 
 <!-- latest-benchmarks:end -->
 

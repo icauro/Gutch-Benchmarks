@@ -44,8 +44,8 @@ def _median(record, label, metric):
 
 
 def render_svg(records: list[dict]) -> str:
-    width, margin, pair_width, cell_width = 1440, 28, 184, 300
-    table_top, header_height, row_height = 76, 56, 104
+    width, margin, pair_width, cell_width = 1080, 20, 160, 220
+    table_top, header_height, row_height = 76, 56, 120
     table_bottom = table_top + header_height + row_height * len(records)
     height = table_bottom + 28
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
@@ -64,47 +64,46 @@ def render_svg(records: list[dict]) -> str:
         parts.append(f'<path d="M{x1} {y1}H{x2}" stroke="#29313d"/>' if y1 == y2 else
                      f'<path d="M{x1} {y1}V{y2}" stroke="#29313d"/>')
 
-    text(margin, 48, "Gutch benchmark comparisons", size=32, weight=700)
-    for x, color, label in ((1080, BLUE, "Gutch"), (1200, ORANGE, "Paired tool")):
+    text(margin, 48, "Gutch benchmark comparisons", size=28, weight=700)
+    for x, color, label in ((780, BLUE, "Gutch"), (900, ORANGE, "Paired tool")):
         rect(x, 36, 16, 13, color, 3)
-        text(x + 25, 48, label, size=14)
+        text(x + 25, 48, label, size=16)
     rect(margin, table_top, width - 2 * margin, table_bottom - table_top, "#161b22", 10)
-    text(margin + 20, table_top + 34, "COMPARISON", size=12, color="#a3afc2", weight=700)
+    text(margin + 12, table_top + 34, "COMPARISON", size=15, color="#a3afc2", weight=700)
     for index, (_, title, unit) in enumerate(METRICS):
         x = margin + pair_width + index * cell_width
-        text(x + 18, table_top + 24, title, size=17, weight=650)
-        text(x + 18, table_top + 44, unit, size=12, color="#a3afc2")
+        text(x + 18, table_top + 24, title, size=20, weight=650)
+        text(x + 18, table_top + 44, unit, size=15, color="#a3afc2")
     for index, record in enumerate(records):
         y = table_top + header_height + index * row_height
         rect(margin, y, width - 2 * margin, row_height, "#000000" if index % 2 == 0 else "#0d1117")
         line(margin, y, width - margin, y)
         other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
         title = "BuildPatchTool" if record["pair"] == "bpt" else record["pair"].title()
-        text(margin + 20, y + 27, "Gutch vs", size=12, color="#a3afc2")
-        text(margin + 20, y + 51, title, size=19, weight=650)
+        text(margin + 12, y + 27, "Gutch vs", size=15, color="#a3afc2")
+        text(margin + 12, y + 51, title, size=18, weight=650)
         status = record["status"]
-        rect(margin + 20, y + 65, 78, 22, "#123325" if status == "PASS" else "#392615", 5)
-        text(margin + 30, y + 80, status, size=11, color="#7cdda6" if status == "PASS" else "#ffba78", weight=650)
+        if status != "PASS":
+            text(margin + 12, y + 91, status, size=15, color="#ffba78", weight=650)
         for column, (metric, _, unit) in enumerate(METRICS):
             x = margin + pair_width + column * cell_width
             values = [_median(record, label, metric) for label in ("gutch", other)]
             maximum = max((value for value in values if value is not None), default=0)
             for slot, (value, color) in enumerate(zip(values, (BLUE, ORANGE))):
-                bar_y = y + 28 + slot * 27
-                rect(x + 18, bar_y, 98, 12, "#252d3a", 2)
+                bar_y = y + 24 + slot * 30
+                rect(x + 14, bar_y, 74, 12, "#252d3a", 2)
                 if value is not None:
                     if maximum:
-                        rect(x + 18, bar_y, 98 * value / maximum, 12, color, 2)
-                    label = f"{value:,.1f} MiB" if unit == "MiB" else f"{value:.3f} s"
+                        rect(x + 14, bar_y, 74 * value / maximum, 12, color, 2)
+                    label = f"{value:,.1f}" if unit == "MiB" else f"{value:.3f}"
                 else:
                     label = "—"
-                text(x + 130, bar_y + 11, label, size=13, color="#c5cedc")
+                text(x + 102, bar_y + 12, label, size=18, color="#c5cedc")
             ratio = relative_metric(record, metric)
-            number, _, direction = ratio.partition(" ")
-            slower = direction == "slower" or (metric == "repo_size" and all(v is not None for v in values) and values[0] > values[1])
-            color = "#ffb36b" if slower else "#71a7ff"
-            text(x + 220, y + 43, number.replace("x", "×"), size=20, color=color if ratio != "-" else "#8794a7", weight=700)
-            text(x + 220, y + 64, direction, size=12, color=color)
+            slower = ratio.endswith(("slower", "larger"))
+            neutral = ratio in ("-", "~same", "same size")
+            color = "#a3afc2" if neutral else ("#ffb36b" if slower else "#71a7ff")
+            text(x + 14, y + 101, ratio.replace("x", "×"), size=20, color=color, weight=700)
     for column in range(5):
         x = margin + pair_width + column * cell_width
         line(x, table_top, x, table_bottom)
