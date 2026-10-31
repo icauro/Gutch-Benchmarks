@@ -1,0 +1,449 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Kopia explicitly uses DYNAMIC-4M-BUZHASH, disabled content compression and AES256-GCM-HMAC-SHA256 encryption. Gutch uses a nominal 4 MiB FastCDC target, no compression, 16 MiB bundles and no encryption. Bounds, metadata, hashes and packing differ. Kopia recovery requests native extra-file deletion. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+  "executables": {
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    },
+    "kopia": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/kopia/kopia",
+      "sha256": "e306c3d48b47756912928738241baffe68d1a8a16ab804ab3fbabd725a61df7f"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Kopia explicitly uses DYNAMIC-4M-BUZHASH, disabled content compression and AES256-GCM-HMAC-SHA256 encryption. Gutch uses a nominal 4 MiB FastCDC target, no compression, 16 MiB bundles and no encryption. Bounds, metadata, hashes and packing differ. Kopia recovery requests native extra-file deletion. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_16MiB",
+          "chunk_profile": "chunk_4MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "none",
+          "compression_level": null,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--compression=none"
+        ],
+        "configuration_label": "",
+        "label": "kopia",
+        "profile": null,
+        "tool": "kopia",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_16MiB",
+          "chunk_profile": "chunk_4MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "none",
+          "compression_level": null,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--compression=none"
+        ],
+        "configuration_label": "",
+        "label": "kopia",
+        "profile": null,
+        "tool": "kopia",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_kopia",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 2,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "measurement_contract": 2,
+  "operations": {
+    "gutch": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    },
+    "kopia": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    }
+  },
+  "pair": "kopia",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41209065070",
+    "GITHUB_SHA": "e90490616310f14e2bcc18a62b4070663865d2b6",
+    "GUTCH_REVISION": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "gutch",
+      "PASS",
+      "5.319",
+      "1.313",
+      "1.113",
+      "1.341",
+      "1758.175",
+      "-",
+      "-"
+    ],
+    [
+      "kopia",
+      "PASS",
+      "4.564",
+      "7.491",
+      "6.295",
+      "2.884",
+      "1754.510",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "gutch": {
+      "backup": {
+        "maximum": 5.336219791000019,
+        "median": 5.318968026999983,
+        "minimum": 5.301716262999946,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.023599742999977025,
+        "median": 0.023564502499965556,
+        "minimum": 0.023529261999954088,
+        "samples": 2
+      },
+      "exact_recovery": {
+        "maximum": 0.5422169399999461,
+        "median": 0.537097666999955,
+        "minimum": 0.5319783939999638,
+        "samples": 2
+      },
+      "exact_recovery_validated": {
+        "maximum": 4.177848305999987,
+        "median": 4.163694736499963,
+        "minimum": 4.1495411669999385,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 1.368851606000021,
+        "median": 1.3410721835000459,
+        "minimum": 1.3132927610000706,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 5.080050255000003,
+        "median": 5.0395968920000485,
+        "minimum": 4.999143529000094,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 0.7857479340000282,
+        "median": 0.7793841405000421,
+        "minimum": 0.7730203470000561,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 4.403675630000009,
+        "median": 4.402073084000023,
+        "minimum": 4.400470538000036,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 2.61184582300001,
+        "median": 2.611525956999998,
+        "minimum": 2.6112060909999855,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 2.724373968000009,
+        "median": 2.707442069999985,
+        "minimum": 2.6905101719999607,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 1.4549813879999647,
+        "median": 1.1134238074999985,
+        "minimum": 0.7718662270000323,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 5.106717641999978,
+        "median": 4.764085259500007,
+        "minimum": 4.421452877000036,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 145,
+        "median": 145.0,
+        "minimum": 145,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 887308617,
+        "median": 887308617.0,
+        "minimum": 887308617,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 1843580458,
+        "median": 1843580458.0,
+        "minimum": 1843580458,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 1.3196060930000044,
+        "median": 1.3128823459999808,
+        "minimum": 1.3061585989999571,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 5.004722092000009,
+        "median": 4.998978249999993,
+        "minimum": 4.993234407999978,
+        "samples": 2
+      },
+      "verify": null
+    },
+    "kopia": {
+      "backup": {
+        "maximum": 4.566753786999982,
+        "median": 4.564264668500016,
+        "minimum": 4.56177555000005,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.02369988999993211,
+        "median": 0.02354524949998904,
+        "minimum": 0.02339060900004597,
+        "samples": 2
+      },
+      "exact_recovery": {
+        "maximum": 5.201093657000001,
+        "median": 5.155157543999991,
+        "minimum": 5.10922143099998,
+        "samples": 2
+      },
+      "exact_recovery_validated": {
+        "maximum": 8.889207645999988,
+        "median": 8.86945673049999,
+        "minimum": 8.849705814999993,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 2.8950476809999373,
+        "median": 2.8840952414999776,
+        "minimum": 2.873142802000018,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 6.58409587299991,
+        "median": 6.580980520499963,
+        "minimum": 6.577865168000017,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 5.199309084999982,
+        "median": 5.191056886499979,
+        "minimum": 5.182804687999976,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 8.892907673000025,
+        "median": 8.881214567499995,
+        "minimum": 8.869521461999966,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 2.195036576000007,
+        "median": 2.1771148070000095,
+        "minimum": 2.159193038000012,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 2.4025825120000377,
+        "median": 2.3871498615000064,
+        "minimum": 2.371717210999975,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 7.4980505380000295,
+        "median": 6.295423395,
+        "minimum": 5.092796251999971,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 11.191153118000045,
+        "median": 9.994455066,
+        "minimum": 8.797757013999956,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 99,
+        "median": 99.0,
+        "minimum": 99,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 883233741,
+        "median": 883231172.5,
+        "minimum": 883228604,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 1839742546,
+        "median": 1839737231.0,
+        "minimum": 1839731916,
+        "samples": 2
+      },
+      "repository_check": {
+        "maximum": 2.109051348000037,
+        "median": 2.104428676500021,
+        "minimum": 2.099806005000005,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 7.741156505999982,
+        "median": 7.490654222999979,
+        "minimum": 7.240151939999976,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 11.631812373999992,
+        "median": 11.299256184,
+        "minimum": 10.96669999400001,
+        "samples": 2
+      }
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "416d0f84a3dbb321a8b2d8f0997b1a0a6e915babe79ee76fa6e4d2bd1e1c5178",
+      "path": "linux-x64/kopia/kopia",
+      "platform": "linux-x64",
+      "prerelease": false,
+      "release_url": "https://github.com/kopia/kopia/releases/tag/v0.23.1",
+      "sha256": "e306c3d48b47756912928738241baffe68d1a8a16ab804ab3fbabd725a61df7f",
+      "source_url": "https://github.com/kopia/kopia/releases/download/v0.23.1/kopia-0.23.1-linux-x64.tar.gz",
+      "tool": "kopia",
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "version": "0.23.1"
+    }
+  ]
+}

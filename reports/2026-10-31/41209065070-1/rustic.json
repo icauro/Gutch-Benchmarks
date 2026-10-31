@@ -1,0 +1,482 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Rustic explicitly uses Rabin with a 1 MiB average, 512 KiB minimum and 8 MiB maximum, Zstd 3, and 8 MiB data/tree pack targets with growth disabled. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3 and 8 MiB compressed bundles. Chunk boundaries, compression units and hashes differ; Rustic remains encrypted. Recovery verifies existing bytes and deletes extra files. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+  "executables": {
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    },
+    "rustic": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/rustic/rustic",
+      "sha256": "c9edb8bff6682163fbe1ed0651bd1a6459159069ff680dbb8d4958a0d22f536e"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Rustic explicitly uses Rabin with a 1 MiB average, 512 KiB minimum and 8 MiB maximum, Zstd 3, and 8 MiB data/tree pack targets with growth disabled. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3 and 8 MiB compressed bundles. Chunk boundaries, compression units and hashes differ; Rustic remains encrypted. Recovery verifies existing bytes and deletes extra files. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--set-compression",
+          "3",
+          "--set-chunker",
+          "rabin",
+          "--set-chunk-size",
+          "1MiB",
+          "--set-chunk-min-size",
+          "512kiB",
+          "--set-chunk-max-size",
+          "8MiB",
+          "--set-datapack-size",
+          "8MiB",
+          "--set-datapack-growfactor",
+          "0",
+          "--set-treepack-size",
+          "8MiB",
+          "--set-treepack-growfactor",
+          "0"
+        ],
+        "configuration_label": "",
+        "label": "rustic",
+        "profile": null,
+        "tool": "rustic",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--set-compression",
+          "3",
+          "--set-chunker",
+          "rabin",
+          "--set-chunk-size",
+          "1MiB",
+          "--set-chunk-min-size",
+          "512kiB",
+          "--set-chunk-max-size",
+          "8MiB",
+          "--set-datapack-size",
+          "8MiB",
+          "--set-datapack-growfactor",
+          "0",
+          "--set-treepack-size",
+          "8MiB",
+          "--set-treepack-growfactor",
+          "0"
+        ],
+        "configuration_label": "",
+        "label": "rustic",
+        "profile": null,
+        "tool": "rustic",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_rustic",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 2,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "measurement_contract": 2,
+  "operations": {
+    "gutch": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    },
+    "rustic": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    }
+  },
+  "pair": "rustic",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41209065070",
+    "GITHUB_SHA": "e90490616310f14e2bcc18a62b4070663865d2b6",
+    "GUTCH_REVISION": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "gutch",
+      "PASS",
+      "6.185",
+      "1.404",
+      "0.800",
+      "1.489",
+      "689.362",
+      "-",
+      "-"
+    ],
+    [
+      "rustic",
+      "PASS",
+      "11.583",
+      "4.356",
+      "3.477",
+      "4.424",
+      "699.548",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "gutch": {
+      "backup": {
+        "maximum": 6.382269030000032,
+        "median": 6.184874433000033,
+        "minimum": 5.987479836000034,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.02005922199998622,
+        "median": 0.019984311499996465,
+        "minimum": 0.01990940100000671,
+        "samples": 2
+      },
+      "exact_recovery": {
+        "maximum": 0.43172712699998783,
+        "median": 0.43144923250000033,
+        "minimum": 0.43117133800001284,
+        "samples": 2
+      },
+      "exact_recovery_validated": {
+        "maximum": 3.116402681000011,
+        "median": 3.115219394500002,
+        "minimum": 3.1140361079999934,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 1.5473932380000406,
+        "median": 1.4893792480000059,
+        "minimum": 1.4313652579999712,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 4.248724103000086,
+        "median": 4.202530667000019,
+        "minimum": 4.156337230999952,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 0.8154404979999867,
+        "median": 0.7996735129999593,
+        "minimum": 0.7839065279999318,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 3.4859613130000184,
+        "median": 3.4747267814999816,
+        "minimum": 3.4634922499999448,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 3.348379542000032,
+        "median": 3.098692837500039,
+        "minimum": 2.849006133000046,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 3.1384737029999883,
+        "median": 3.086181595499994,
+        "minimum": 3.033889488,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 0.8170270779999669,
+        "median": 0.8004148265000026,
+        "minimum": 0.7838025750000384,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 3.5017991569999936,
+        "median": 3.4744918155000164,
+        "minimum": 3.4471844740000392,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 120,
+        "median": 120.0,
+        "minimum": 120,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 322167265,
+        "median": 322167265.0,
+        "minimum": 322167265,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 722847959,
+        "median": 722847959.0,
+        "minimum": 722847959,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 1.4169377580000173,
+        "median": 1.4039965110000026,
+        "minimum": 1.3910552639999878,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 4.1758727910000175,
+        "median": 4.150860746500001,
+        "minimum": 4.125848701999985,
+        "samples": 2
+      },
+      "verify": null
+    },
+    "rustic": {
+      "backup": {
+        "maximum": 11.645188647999987,
+        "median": 11.58270172799999,
+        "minimum": 11.520214807999992,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.0214232220000099,
+        "median": 0.021243112500002326,
+        "minimum": 0.02106300299999475,
+        "samples": 2
+      },
+      "exact_recovery": {
+        "maximum": 3.4332636139999977,
+        "median": 3.4264911329999848,
+        "minimum": 3.419718651999972,
+        "samples": 2
+      },
+      "exact_recovery_validated": {
+        "maximum": 6.137137220999989,
+        "median": 6.127859579499983,
+        "minimum": 6.118581937999977,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 4.485607010000024,
+        "median": 4.423765025499989,
+        "minimum": 4.3619230409999545,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 7.192885538000041,
+        "median": 7.154867848500004,
+        "minimum": 7.116850158999966,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 3.481003648000012,
+        "median": 3.4708963040000356,
+        "minimum": 3.460788960000059,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 6.1927879020000205,
+        "median": 6.174893457500048,
+        "minimum": 6.156999013000075,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 5.395912113999998,
+        "median": 5.388711125500009,
+        "minimum": 5.381510137000021,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 6.263678510999966,
+        "median": 6.19399060249998,
+        "minimum": 6.124302693999994,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 3.515829472000007,
+        "median": 3.4767601635000176,
+        "minimum": 3.437690855000028,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 6.229287125999974,
+        "median": 6.182946735000002,
+        "minimum": 6.136606344000029,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 93,
+        "median": 92.5,
+        "minimum": 92,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 326654536,
+        "median": 326163410.0,
+        "minimum": 325672284,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 733902485,
+        "median": 733529004.5,
+        "minimum": 733155524,
+        "samples": 2
+      },
+      "repository_check": {
+        "maximum": 3.0903595600000244,
+        "median": 3.083201137000003,
+        "minimum": 3.076042713999982,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 4.418363371000055,
+        "median": 4.355866369500006,
+        "minimum": 4.293369367999958,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 7.124460395999961,
+        "median": 7.12409581350002,
+        "minimum": 7.123731231000079,
+        "samples": 2
+      }
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "628b26785f3787fa1d52e61b3289493f483230a1ed6e86a84ae9c76d7a41a81e",
+      "path": "linux-x64/rustic/rustic",
+      "platform": "linux-x64",
+      "prerelease": false,
+      "release_url": "https://github.com/rustic-rs/rustic/releases/tag/v0.11.4",
+      "sha256": "c9edb8bff6682163fbe1ed0651bd1a6459159069ff680dbb8d4958a0d22f536e",
+      "source_url": "https://github.com/rustic-rs/rustic/releases/download/v0.11.4/rustic-v0.11.4-x86_64-unknown-linux-musl.tar.gz",
+      "tool": "rustic",
+      "verified_at": "2026-10-31",
+      "version": "0.11.4"
+    }
+  ]
+}

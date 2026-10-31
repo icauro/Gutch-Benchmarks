@@ -1,0 +1,407 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "BuildPatchTool uses a 1 MiB chunk window and its internal compression with FeatureLevel=Latest. Local InstallManifest recovery uses PrevManifest. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3 and 8 MiB compressed bundles. Chunk windows are not CDC averages; codecs and formats are unmatched. No native extra-file cleanup or separate repository check is available in this adapter. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+  "executables": {
+    "buildpatchtool": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a"
+    },
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "BuildPatchTool uses a 1 MiB chunk window and its internal compression with FeatureLevel=Latest. Local InstallManifest recovery uses PrevManifest. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3 and 8 MiB compressed bundles. Chunk windows are not CDC averages; codecs and formats are unmatched. No native extra-file cleanup or separate repository check is available in this adapter. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "-ChunkWindowSize=1048576"
+        ],
+        "configuration_label": "",
+        "label": "buildpatchtool",
+        "profile": null,
+        "tool": "buildpatchtool",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "-ChunkWindowSize=1048576"
+        ],
+        "configuration_label": "",
+        "label": "buildpatchtool",
+        "profile": null,
+        "tool": "buildpatchtool",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_bpt",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 2,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "measurement_contract": 2,
+  "operations": {
+    "buildpatchtool": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "UNSUPPORTED: no native extra-file deletion in this adapter",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "repair": "PASS"
+    },
+    "gutch": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    }
+  },
+  "pair": "bpt",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41209065070",
+    "GITHUB_SHA": "e90490616310f14e2bcc18a62b4070663865d2b6",
+    "GUTCH_REVISION": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "buildpatchtool",
+      "PASS",
+      "36.370",
+      "28.100",
+      "2.227",
+      "28.181",
+      "732.343",
+      "-",
+      "-"
+    ],
+    [
+      "gutch",
+      "PASS",
+      "4.414",
+      "1.900",
+      "1.005",
+      "1.901",
+      "689.362",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "buildpatchtool": {
+      "backup": {
+        "maximum": 36.435034691,
+        "median": 36.37015952349999,
+        "minimum": 36.30528435599999,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.03013650200000484,
+        "median": 0.028044346000001497,
+        "minimum": 0.025952189999998154,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 28.21687743500007,
+        "median": 28.18129134700004,
+        "minimum": 28.14570525900001,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 31.8277893020001,
+        "median": 31.784530724000064,
+        "minimum": 31.74127214600003,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 2.2040516449999927,
+        "median": 2.202475430000021,
+        "minimum": 2.2008992150000495,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 5.866171254999983,
+        "median": 5.843933523499999,
+        "minimum": 5.821695792000014,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 23.146789650000017,
+        "median": 23.095872218500006,
+        "minimum": 23.044954786999995,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 13.288245040999982,
+        "median": 13.274287304999987,
+        "minimum": 13.260329568999992,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 2.2272400960000027,
+        "median": 2.2270418585000016,
+        "minimum": 2.2268436210000004,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 5.825488355999994,
+        "median": 5.822761800999984,
+        "minimum": 5.820035245999975,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 1789,
+        "median": 1789.0,
+        "minimum": 1789,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 344645868,
+        "median": 344645859.5,
+        "minimum": 344645851,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 767917697,
+        "median": 767917681.0,
+        "minimum": 767917665,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 28.136513607999973,
+        "median": 28.100032741000007,
+        "minimum": 28.06355187400004,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 31.74451653,
+        "median": 31.69909278250003,
+        "minimum": 31.653669035000064,
+        "samples": 2
+      }
+    },
+    "gutch": {
+      "backup": {
+        "maximum": 4.416988914000058,
+        "median": 4.414336547000033,
+        "minimum": 4.411684180000009,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.02880469400000152,
+        "median": 0.027324634999999375,
+        "minimum": 0.025844575999997232,
+        "samples": 2
+      },
+      "exact_recovery": {
+        "maximum": 0.557698165999966,
+        "median": 0.5498713819999779,
+        "minimum": 0.5420445979999897,
+        "samples": 2
+      },
+      "exact_recovery_validated": {
+        "maximum": 4.162176356000003,
+        "median": 4.156335767999977,
+        "minimum": 4.15049517999995,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 1.901929435999989,
+        "median": 1.9006744569999938,
+        "minimum": 1.8994194779999987,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 5.594622714000025,
+        "median": 5.571155152000017,
+        "minimum": 5.5476875900000095,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 1.000741617000017,
+        "median": 0.9980419995000034,
+        "minimum": 0.9953423819999898,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 4.602050010999989,
+        "median": 4.601874999000003,
+        "minimum": 4.601699987000018,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 2.1874300510000353,
+        "median": 2.1839673425000257,
+        "minimum": 2.180504634000016,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 2.231179545999993,
+        "median": 2.2303692045000076,
+        "minimum": 2.2295588630000225,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 1.0091754220000553,
+        "median": 1.004910107000029,
+        "minimum": 1.0006447920000028,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 4.630344455999989,
+        "median": 4.615997797500029,
+        "minimum": 4.601651139000069,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 120,
+        "median": 120.0,
+        "minimum": 120,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 322167265,
+        "median": 322167265.0,
+        "minimum": 322167265,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 722847959,
+        "median": 722847959.0,
+        "minimum": 722847959,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 1.9039110440000115,
+        "median": 1.900387280500027,
+        "minimum": 1.8968635170000425,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 5.565309630000058,
+        "median": 5.558581174000025,
+        "minimum": 5.551852717999992,
+        "samples": 2
+      },
+      "verify": null
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "9d56626cc073c1c5f12134a43e5d3be9e4c68146ecbe882f1645f0d3435b2660",
+      "path": "linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "platform": "linux-x64",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a",
+      "source_url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip",
+      "tool": "buildpatchtool",
+      "verification": "matches current official package; publisher does not provide a separate checksum here",
+      "verified_at": "2026-10-31",
+      "version": "1.8.8"
+    }
+  ]
+}

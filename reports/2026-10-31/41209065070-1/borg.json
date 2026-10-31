@@ -1,0 +1,433 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "Borg explicitly uses FastCDC fastcdc,19,23,21,2, LZ4, authenticated unencrypted storage and metadata-based resume. Gutch uses a nominal 2 MiB FastCDC target, LZ4 0 and 8 MiB compressed bundles. Bounds, hashes, compression framing and storage layout differ. Borg cannot detect preserved-mtime damage via resume and this adapter has no native extra-file cleanup. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+  "executables": {
+    "borg": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/borg/borg",
+      "sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4"
+    },
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/gutch/gutch-cli",
+      "sha256": "6dace1f9101604203653adcc65f7b6e32d7d9c97a2c4a1180c8f61772841db87"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "Borg explicitly uses FastCDC fastcdc,19,23,21,2, LZ4, authenticated unencrypted storage and metadata-based resume. Gutch uses a nominal 2 MiB FastCDC target, LZ4 0 and 8 MiB compressed bundles. Bounds, hashes, compression framing and storage layout differ. Borg cannot detect preserved-mtime damage via resume and this adapter has no native extra-file cleanup. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 2 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_2MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "lz4",
+          "compression_level": 0,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--chunker-params",
+          "fastcdc,19,23,21,2",
+          "--compression",
+          "lz4"
+        ],
+        "configuration_label": "",
+        "label": "borg",
+        "profile": null,
+        "tool": "borg",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_2MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "lz4",
+          "compression_level": 0,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "--chunker-params",
+          "fastcdc,19,23,21,2",
+          "--compression",
+          "lz4"
+        ],
+        "configuration_label": "",
+        "label": "borg",
+        "profile": null,
+        "tool": "borg",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_borg",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 2,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "revision": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "measurement_contract": 2,
+  "operations": {
+    "borg": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "UNSUPPORTED: no native extra-file deletion in this adapter",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "UNSUPPORTED: native resume trusts size and mtime",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    },
+    "gutch": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    }
+  },
+  "pair": "borg",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "41209065070",
+    "GITHUB_SHA": "e90490616310f14e2bcc18a62b4070663865d2b6",
+    "GUTCH_REVISION": "c0892bd236f83ad6b4973968beacba72d28d2f4b",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261026.354.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "rows": [
+    [
+      "borg",
+      "PASS",
+      "12.701",
+      "10.053",
+      "3.541",
+      "9.806",
+      "915.942",
+      "-",
+      "-"
+    ],
+    [
+      "gutch",
+      "PASS",
+      "6.983",
+      "1.736",
+      "0.882",
+      "1.779",
+      "913.570",
+      "-",
+      "-"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "borg": {
+      "backup": {
+        "maximum": 14.242529173000037,
+        "median": 12.70117151300002,
+        "minimum": 11.159813853000003,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.01546609100000751,
+        "median": 0.013623076000015999,
+        "minimum": 0.011780061000024489,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 9.893921639000041,
+        "median": 9.806016175000025,
+        "minimum": 9.718110711000008,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 13.508080409000058,
+        "median": 13.417991513500027,
+        "minimum": 13.327902617999996,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 7.088108786000021,
+        "median": 6.321979564499998,
+        "minimum": 5.555850342999975,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 7.154420387000016,
+        "median": 6.379191948500022,
+        "minimum": 5.603963510000028,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 3.5526368889999844,
+        "median": 3.540523888499962,
+        "minimum": 3.5284108879999394,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 7.119606054999963,
+        "median": 7.109400205999947,
+        "minimum": 7.099194356999931,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 30,
+        "median": 30.0,
+        "minimum": 30,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 439058438,
+        "median": 438987918.5,
+        "minimum": 438917399,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 960501415,
+        "median": 960435162.0,
+        "minimum": 960368909,
+        "samples": 2
+      },
+      "repository_check": {
+        "maximum": 5.173395341999992,
+        "median": 5.157110388500001,
+        "minimum": 5.140825435000011,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 10.157812053000043,
+        "median": 10.053163092500029,
+        "minimum": 9.948514132000014,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 13.776354617000038,
+        "median": 13.672856317000026,
+        "minimum": 13.569358017000013,
+        "samples": 2
+      }
+    },
+    "gutch": {
+      "backup": {
+        "maximum": 7.0830126550000045,
+        "median": 6.982806364000027,
+        "minimum": 6.882600073000049,
+        "samples": 2
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 2
+      },
+      "corrupt": {
+        "maximum": 0.023450313000012102,
+        "median": 0.023409393500031683,
+        "minimum": 0.023368474000051265,
+        "samples": 2
+      },
+      "exact_recovery": {
+        "maximum": 0.5419245690000025,
+        "median": 0.5372544994999942,
+        "minimum": 0.5325844299999858,
+        "samples": 2
+      },
+      "exact_recovery_validated": {
+        "maximum": 4.088869037999984,
+        "median": 4.07947329649997,
+        "minimum": 4.070077554999955,
+        "samples": 2
+      },
+      "full_restore_recovery": {
+        "maximum": 1.8115870959999825,
+        "median": 1.778785974499982,
+        "minimum": 1.7459848529999817,
+        "samples": 2
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 5.444627414999957,
+        "median": 5.408454443499949,
+        "minimum": 5.3722814719999405,
+        "samples": 2
+      },
+      "hidden_repair": {
+        "maximum": 0.884438484000043,
+        "median": 0.8788863059999983,
+        "minimum": 0.8733341279999536,
+        "samples": 2
+      },
+      "hidden_repair_validated": {
+        "maximum": 4.423766761000081,
+        "median": 4.419772880500005,
+        "minimum": 4.4157789999999295,
+        "samples": 2
+      },
+      "incremental_capture": {
+        "maximum": 3.537512480000032,
+        "median": 3.504040656500024,
+        "minimum": 3.4705688330000157,
+        "samples": 2
+      },
+      "initial_capture": {
+        "maximum": 3.5455001749999724,
+        "median": 3.4787657075000027,
+        "minimum": 3.412031240000033,
+        "samples": 2
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 2
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 2
+      },
+      "repair": {
+        "maximum": 0.8851598269999954,
+        "median": 0.8817575334999503,
+        "minimum": 0.8783552399999053,
+        "samples": 2
+      },
+      "repair_validated": {
+        "maximum": 4.452597213999979,
+        "median": 4.449113919999917,
+        "minimum": 4.445630625999854,
+        "samples": 2
+      },
+      "repo_files": {
+        "maximum": 178,
+        "median": 178.0,
+        "minimum": 178,
+        "samples": 2
+      },
+      "repo_growth_bytes": {
+        "maximum": 437891796,
+        "median": 437891796.0,
+        "minimum": 437891796,
+        "samples": 2
+      },
+      "repo_size": {
+        "maximum": 957947508,
+        "median": 957947508.0,
+        "minimum": 957947508,
+        "samples": 2
+      },
+      "restore": {
+        "maximum": 1.7410784470000067,
+        "median": 1.7356449399999576,
+        "minimum": 1.7302114329999085,
+        "samples": 2
+      },
+      "restore_validated": {
+        "maximum": 5.360836005999886,
+        "median": 5.358403534499928,
+        "minimum": 5.35597106299997,
+        "samples": 2
+      },
+      "verify": null
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4",
+      "minimum_glibc": "2.39",
+      "path": "linux-x64/borg/borg",
+      "platform": "linux-x64",
+      "prerelease": true,
+      "release_channel": "2.x prerelease; required by FastCDC fixtures",
+      "release_url": "https://github.com/borgbackup/borg/releases/tag/2.0.0b25",
+      "sha256": "10112ca0cce2d4bde99cf3d93a9f4cd6bda8cd6f099c8fc4057fa5041d375cf4",
+      "source_url": "https://github.com/borgbackup/borg/releases/download/2.0.0b25/borg-linux-glibc239-x86_64-gh",
+      "tool": "borg",
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-10-31",
+      "version": "2.0.0b25"
+    }
+  ]
+}
