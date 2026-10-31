@@ -8,16 +8,21 @@ using shared Blender inputs, pair-specific settings and SHA-256 output validatio
 <details>
 <summary>Comparison differences and limits</summary>
 
-- Same input bytes and strict SHA-256 checks; these compare complete tool workflows.
-- **Borg:** FastCDC/LZ4 is approximate; resume trusts metadata, so preserved-mtime repair is unsupported.
-- **Plakar:** approximate FastCDC/LZ4 match; restore-over-existing is distinct from selective repair.
-- **Kopia:** compression off on both; Buzhash versus FastCDC, with encryption only on Kopia.
-- **Restic / Rustic:** Rabin versus FastCDC and mandatory encryption. Restic Zstd auto differs from Gutch Zstd 3; Rustic uses level 3. Matching pack targets does not match compression units.
-- **BuildPatchTool:** chunk windows and internal compression differ; installation recovery uses a previous manifest.
-- New runs separate content repair, preserved-mtime damage, extra-file cleanup and full restoration. Unsupported operations have no timing.
-- Chart times include native checks; detailed reports also show common validation-inclusive times and sample ranges. Native verification, metadata and durability work still differ.
-- Six measured repetitions balance tool order. OS caches are uncontrolled; one-sample local smoke tests establish compatibility only.
-- Historical runs retain their original methodology; consult each source report before comparing runs.
+Every pair processes the same files, and we check the restored content with SHA-256.
+We match settings where practical, but the tools still do different work:
+
+- **Encryption:** Kopia, Restic and Rustic encrypt their repositories; Gutch does not in these tests. Those tools have no supported plaintext mode, so their encryption work remains part of the measured time.
+- **Borg:** Both use FastCDC chunking and LZ4 compression, but split and store data differently. Borg's resume command can skip files whose size and modification time match, even if their contents are damaged. We therefore mark that repair scenario as unsupported.
+- **Plakar:** Both use FastCDC and LZ4, but compress and pack data differently. Plakar restores over existing files, while Gutch selectively repairs damaged content; their recovery commands do different work.
+- **Kopia:** Compression is disabled on both sides. Kopia uses Buzhash to split files into chunks; Gutch uses FastCDC. Matching the target chunk size does not produce identical chunks.
+- **Restic / Rustic:** Both use Rabin chunking; Gutch uses FastCDC. Restic's automatic Zstd setting is not identical to Gutch's level 3. Rustic uses level 3 too, but Gutch compresses whole bundles, so matching the level and pack size still does not make the compression work identical.
+- **BuildPatchTool:** Its chunk window and internal compression do not match Gutch's FastCDC and Zstd settings. Recovery uses a previous installation manifest, so this compares two artifact-delivery workflows.
+- **Recovery checks:** New runs measure damaged-file repair, damage with unchanged timestamps, extra-file cleanup and full restoration separately. Borg, Plakar and BuildPatchTool have no native extra-file cleanup in these adapters. Unsupported checks receive no timing.
+- **Timing:** The chart includes checks performed by each tool itself. Detailed reports also include timings with our shared validation added, plus sample ranges. Tools can still differ in metadata handling and when they flush writes to disk.
+
+New performance runs use six measured repetitions, alternating which tool runs first.
+OS caches are not reset. A single local smoke run checks that commands work; it does
+not establish a performance result. Older reports retain their original settings.
 
 </details>
 
