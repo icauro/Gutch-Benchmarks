@@ -17,6 +17,7 @@ this project or a complete set of notices for a particular binary distribution.
 | --- | --- | --- |
 | Borg | [borgbackup/borg](https://github.com/borgbackup/borg) | BSD-3-Clause; [notice](bin/licenses/borg.txt). |
 | Restic | [restic/restic](https://github.com/restic/restic) | BSD-2-Clause; [notice](bin/licenses/restic.txt). |
+| Rustic | [rustic-rs/rustic](https://github.com/rustic-rs/rustic) | MIT OR Apache-2.0; [MIT notice](bin/licenses/rustic-MIT.txt), [Apache license](bin/licenses/rustic-APACHE.txt). |
 | Kopia | [kopia/kopia](https://github.com/kopia/kopia) | Apache-2.0; [license](bin/licenses/kopia.txt). |
 | Plakar | [PlakarKorp/plakar](https://github.com/PlakarKorp/plakar) | ISC; [notice](bin/licenses/plakar.txt). |
 | BuildPatchTool | Epic Games | Supplied and licensed by Epic Games under its applicable terms; this project supplies no Epic executable, runtime files or redistribution permission. |

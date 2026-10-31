@@ -1,4 +1,4 @@
-"""Adapters for the local Restic, Kopia, Borg, and Plakar comparison lanes."""
+"""Adapters for local external-tool comparison lanes."""
 
 from dataclasses import dataclass
 import hashlib
@@ -21,6 +21,7 @@ from comparison_benchmark_suite.tools.models import LaneResult, LaneSpec
 class ExternalTools:
     commands: CommandRunner
     restic: Path | None = None
+    rustic: Path | None = None
     kopia: Path | None = None
     borg: Path | None = None
     plakar: Path | None = None
@@ -44,6 +45,7 @@ class ExternalTools:
     def executable(self, kind: str) -> Path:
         explicit = {
             "restic": self.restic,
+            "rustic": self.rustic,
             "kopia": self.kopia,
             "borg": self.borg,
             "plakar": self.plakar,
@@ -136,6 +138,21 @@ def run_external(
             description=f"{lane_spec.label} init",
             env=env,
         )
+    elif kind == "rustic":
+        # An explicit empty profile avoids inheriting a user's backup hooks,
+        # repository settings or filters. Caches and credentials are run-owned.
+        profile = lane_root / "rustic-profile.toml"
+        profile.write_text("", encoding="utf-8")
+        env = {"RUSTIC_PASSWORD": "bench"}
+        rustic_command = [
+            executable, "--use-profile", profile, "--repository", repo,
+            "--cache-dir", lane_root / "rustic-cache", "--no-progress",
+            "--log-level", "warn",
+        ]
+        execute(
+            [*rustic_command, "init", *lane_spec.arguments],
+            description=f"{lane_spec.label} init", env=env,
+        )
     elif kind == "kopia":
         env = {
             "KOPIA_CONFIG_PATH": str(lane_root / "kopia.config"),
@@ -188,6 +205,15 @@ def run_external(
                 env=env,
             )
             identifiers[source.name] = _restic_id(result.stdout)
+        elif kind == "rustic":
+            tag = f"gutch-benchmark-{index:04d}"
+            execute(
+                [*rustic_command, "backup", "--as-path", source.name,
+                 "--tag", tag, source.name],
+                description=f"{lane_spec.label} backup {source.name}",
+                cwd=product, env=env,
+            )
+            identifiers[source.name] = tag
         elif kind == "kopia":
             execute([executable, "snapshot", "create", source, "--no-progress"], description=f"{lane_spec.label} create {source.name}", env=env)
             identifiers[source.name] = source.name
@@ -228,6 +254,16 @@ def run_external(
                     [executable, "restore", identifiers[source.name], *restic_options, "--verify", "--repo", repo, "--target", output, "--include", source.name],
                     description=f"{lane_spec.label} {operation} {source.name}",
                     env=env,
+                )
+            elif kind == "rustic":
+                # Select a unique per-source tag and restore its named subtree.
+                # Recovery deletion must not touch other versions in output/.
+                rustic_options = [] if record_snapshots else ["--delete"]
+                execute(
+                    [*rustic_command, "restore", f"latest:{source.name}",
+                     output / source.name, "--filter-tags", identifiers[source.name],
+                     "--verify-existing", "--no-ownership", *rustic_options],
+                    description=f"{lane_spec.label} {operation} {source.name}", env=env,
                 )
             elif kind == "kopia":
                 execute(
@@ -283,6 +319,9 @@ def run_external(
     verify_started = len(elapsed_commands)
     if kind == "restic":
         execute([executable, "check", "--read-data", "--repo", repo], description=f"{lane_spec.label} check", env=env)
+    elif kind == "rustic":
+        execute([*rustic_command, "check", "--read-data"],
+                description=f"{lane_spec.label} check", env=env)
     elif kind == "kopia":
         for source in sources:
             execute(
@@ -324,7 +363,7 @@ def run_external(
             "reason": recovery_error,
             "recovery_error": recovery_error,
             "recovery_mode": "restore_existing",
-            "extra_file_policy": "native_delete" if kind in {"restic", "kopia"} else "no_native_delete_option",
+            "extra_file_policy": "native_delete" if kind in {"restic", "rustic", "kopia"} else "no_native_delete_option",
             "snapshot_metrics": snapshot_metrics,
             "tool_version": tool_version,
             "binary_sha256": file_sha256(executable) if executable.is_file() else None,

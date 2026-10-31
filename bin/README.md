@@ -17,6 +17,8 @@ tools use stable releases. Platform folders target x86-64.
 Upstreams and notices:
 
 - Borg: https://github.com/borgbackup/borg (licenses/borg.txt).
+- Rustic: https://github.com/rustic-rs/rustic (licenses/rustic-MIT.txt and
+  licenses/rustic-APACHE.txt; MIT OR Apache-2.0).
 - Restic: https://github.com/restic/restic (licenses/restic.txt).
 - Kopia: https://github.com/kopia/kopia (licenses/kopia.txt).
 - Plakar: https://github.com/PlakarKorp/plakar (licenses/plakar.txt).

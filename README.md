@@ -28,18 +28,18 @@ partial evidence. Afterward, the summary stays open with **Run another**,
 For scripts and noninteractive terminals, select a fixture explicitly:
 
 ```text
-python run.py --fixture blender
+python run.py --fixture gutch_vs_rustic
 ```
 
 The `--fixture` form runs once and exits. `--no-open-perfetto` suppresses automatic
 browser opening; the interactive screen uses this and opens Perfetto only when
 requested. Install updated requirements to get the Textual terminal dependency.
 
-The Blender fixture reads the bundled 5.0.0 and 5.1.0 Windows x64 builds from
-`fixtures/blender/builds/`; it does not download inputs. Both host platforms
+The pairwise fixtures read the same local 5.0.0 and 5.1.0 Windows x64 builds from
+`fixtures/blender/builds/`; the suite does not download inputs. Both host platforms
 benchmark these same files as data. Local build folders stay outside Git history;
 include them when copying or distributing the ready-to-run suite folder.
-The fixture runs one warm-up and three measured repetitions, rotating tool order.
+Each fixture runs one warm-up and three measured repetitions, rotating tool order.
 Preparation and independent output validation are outside tool-command timings.
 OS cache state is uncontrolled; these are not cold-cache measurements.
 
@@ -58,7 +58,7 @@ executables:
 Local tools are discovered automatically under `bin/windows-x64/`
 or `bin/linux-x64/`, before searching PATH. Each tool has its own
 folder: `restic/restic.exe` on Windows or `restic/restic` on Linux, likewise for
-Borg, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
+Borg, Rustic, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
 BuildPatchTool keeps its Engine layout under `buildpatchtool/Engine/Binaries/`,
 with `Win64/BuildPatchTool.exe` or `Linux/BuildPatchTool`. Preserve its accompanying
 Engine files. Explicit fixture paths and `GUTCH_EXECUTABLE` still take precedence.
@@ -80,15 +80,17 @@ Run one pair with the same shared Blender inputs:
 ```text
 python run.py --fixture gutch_vs_kopia
 python run.py --fixture gutch_vs_restic
+python run.py --fixture gutch_vs_rustic
 python run.py --fixture gutch_vs_borg
 python run.py --fixture gutch_vs_plakar
 python run.py --fixture gutch_vs_bpt
 ```
 
 These fixtures use one warm-up, three measured repetitions, rotating order and
-profiling off. Each references `blender/fixture.yaml` for inputs, reusing its
-cache rather than duplicating the Blender input definitions. Set executable paths
-in the selected fixture as needed. Custom fixtures may use `dataset: file.yaml`
+profiling off. Each references `blender/dataset.yaml` for inputs, reusing the
+cache rather than duplicating the Blender input definitions. This shared file
+defines inputs only; every shipped runnable fixture compares Gutch with one tool.
+Set executable paths in the selected fixture as needed. Custom fixtures may use `dataset: file.yaml`
 instead of `builds`; build paths are relative to the shared definition file.
 Nested dataset references are not supported.
 
@@ -96,6 +98,7 @@ Nested dataset references are not supported.
 |---|---|---|
 | Kopia 0.23.1 | Buzhash 4 MiB target; file compression off | `chunk_4MiB`, compression `none`, `bundle_16MiB` |
 | Restic 0.19.1 | Rabin approximately 1 MiB; Zstd `auto` | `chunk_1MiB`, Zstd 3 |
+| Rustic 0.11.4 | Rabin approximately 1 MiB; repository Zstd level 3 selected | `chunk_1MiB`, Zstd 3 |
 | Borg 2.0.0b25 | FastCDC approximately 2 MiB, normalization 2; LZ4 | `chunk_2MiB`, LZ4 0 |
 | Plakar 1.1.8 | FastCDC approximately 1 MiB; default LZ4 stream writer | `chunk_1MiB`, LZ4 0 |
 | BPT 1.8.8 | 1 MiB window; internal compression | `chunk_1MiB`, Zstd 3 (codec unmatched) |
@@ -114,8 +117,9 @@ are printed before execution and included in `summary.md` and `run.json`.
 External tool releases were verified on 2026-10-31; URLs and archive SHA-256
 values are recorded in [the local tool manifest](bin/manifest.json). Borg tracks
 the latest 2.x prerelease because the fixtures require Borg 2 FastCDC; other
-external tools track stable releases. Windows capture, restore, verification and
-recovery were checked with two small deterministic builds. Linux assets were
+external tools track stable releases. The five pre-existing Windows adapters were
+checked with two small deterministic builds. Rustic command construction is covered by mocked tests only; its capture,
+restore, verification and recovery have not been executed. Linux assets were
 checksum-verified but not executed during this refresh.
 
 Borg 2.0.0b25 removed `none-sha256`. The suite uses `authenticated-sha256`, with
@@ -125,50 +129,27 @@ multiple versions share the output root. Independent content validation still
 checks every restored build. Earlier `none-sha256` measurements are not directly
 comparable with this authenticated mode.
 Encryption is disabled wherever supported; an empty password is not treated as
-plaintext. Kopia and Restic remain encrypted because they have no supported
+plaintext. Kopia, Restic and Rustic remain encrypted because they have no supported
 plaintext mode.
 
 Existing operational choices remain: isolated repositories/caches, no encryption
-for Borg/Plakar, encryption for Kopia/Restic, independent validation, and native
+for Borg/Plakar, encryption for Kopia/Restic/Rustic, independent validation, and native
 recovery options. Thus these preserve performance defaults where practical;
 they are not unmodified default invocations. Extra files remain nonfatal.
 Use detailed profiling only in a separate diagnostic run.
-The all-tools `blender` fixture remains the explicitly normalized overview below.
-
-## Comparison settings
-
-The Blender fixture explicitly targets **1 MiB chunks** and **Zstd level 3 or
-its closest standard preset** where the tool exposes those controls. This is
-an approximate alignment, not equal compression work or identical chunk boundaries.
-The settings below belong to `fixtures/blender/fixture.yaml`; custom fixtures
-choose their own settings. Recorded fixture settings and command logs accompany
-every run. Earlier results using tool defaults are not directly comparable.
-
-| Tool | Compression selected | Chunking selected | Controls and remaining differences |
-|---|---|---|---|
-| Gutch | Zstd, level 3 | `chunk_1MiB`: FastCDC, 256 KiB minimum / 1 MiB target / 4 MiB maximum | Numeric compression level and chunk profiles are selectable. Default 8 MiB bundles remain enabled. |
-| Restic | `--compression auto`: Zstd standard preset | Rabin, 512 KiB minimum / roughly 1 MiB target / 8 MiB maximum | CLI exposes named compression modes, not a numeric Zstd level or chunk-size setting. `auto` is an approximate level-3 counterpart, not an identical encoder. |
-| Kopia | `--compression=zstd`: standard preset | `--splitter=DYNAMIC-1M-BUZHASH`: 512 KiB minimum / 1 MiB target / 2 MiB maximum | Named codec/presets and splitter profiles are selectable; no numeric Zstd level in this policy. |
-| Borg | `--compression zstd,3` | `--chunker-params fastcdc,19,23,20,2`: 512 KiB minimum / 1 MiB target / 8 MiB maximum | Borg 2 only. Retains native FastCDC and normalization level 2; only the target size changes. Borg 1 is rejected. |
-| Plakar | LZ4, tool-managed level | Default FastCDC: 512 KiB minimum / 1 MiB target / 8 MiB maximum | The original 1.1.5 control audit found compression on/off, but no codec, level, or chunk-size selector. The 1.1.8 lane retains the same default profile; no claim of Zstd-equivalent effort. |
-| BuildPatchTool | Tool-managed compression; codec/level not selected | `-ChunkWindowSize=1048576` (1 MiB) | Tested 1.8.8 local-generation help exposes a chunk window, but no compression codec/level control. Its window is not a CDC average. Local restore and restore-over-existing are independently validated. |
-| Filesystem | None | None | Copy baseline; no deduplication or compression. |
-
-Chunk targets are nominal parameters, not measured means. File boundaries,
-minimum/maximum sizes, hashes, compression libraries and skip heuristics still
-change the resulting chunks and compression cost. Worker counts remain tool
-defaults; Restic and Kopia retain encryption, while Gutch, Borg and Plakar lanes
-use unencrypted storage. Packing, metadata and verification costs also differ.
+Each pair selects its own approximate match. There is no all-tools preset:
+chunking algorithms, bounds, compression work, encryption and packing differ.
 Interpret results as complete tool workflows, not isolated codec benchmarks.
+Chunk targets are nominal parameters, not measured means.
 
-Settings were checked against the installed CLIs on 2026-09-27 and upstream
-[Kopia compressors](https://github.com/kopia/kopia/blob/v0.23.1/repo/compression/compressor_zstd.go),
-[Kopia splitters](https://github.com/kopia/kopia/blob/v0.23.1/repo/splitter/splitter_buzhash32.go),
-[Restic chunker](https://github.com/restic/chunker/blob/master/chunker.go),
-[Restic compression](https://github.com/restic/restic/blob/master/internal/repository/repository.go),
-[Borg chunker parameters](https://borgbackup.readthedocs.io/en/stable/usage/notes.html),
-and [Plakar chunking](https://github.com/PlakarKorp/kloset/blob/v1.1.5/chunking/chunking.go).
-Recheck the table when changing tool versions or fixture arguments.
+Rustic's `arguments` apply to repository initialization; the shipped pair selects
+`--set-compression 3`. Backup uses a stable relative path and unique per-build tag.
+Restore selects that tagged snapshot's build subtree, verifies existing bytes,
+and disables ownership restoration. Recovery adds `--delete` only within that
+build's destination. The adapter uses an explicit empty profile and run-owned
+cache, then checks all repository data separately from backup/restore timings.
+These commands target [Rustic 0.11.4](https://github.com/rustic-rs/rustic/releases/tag/v0.11.4).
+Actual runtime compatibility and performance still need a user-selected run.
 
 ## Use your own builds
 
@@ -271,14 +252,15 @@ harness does not chmod damaged files or remove extras on the tool's behalf.
 |---|---|---|
 | Gutch | Existing installation repair | Existing native repair path; independent validation remains required. |
 | Restic | `restore --overwrite always --delete --verify` | Native extra deletion. Real small-fixture and Blender recovery passed. Individual restores retain `--include <build>` to protect other builds. |
+| Rustic | `restore --verify-existing --no-ownership --delete` | Native deletion requested within one build directory. Command construction is mock-tested; runtime recovery is unverified. |
 | Kopia | `snapshot restore --delete-extra` | Native extra deletion requested. Installed 0.23.1 failed replacing a read-only damaged file; atomic writes also failed in a separate probe. |
 | Borg | `extract --continue` (Borg 2 only) | No native extra deletion option. An earlier Windows Borg 2 probe failed on the read-only file. Resume skips based on metadata, so it is not a content-integrity guarantee. |
 | Plakar | `restore` into the existing destination | No native extra deletion option established. The earlier 1.1.5 probe left an extra file and a content mismatch. |
 | BuildPatchTool | `InstallManifest -PrevManifest=...` | No native extra deletion option advertised. Installed 1.8.8 left the unexpected file. |
 
-The outcomes above are from the earlier probe that also changed read-only
-attributes. Current corruption plans no longer change permissions; those results
-need a new run before comparison. They are not claims
+The historical outcomes above (excluding the unexecuted Rustic adapter) are
+from the earlier probe that also changed read-only attributes. Current corruption
+plans no longer change permissions; those results need a new run before comparison. They are not claims
 about every platform. Recovery errors retain successful capture/restore metrics,
 mark the run `ERROR`, omit a successful repair timing, and preserve evidence.
 No full-rebuild fallback masks a native recovery failure. Independent validation
@@ -362,7 +344,8 @@ python -m unittest discover -s tests
 
 The tests cover portable execution, failure isolation, output validation,
 archive path boundaries, the interactive run flow, and cancellation.
-Tool-specific mock tests and narrow configuration checks are intentionally omitted.
+Rustic adapter tests use mocked commands and block subprocess creation. The
+fixture catalog checks keep shipped comparisons pairwise.
 
 Fixtures use a `lanes` list with explicit labels and a `profile` mapping for
 Gutch options. `profile.chunker` accepts `fastcdc` (default), `jc` for

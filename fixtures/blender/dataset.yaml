@@ -1,0 +1,6 @@
+# Shared inputs only; choose a gutch_vs_* fixture to compare two tools.
+builds:
+- version: 5.0.0
+  path: builds/blender-5.0.0-windows-x64
+- version: 5.1.0
+  path: builds/blender-5.1.0-windows-x64

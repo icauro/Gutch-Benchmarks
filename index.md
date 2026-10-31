@@ -8,12 +8,13 @@ benchmark.py
 datasets.py
 fixtures/
 fixtures/blender/
-fixtures/blender/fixture.yaml
+fixtures/blender/dataset.yaml
 fixtures/gutch_vs_borg.yaml
 fixtures/gutch_vs_bpt.yaml
 fixtures/gutch_vs_kopia.yaml
 fixtures/gutch_vs_plakar.yaml
 fixtures/gutch_vs_restic.yaml
+fixtures/gutch_vs_rustic.yaml
 LICENSE
 THIRD_PARTY_NOTICES.md
 index.md
@@ -42,6 +43,7 @@ support/traces.py
 tests/
 tests/test_interactive.py
 tests/test_suite.py
+tests/test_rustic.py
 tools/
 tools/__init__.py
 tools/buildpatchtool.py

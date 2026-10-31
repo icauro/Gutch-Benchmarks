@@ -10,4 +10,5 @@ build/
 dist/
 fixtures/*/*
 !fixtures/*/fixture.yaml
+!fixtures/blender/dataset.yaml
 !fixtures/*/README.md

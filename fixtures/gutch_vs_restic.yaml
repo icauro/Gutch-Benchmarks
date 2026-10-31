@@ -7,7 +7,7 @@ description: Restic keeps default Rabin chunking (about 1 MiB) and Zstd auto. En
   and isolated caches; automatic workers; noninteractive/output flags. One warm-up
   and three rotating measured repetitions, profiling off. Independent validation is
   outside timings; extra files are allowed.
-dataset: blender/fixture.yaml
+dataset: blender/dataset.yaml
 repetitions: 3
 warmups: 1
 profile_mode: 'off'

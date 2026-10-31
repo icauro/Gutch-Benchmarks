@@ -1,0 +1,32 @@
+name: gutch_vs_rustic
+description: >-
+  Rustic uses native Rabin chunking (about 1 MiB, 512 KiB minimum and 8 MiB
+  maximum), default pack sizing, and repository Zstd level 3. Gutch uses FastCDC
+  with a 1 MiB target, Zstd 3 and 8 MiB bundles. Algorithms, chunk bounds,
+  compression implementations and packing differ; Rustic remains encrypted.
+  Backup paths and per-source tags select each version independently. Restore
+  verifies existing bytes; recovery requests deletion only inside the selected
+  version directory. A full repository data check and independent SHA-256
+  validation are separate from capture and restore timings. Fresh repositories,
+  isolated profiles and caches, automatic workers and noninteractive commands.
+  One warm-up and three rotating measured repetitions, profiling off. Extra files
+  are allowed by the shared validator; native deletion is requested for recovery.
+dataset: blender/dataset.yaml
+repetitions: 3
+warmups: 1
+profile_mode: 'off'
+corrupt_repair: true
+lane_wait_seconds: 0
+step_wait_seconds: 0
+executables:
+  gutch: gutch-cli
+  rustic: rustic
+lanes:
+- label: gutch
+  tool: gutch
+  profile:
+    chunk: chunk_1MiB
+    compression: {algorithm: zstd, level: 3}
+- label: rustic
+  tool: rustic
+  arguments: [--set-compression, '3']

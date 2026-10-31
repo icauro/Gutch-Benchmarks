@@ -1,5 +1,6 @@
 name: gutch_vs_borg
-description: Borg 2 keeps default FastCDC (about 2 MiB, normalization 2), LZ4 and
+description: >-
+  Borg 2 keeps default FastCDC (about 2 MiB, normalization 2), LZ4 and
   cache policy. Repository creation uses --encryption authenticated-sha256: payloads
   are unencrypted but authenticated, with a fixed local test passphrase protecting
   the key. Restore and recovery use --continue for the shared output directory;
@@ -10,7 +11,7 @@ description: Borg 2 keeps default FastCDC (about 2 MiB, normalization 2), LZ4 an
   repositories and isolated caches; automatic workers; noninteractive/output flags.
   One warm-up and three rotating measured repetitions, profiling off. Independent
   validation is outside timings; extra files are allowed.
-dataset: blender/fixture.yaml
+dataset: blender/dataset.yaml
 repetitions: 3
 warmups: 1
 profile_mode: 'off'

@@ -48,7 +48,7 @@ def _lane_arguments(values: dict[str, Any], name: str, kind: str) -> tuple[str, 
         raw = []
     if not isinstance(raw, list) or any(not isinstance(argument, str) or not argument for argument in raw):
         raise ValueError(f"{name} arguments must be a list of non-empty strings")
-    if raw and not kind.startswith(("restic-", "kopia-", "borg-", "plakar-", "buildpatchtool-")):
+    if raw and not kind.startswith(("restic-", "rustic-", "kopia-", "borg-", "plakar-", "buildpatchtool-")):
         raise ValueError(f"{name} arguments are only supported for external lanes")
     return tuple(raw)
 
@@ -153,7 +153,7 @@ def load_fixture(path: Path, *, gutch_workloads=("individual",)) -> FixtureSpec:
             raise ValueError(f"lane labels collide as artifact names: {label}")
         labels.add(normalized_label)
         allowed = {"gutch": gutch_workloads, "filesystem": ("copy",),
-                   **dict.fromkeys(("restic", "kopia", "borg", "plakar", "buildpatchtool"), ("individual",))}
+                   **dict.fromkeys(("restic", "rustic", "kopia", "borg", "plakar", "buildpatchtool"), ("individual",))}
         if workload not in allowed.get(tool, ()):
             raise ValueError(f"unsupported lane kind: {kind}")
         if tool != "gutch" and "profile" in raw:

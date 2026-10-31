@@ -8,7 +8,7 @@ description: Plakar keeps default FastCDC (about 1 MiB), LZ4 stream compression 
   Fresh local repositories and isolated caches; automatic workers; noninteractive/output
   flags. One warm-up and three rotating measured repetitions, profiling off. Independent
   validation is outside timings; extra files are allowed.
-dataset: blender/fixture.yaml
+dataset: blender/dataset.yaml
 repetitions: 3
 warmups: 1
 profile_mode: 'off'

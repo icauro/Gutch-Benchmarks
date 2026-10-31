@@ -225,7 +225,7 @@ class LocalFixtureRunner:
         recovery_enabled: bool = False,
         snapshot_limit: int | None = None,
     ) -> LaneResult:
-        if lane_spec.kind.startswith(("restic-", "kopia-", "borg-", "plakar-")):
+        if lane_spec.kind.startswith(("restic-", "rustic-", "kopia-", "borg-", "plakar-")):
             if self.external is None:
                 raise RuntimeError("external benchmark tools are not configured")
             return run_external(

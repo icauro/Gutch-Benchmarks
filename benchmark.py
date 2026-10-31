@@ -124,7 +124,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         if lane.label in runners or lane.label in unavailable or lane.tool == "buildpatchtool":
             continue
         binary = resolved.get(lane.label, Path("unavailable"))
-        external_paths = {lane.tool: binary} if lane.tool in {"restic", "kopia", "borg", "plakar"} else {}
+        external_paths = {lane.tool: binary} if lane.tool in {"restic", "rustic", "kopia", "borg", "plakar"} else {}
         external = ExternalTools(commands, **external_paths)
         runners[lane.label] = LocalFixtureRunner(GutchCli(binary, profile_mode=fixture.profile_mode), commands, layout, external)
 

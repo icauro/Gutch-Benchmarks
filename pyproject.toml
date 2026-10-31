@@ -20,4 +20,4 @@ package-dir = {comparison_benchmark_suite = "."}
 include-package-data = false
 
 [tool.setuptools.package-data]
-comparison_benchmark_suite = ["fixtures/*.yaml", "fixtures/blender/fixture.yaml", "requirements.txt"]
+comparison_benchmark_suite = ["fixtures/*.yaml", "fixtures/blender/dataset.yaml", "requirements.txt"]
