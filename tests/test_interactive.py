@@ -102,7 +102,7 @@ class InteractiveTests(unittest.IsolatedAsyncioTestCase):
             "from pathlib import Path\n"
             "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
             "Path('child.pid').write_text(str(child.pid))\n"
-            "run = Path('.artifacts/runs/stopped'); run.mkdir(parents=True)\n"
+            "run = Path('.artifacts/benchmarks/runs/stopped'); run.mkdir(parents=True)\n"
             "(run / 'run.json').write_text('{\"status\": \"running\"}')\n"
             "print('Running stop. Results: ' + str(run.resolve()), flush=True)\n"
             "print('Step: waiting', flush=True)\n"

@@ -129,7 +129,7 @@ jobs:
           python .github/scripts/benchmarks.py fixture --pair "$PAIR" --repetitions "$REPETITIONS"
       - name: Compare one pair, discarding each case's outputs
         id: benchmark
-        run: gutch-bench --fixture .artifacts/ci/fixture.yaml --no-open-perfetto --discard-outputs
+        run: gutch-bench --fixture .artifacts/tools/ci/fixture.yaml --no-open-perfetto --discard-outputs
       - name: Collect reports and discard remaining outputs
         if: always() && steps.checkout.outcome == 'success'
         env:
@@ -139,7 +139,7 @@ jobs:
         if: always()
         with:
           name: benchmark-${{ matrix.pair }}
-          path: .artifacts/export
+          path: .artifacts/benchmarks/export
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
@@ -178,7 +178,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- README.md reports/
+          git add -- README.md _docs/reports/
           git diff --cached --quiet && exit 0
           git commit -m "Record Linux benchmarks from run $RUN_ID"
           git pull --rebase origin "$DEFAULT_BRANCH"

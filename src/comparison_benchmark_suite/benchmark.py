@@ -109,7 +109,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
     warmups = values.get("warmups", 1)
     if isinstance(warmups, bool) or warmups not in (0, 1):
         raise ValueError("warmups must be 0 or 1")
-    artifacts = root / ".artifacts"
+    artifacts = root / ".artifacts/benchmarks"
     print("Preparing and validating input builds...", flush=True)
     product, dataset_metadata = prepare_dataset(values, fixture_path, artifacts)
     dataset = DatasetSelection.resolve(product, fixture.snapshot_limit)

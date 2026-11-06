@@ -1,0 +1,4 @@
+{
+  "children": [],
+  "cleanup_engine": "_tools/cleanup/cleanup_workspace.py"
+}

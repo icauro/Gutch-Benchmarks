@@ -81,7 +81,7 @@ class SuiteTests(unittest.TestCase):
         self.assertIn("not-installed", result.stdout)
         self.assertIn("UNAVAILABLE", result.stdout)
         self.assertIn("'-' = not measured", result.stdout)
-        run = next((standalone / ".artifacts/runs").iterdir())
+        run = next((standalone / ".artifacts/benchmarks/runs").iterdir())
         results = json.loads((run / "results.json").read_text())
         self.assertEqual(len(results), 4)
         self.assertEqual({r["metadata"]["status"] for r in results}, {"PASS", "UNAVAILABLE"})
@@ -107,7 +107,7 @@ class SuiteTests(unittest.TestCase):
         }))
         with patch("comparison_benchmark_suite.cli.Path.cwd", return_value=self.root):
             self.assertEqual(cli.main(["--fixture", str(fixture)]), 1)
-        output = next((self.root / ".artifacts/runs").iterdir())
+        output = next((self.root / ".artifacts/benchmarks/runs").iterdir())
         results = json.loads((output / "results.json").read_text())
         self.assertEqual([r["metadata"]["status"] for r in results], ["ERROR", "PASS"])
         self.assertEqual(json.loads((output / "run.json").read_text())["status"], "failed")

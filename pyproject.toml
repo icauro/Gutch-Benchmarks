@@ -9,7 +9,7 @@ description = "Portable storage tool comparison benchmarks"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-license-files = ["LICENSE", "docs/third-party-notices.md", "src/comparison_benchmark_suite/resources/licenses/*.txt"]
+license-files = ["LICENSE", "_docs/third-party-notices.md", "src/comparison_benchmark_suite/resources/licenses/*.txt"]
 dependencies = ["PyYAML>=6,<7", "psutil>=6,<8", "textual>=8.2.8,<9"]
 
 [project.scripts]

@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 def main(arguments=None) -> int:
-    parser = argparse.ArgumentParser(description="Compare build storage tools. Results go to .artifacts/runs/.")
+    parser = argparse.ArgumentParser(description="Compare build storage tools. Results go to .artifacts/benchmarks/runs/.")
     parser.add_argument("--fixture", help="Fixture name, directory, or YAML file")
     parser.add_argument("--no-open-perfetto", action="store_true", help="Keep traces for manual opening")
     parser.add_argument("--discard-outputs", action="store_true",

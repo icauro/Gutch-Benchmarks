@@ -3,11 +3,11 @@
 Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic and Rustic
 using shared Blender inputs, pair-specific settings and SHA-256 output validation.
 
-![Latest per-pair benchmark comparisons](reports/comparison.svg?v=4768eb0be20c)
+![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=4768eb0be20c)
 
-![Peak RAM by operation](reports/ram.svg?v=177867000b57)
+![Peak RAM by operation](_docs/reports/ram.svg?v=177867000b57)
 
-![Peak disk by operation](reports/disk.svg?v=920140d60f8e)
+![Peak disk by operation](_docs/reports/disk.svg?v=920140d60f8e)
 
 <details>
 <summary>Comparison differences and limits</summary>
@@ -48,12 +48,12 @@ Sampling may miss short spikes; RAM includes child processes.
 <!-- latest-benchmarks:start -->
 Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31 · measurement contract 2
 
-[This run's report](reports/2026-10-31/41218304728-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41218304728)
+[This run's report](_docs/reports/2026-10-31/41218304728-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41218304728)
 
 <details>
 <summary>Detailed results and source reports</summary>
 
-[Source: Gutch vs restic](reports/2026-10-31/41218304728-1/restic.json)
+[Source: Gutch vs restic](_docs/reports/2026-10-31/41218304728-1/restic.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Restic](https://github.com/restic/restic) (PASS)
 
@@ -85,7 +85,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 | Extra-file cleanup + validation s | 4.144 (4.144–4.144; n=1) | 7.628 (7.628–7.628; n=1) |
 | Full restore recovery + validation s | 5.611 (5.611–5.611; n=1) | 9.526 (9.526–9.526; n=1) |
 
-[Source: Gutch vs kopia](reports/2026-10-31/41218304728-1/kopia.json)
+[Source: Gutch vs kopia](_docs/reports/2026-10-31/41218304728-1/kopia.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Kopia](https://github.com/kopia/kopia) (PASS)
 
@@ -117,7 +117,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 | Extra-file cleanup + validation s | 3.041 (3.041–3.041; n=1) | 14.291 (14.291–14.291; n=1) |
 | Full restore recovery + validation s | 3.625 (3.625–3.625; n=1) | 5.074 (5.074–5.074; n=1) |
 
-[Source: Gutch vs borg](reports/2026-10-31/41218304728-1/borg.json)
+[Source: Gutch vs borg](_docs/reports/2026-10-31/41218304728-1/borg.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (PASS)
 
@@ -151,7 +151,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 borg: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter; hidden_repair: UNSUPPORTED: native resume trusts size and mtime
 
-[Source: Gutch vs rustic](reports/2026-10-31/41218304728-1/rustic.json)
+[Source: Gutch vs rustic](_docs/reports/2026-10-31/41218304728-1/rustic.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Rustic](https://github.com/rustic-rs/rustic) (PASS)
 
@@ -183,7 +183,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 | Extra-file cleanup + validation s | 4.120 (4.120–4.120; n=1) | 7.807 (7.807–7.807; n=1) |
 | Full restore recovery + validation s | 5.582 (5.582–5.582; n=1) | 9.351 (9.351–9.351; n=1) |
 
-[Source: Gutch vs plakar](reports/2026-10-31/41218304728-1/plakar.json)
+[Source: Gutch vs plakar](_docs/reports/2026-10-31/41218304728-1/plakar.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Plakar](https://github.com/PlakarKorp/plakar) (PASS)
 
@@ -217,7 +217,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 plakar: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
-[Source: Gutch vs bpt](reports/2026-10-31/41218304728-1/bpt.json)
+[Source: Gutch vs bpt](_docs/reports/2026-10-31/41218304728-1/bpt.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) (PASS)
 
@@ -284,14 +284,14 @@ gutch-bench --fixture gutch_vs_rustic --no-open-perfetto --discard-outputs
 ```
 
 Selecting a shipped fixture downloads and checksum-verifies the pinned Blender
-5.0.0 and 5.1.0 inputs if missing. Reports are written under `.artifacts/runs/`.
+5.0.0 and 5.1.0 inputs if missing. Reports are written under `.artifacts/benchmarks/runs/`.
 Local runs retain failed outputs unless `--discard-outputs` is selected.
 
 </details>
 
-See the [benchmark guide](docs/guide.md) for settings, custom inputs, recovery,
+See the [benchmark guide](_docs/guide.md) for settings, custom inputs, recovery,
 report interpretation and development instructions. Tool versions and checksums
 are recorded in the [manifest](src/comparison_benchmark_suite/resources/tools.json).
 
 [MIT licensed](LICENSE). External tools and workloads retain their own licenses;
-see [third-party notices](docs/third-party-notices.md).
+see [third-party notices](_docs/third-party-notices.md).

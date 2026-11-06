@@ -1,0 +1,8 @@
+{
+  "repositories": [
+    {
+      "name": "gutch_benchmark_repo",
+      "path": "."
+    }
+  ]
+}

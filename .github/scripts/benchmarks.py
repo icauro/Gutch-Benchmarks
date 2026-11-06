@@ -101,16 +101,16 @@ def write_fixture(pair, repetitions, root=ROOT):
         "six rotating measured repetitions", f"{repetitions} rotating measured repetitions"
     )
     document["open_perfetto"] = False
-    path = root / ".artifacts/ci/fixture.yaml"
+    path = root / ".artifacts/tools/ci/fixture.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8", newline="\n")
 
 
 def collect(pair, outcome, root=ROOT):
     """Copy evidence through an allowlist, never repositories or restored files."""
-    destination = root / ".artifacts/export" / pair
+    destination = root / ".artifacts/benchmarks/export" / pair
     destination.mkdir(parents=True, exist_ok=True)
-    runs = sorted((root / ".artifacts/runs").glob("*/run.json"))
+    runs = sorted((root / ".artifacts/benchmarks/runs").glob("*/run.json"))
     compact = {"pair": pair, "job_outcome": outcome, "rows": [], "status": "ERROR"}
     if runs:
         run = runs[-1].parent
@@ -162,7 +162,7 @@ def collect(pair, outcome, root=ROOT):
         compact["gutch_build"] = json.loads(build.read_text(encoding="utf-8"))
     write_json(destination / "compact.json", compact)
     # A setup error can prevent the runtime's finally block from being reached.
-    for run in (root / ".artifacts/runs").glob("*"):
+    for run in (root / ".artifacts/benchmarks/runs").glob("*"):
         remove_owned(run, root / ".artifacts")
     return compact
 
@@ -194,7 +194,7 @@ def pair_overview(record):
 def version_chart_links(text, root):
     """Give changed SVGs new URLs so README images bypass stale browser caches."""
     for name in ("comparison.svg", "ram.svg", "disk.svg"):
-        path = f"reports/{name}"
+        path = f"_docs/reports/{name}"
         version = file_sha256(root / path)[:12]
         text = re.sub(r"\(" + re.escape(path) + r"(?:\?[^)]*)?\)",
                       f"({path}?v={version})", text)
@@ -206,7 +206,7 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     if not run_id.isdecimal() or not attempt.isdecimal():
         raise ValueError("Run ID and attempt must be numeric")
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    relative = Path("reports") / stamp / f"{run_id}-{attempt}"
+    relative = Path("_docs/reports") / stamp / f"{run_id}-{attempt}"
     destination = root / relative
     records = []
     for name in selected_pairs(pair):
@@ -218,13 +218,13 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
             "pair": name, "status": "ERROR", "rows": [], "reasons": ["Job produced no report; see Actions logs."]}
         records.append(record)
         write_json(destination / f"{name}.json", record)
-    latest = latest_records(root / "reports")
+    latest = latest_records(root / "_docs/reports")
     for name, chart in (
         ("comparison.svg", render_svg(latest)),
         ("ram.svg", render_resources_svg(latest, kind="ram")),
         ("disk.svg", render_resources_svg(latest, kind="disk")),
     ):
-        for path in (destination / name, root / "reports" / name):
+        for path in (destination / name, root / "_docs/reports" / name):
             path.write_text(chart, encoding="utf-8", newline="\n")
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")
     url = f"https://github.com/{repository}/actions/runs/{run_id}"
@@ -237,7 +237,7 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
                 "<details>", "<summary>Detailed results and source reports</summary>", ""]
     for item in latest:
         if item.get("source_report"):
-            overview.extend([f"[Source: Gutch vs {item['pair']}](reports/{item['source_report']})", ""])
+            overview.extend([f"[Source: Gutch vs {item['pair']}](_docs/reports/{item['source_report']})", ""])
         overview.extend(pair_overview(item))
     overview.extend(["</details>", ""])
     for record in sorted(records, key=lambda record: PAIR_NOTES[record["pair"]]):

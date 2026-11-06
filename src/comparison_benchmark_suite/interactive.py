@@ -239,7 +239,7 @@ class BenchmarkApp(App):
                 await self.stop_process()
             self.process = None
             self.busy = False
-        if self.stopping and self.run_root and self.run_root.resolve().is_relative_to(self.root / ".artifacts/runs"):
+        if self.stopping and self.run_root and self.run_root.resolve().is_relative_to(self.root / ".artifacts/benchmarks/runs"):
             manifest = self.run_root / "run.json"
             try:
                 record = json.loads(manifest.read_text(encoding="utf-8"))

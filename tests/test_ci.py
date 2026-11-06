@@ -197,7 +197,7 @@ class CiTests(unittest.TestCase):
         self.assertEqual(dataset.inventories, DatasetSelection.resolve(product).inventories)
 
     def test_collection_excludes_payload_and_publication_marks_missing_pair(self):
-        run = self.root / ".artifacts/runs/test"
+        run = self.root / ".artifacts/benchmarks/runs/test"
         run.mkdir(parents=True)
         (self.package / "resources").mkdir(parents=True)
         (self.package / "resources/tools.json").write_text('{"executables": []}')
@@ -211,14 +211,14 @@ class CiTests(unittest.TestCase):
             path.write_text("evidence")
         compact = ci.collect("restic", "success", self.root)
         self.assertEqual(compact["status"], "PASS")
-        export = self.root / ".artifacts/export/restic"
+        export = self.root / ".artifacts/benchmarks/export/restic"
         self.assertFalse(any(path.name == "private.bin" for path in export.rglob("*")))
         self.assertTrue((export / "lanes/gutch/commands/command.log").exists())
         self.assertFalse(run.exists())
         incoming = self.root / "incoming/benchmark-restic/restic"
         incoming.mkdir(parents=True)
         shutil.copyfile(export / "compact.json", incoming / "compact.json")
-        (self.root / "README.md").write_text(f"Original intro\n![Latest per-pair benchmark comparisons](reports/comparison.svg)\n![Peak RAM by operation](reports/ram.svg)\n![Peak disk by operation](reports/disk.svg)\n{ci.START}\nold\n{ci.END}\nOriginal footer")
+        (self.root / "README.md").write_text(f"Original intro\n![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg)\n![Peak RAM by operation](_docs/reports/ram.svg)\n![Peak disk by operation](_docs/reports/disk.svg)\n{ci.START}\nold\n{ci.END}\nOriginal footer")
         ci.publish("all", self.root / "incoming", "123", "2", self.root)
         readme = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("Original intro", readme)
@@ -229,20 +229,20 @@ class CiTests(unittest.TestCase):
         self.assertNotIn("Suite commit:", readme)
         self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (ERROR)", readme)
         self.assertIn("![Latest per-pair benchmark comparisons]", readme)
-        charts = list((self.root / "reports").rglob("comparison.svg"))
+        charts = list((self.root / "_docs/reports").rglob("comparison.svg"))
         self.assertEqual(len(charts), 2)
         self.assertEqual(charts[0].read_bytes(), charts[1].read_bytes())
         for name in ("comparison.svg", "ram.svg", "disk.svg"):
-            version = ci.file_sha256(self.root / "reports" / name)[:12]
-            self.assertIn(f"(reports/{name}?v={version})", readme)
+            version = ci.file_sha256(self.root / "_docs/reports" / name)[:12]
+            self.assertIn(f"(_docs/reports/{name}?v={version})", readme)
         self.assertEqual(ci.version_chart_links(readme, self.root), readme)
         for name in ("ram.svg", "disk.svg"):
-            resources = list((self.root / "reports").rglob(name))
+            resources = list((self.root / "_docs/reports").rglob(name))
             self.assertEqual(len(resources), 2)
             self.assertEqual(resources[0].read_bytes(), resources[1].read_bytes())
-        self.assertLess(readme.index("reports/comparison.svg"), readme.index("reports/ram.svg"))
-        self.assertLess(readme.index("reports/ram.svg"), readme.index("reports/disk.svg"))
-        self.assertLess(readme.index("reports/disk.svg"), readme.index(ci.START))
+        self.assertLess(readme.index("_docs/reports/comparison.svg"), readme.index("_docs/reports/ram.svg"))
+        self.assertLess(readme.index("_docs/reports/ram.svg"), readme.index("_docs/reports/disk.svg"))
+        self.assertLess(readme.index("_docs/reports/disk.svg"), readme.index(ci.START))
         self.assertLess(readme.index("![Latest per-pair"), readme.index(ci.START))
         ci.publish("restic", self.root / "incoming", "124", "1", self.root)
         updated = (self.root / "README.md").read_text(encoding="utf-8")
@@ -250,10 +250,10 @@ class CiTests(unittest.TestCase):
         self.assertIn("/123-2/borg.json", updated)
         self.assertIn("/124-1/restic.json", updated)
         self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (ERROR)", updated)
-        self.assertEqual((self.root / "reports/comparison.svg").read_bytes(),
-                         next((self.root / "reports").glob("*/124-1/comparison.svg")).read_bytes())
-        self.assertEqual(len(list((self.root / "reports").rglob("*.json"))), 7)
-        self.assertFalse(list((self.root / "reports").rglob("command.log")))
+        self.assertEqual((self.root / "_docs/reports/comparison.svg").read_bytes(),
+                         next((self.root / "_docs/reports").glob("*/124-1/comparison.svg")).read_bytes())
+        self.assertEqual(len(list((self.root / "_docs/reports").rglob("*.json"))), 7)
+        self.assertFalse(list((self.root / "_docs/reports").rglob("command.log")))
         with self.assertRaises(ValueError):
             ci.publish("all", self.root / "incoming", "../escape", "1", self.root)
 
@@ -270,7 +270,7 @@ class CiTests(unittest.TestCase):
         (incoming / "compact.json").write_text(json.dumps(record))
         (self.root / "README.md").write_text(f"{ci.START}\nold\n{ci.END}")
         ci.publish("rustic", self.root / "incoming", "123", "1", self.root)
-        report = next((self.root / "reports").glob("*/123-1/rustic.json"))
+        report = next((self.root / "_docs/reports").glob("*/123-1/rustic.json"))
         self.assertEqual(json.loads(report.read_text())["status"], "PASS")
         self.assertNotIn(b"\r", report.read_bytes())
         readme = (self.root / "README.md").read_text(encoding="utf-8")
@@ -344,7 +344,7 @@ class CiTests(unittest.TestCase):
         shutil.copytree(ROOT / ci.SOURCE / "fixtures", self.package / "fixtures",
                         ignore=shutil.ignore_patterns("builds", "__pycache__"))
         ci.write_fixture("rustic", 5, self.root)
-        fixture = yaml.safe_load((self.root / ".artifacts/ci/fixture.yaml").read_text())
+        fixture = yaml.safe_load((self.root / ".artifacts/tools/ci/fixture.yaml").read_text())
         self.assertEqual(fixture["repetitions"], 5)
         self.assertIn("5 rotating measured repetitions", fixture["description"])
         self.assertEqual([lane["tool"] for lane in fixture["lanes"]], ["gutch", "rustic"])
