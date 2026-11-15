@@ -1,13 +1,14 @@
-__pycache__/
+# Python tooling
+**/__pycache__/
 *.pyc
-.venv/
-.pytest_cache/
-*.egg-info/
-build/
-dist/
+/.venv/
+/.pytest_cache/
 
 # Python packaging metadata
 /build/
+/dist/
 **/*.egg-info/
+
+# Disposable outputs
 **/.artifacts/
 **/.builds/
