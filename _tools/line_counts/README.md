@@ -15,6 +15,3 @@ Gitless workspaces report maintained-source totals with deltas explicitly
 unavailable; --commit cannot invent a baseline. Configuration/fixture boundaries
 and category exclusions are declared in the tool; adjust them only for the owning
 project. No global Git configuration is modified.
-
-The script has been written for the current paths but has NOT been executed or
-runtime-tested during this migration, by user instruction.
