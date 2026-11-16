@@ -1,2 +1,5 @@
+# Store and check out text as LF on every platform; Git detects binary files.
+* text=auto eol=lf
+
 # Preserve upstream notice copies exactly.
 src/comparison_benchmark_suite/resources/licenses/** -text -whitespace
