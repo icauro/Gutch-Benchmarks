@@ -30,7 +30,7 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
     if fixture.resource_sampling:
         schedule.extend((replace(lane, resource_sample=True), 0) for lane in measured)
     try:
-        revision = subprocess.run(['git', 'rev-parse', 'HEAD'], stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False, cwd=Path(__file__).resolve().parents[1]).stdout.strip()
+        revision = subprocess.run(['git', 'rev-parse', 'HEAD'], stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8", check=False, cwd=Path(__file__).resolve().parents[1]).stdout.strip()
     except OSError:
         revision = None
     layout.write_manifest('running', schema_version=1, fixture=asdict(fixture),

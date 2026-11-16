@@ -170,13 +170,13 @@ class ResourceTests(unittest.TestCase):
             module + "platform.platform", return_value="test"), patch(module + "write_lane_timeline"), patch(
             module + "combine_labeled_traces"):
             execute_cases(fixture, layout, commands, execute, executable=self.root / "missing", discard_outputs=True)
-        summary = json.loads((layout.root / "summary.json").read_text())["gutch"]
+        summary = json.loads((layout.root / "summary.json").read_text(encoding="utf-8"))["gutch"]
         self.assertEqual(summary["backup"]["median"], 1)
         self.assertEqual(summary["backup"]["samples"], 1)
         self.assertEqual(summary["peak_rss_bytes"]["median"], 456)
         self.assertEqual(summary["peak_disk_bytes"]["median"], 123)
         self.assertEqual(summary["peak_disk_bytes"]["source"], "separate_resource_pass")
-        self.assertEqual(len(json.loads((layout.root / "results.json").read_text())), 1)
-        self.assertEqual(len(json.loads((layout.root / "resources.json").read_text())), 1)
+        self.assertEqual(len(json.loads((layout.root / "results.json").read_text(encoding="utf-8"))), 1)
+        self.assertEqual(len(json.loads((layout.root / "resources.json").read_text(encoding="utf-8"))), 1)
         self.assertEqual(seen, [(False, False, False), (True, True, True)])
         self.assertIsNone(commands.disk_roots)

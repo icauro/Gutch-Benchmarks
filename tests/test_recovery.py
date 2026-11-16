@@ -42,7 +42,7 @@ class RecoveryTests(unittest.TestCase):
         destination = self.output / "v1"
         plan = build_corruption_plan(destination, self.root / "plan.json", 1,
             expected_inventory=self.dataset.inventories["v1"], preserve_mtime=True, add_extra=False)
-        operations = json.loads(plan.read_text())["operations"]
+        operations = json.loads(plan.read_text(encoding="utf-8"))["operations"]
         self.assertEqual({item["path"] for item in operations if item["kind"] == "flipByte"}, {"small", "large"})
         times = {name: (destination / name).stat().st_mtime_ns for name in ("small", "large")}
         apply_corruption_plan(destination, plan)

@@ -154,8 +154,8 @@ def collect(pair, outcome, root=ROOT):
     cpuinfo = Path("/proc/cpuinfo")
     if cpuinfo.is_file():
         compact["host"]["cpu_model"] = next((line.split(":", 1)[1].strip()
-            for line in cpuinfo.read_text().splitlines() if line.startswith("model name")), "unknown")
-    compact["tools"] = [record for record in json.loads((root / SOURCE / "resources/tools.json").read_text())["executables"]
+            for line in cpuinfo.read_text(encoding="utf-8").splitlines() if line.startswith("model name")), "unknown")
+    compact["tools"] = [record for record in json.loads((root / SOURCE / "resources/tools.json").read_text(encoding="utf-8"))["executables"]
                         if record["platform"] == "linux-x64" and record["tool"] == ("buildpatchtool" if pair == "bpt" else pair)]
     build = root / ".artifacts/build/provenance.json"
     if build.exists():

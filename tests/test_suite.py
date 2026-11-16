@@ -73,7 +73,7 @@ class SuiteTests(unittest.TestCase):
         env = dict(os.environ, PYTHONPATH=str(standalone / "src"))
         env.pop("GUTCH_EXECUTABLE", None)
         result = subprocess.run([sys.executable, "-m", "comparison_benchmark_suite", "--fixture", str(fixture)],
-                                cwd=standalone, env=env, capture_output=True, text=True, timeout=30)
+                                cwd=standalone, env=env, capture_output=True, text=True, encoding="utf-8", timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Fixture settings and limitations.", result.stdout)
         self.assertIn("| Tool", result.stdout)
@@ -82,18 +82,18 @@ class SuiteTests(unittest.TestCase):
         self.assertIn("UNAVAILABLE", result.stdout)
         self.assertIn("'-' = not measured", result.stdout)
         run = next((standalone / ".artifacts/benchmarks/runs").iterdir())
-        results = json.loads((run / "results.json").read_text())
+        results = json.loads((run / "results.json").read_text(encoding="utf-8"))
         self.assertEqual(len(results), 4)
         self.assertEqual({r["metadata"]["status"] for r in results}, {"PASS", "UNAVAILABLE"})
         self.assertFalse(any((run / "lanes").glob("*/payload")))
-        self.assertIn("Fixture settings and limitations.", (run / "summary.md").read_text())
-        events = json.loads((run / "trace.json").read_text())["traceEvents"]
+        self.assertIn("Fixture settings and limitations.", (run / "summary.md").read_text(encoding="utf-8"))
+        events = json.loads((run / "trace.json").read_text(encoding="utf-8"))["traceEvents"]
         spans = [event for event in events if event["ph"] == "X"]
         self.assertEqual(len(spans), 12)  # Capture, restore, recovery x two builds x two measured runs.
         self.assertTrue(all(event["dur"] > 0 for event in spans))
         self.assertFalse(any("warmup" in event.get("args", {}).get("name", "") for event in events))
         for index, build in enumerate(builds, 1):
-            self.assertEqual((Path(build["path"]) / "file.txt").read_text(), f"version {index}")
+            self.assertEqual((Path(build["path"]) / "file.txt").read_text(encoding="utf-8"), f"version {index}")
 
     def test_failed_candidate_retains_evidence_and_does_not_stop_copy(self):
         from comparison_benchmark_suite import cli
@@ -108,9 +108,9 @@ class SuiteTests(unittest.TestCase):
         with patch("comparison_benchmark_suite.cli.Path.cwd", return_value=self.root):
             self.assertEqual(cli.main(["--fixture", str(fixture)]), 1)
         output = next((self.root / ".artifacts/benchmarks/runs").iterdir())
-        results = json.loads((output / "results.json").read_text())
+        results = json.loads((output / "results.json").read_text(encoding="utf-8"))
         self.assertEqual([r["metadata"]["status"] for r in results], ["ERROR", "PASS"])
-        self.assertEqual(json.loads((output / "run.json").read_text())["status"], "failed")
+        self.assertEqual(json.loads((output / "run.json").read_text(encoding="utf-8"))["status"], "failed")
         self.assertTrue(list(output.glob("lanes/*/commands/*")))
 
     def test_archive_traversal_is_rejected(self):
@@ -138,7 +138,7 @@ class SuiteTests(unittest.TestCase):
             dataset.validate(source, output, evidence)
         shutil.copy2(source / "expected", output / "expected")
         dataset.validate(source, output, evidence)
-        self.assertEqual(json.loads(evidence.read_text())["extra_files"], ["extra"])
+        self.assertEqual(json.loads(evidence.read_text(encoding="utf-8"))["extra_files"], ["extra"])
 
 if __name__ == "__main__":
     unittest.main()

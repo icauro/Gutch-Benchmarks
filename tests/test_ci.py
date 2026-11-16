@@ -69,13 +69,13 @@ class CiTests(unittest.TestCase):
             relocated.mkdir()
             copy = relocated / "dataset.yaml"
             shutil.copyfile(shared, copy)
-            other = prepare_dataset(yaml.safe_load(copy.read_text()), copy, artifacts)[0]
+            other = prepare_dataset(yaml.safe_load(copy.read_text(encoding="utf-8")), copy, artifacts)[0]
             self.assertEqual(other, products[0])
             self.assertEqual(download.call_count, 1)
             # A modified cached input is rebuilt from the verified archive.
             (other / "v1/file.txt").write_text("corrupt")
-            prepare_dataset(yaml.safe_load(copy.read_text()), copy, artifacts)
-            self.assertEqual((other / "v1/file.txt").read_text(), "immutable Blender stand-in")
+            prepare_dataset(yaml.safe_load(copy.read_text(encoding="utf-8")), copy, artifacts)
+            self.assertEqual((other / "v1/file.txt").read_text(encoding="utf-8"), "immutable Blender stand-in")
 
     def test_tool_install_verifies_archive_and_executable_without_launching(self):
         binary = b"synthetic executable"
@@ -122,7 +122,7 @@ class CiTests(unittest.TestCase):
                           discard_outputs=True)
         self.assertEqual(len(calls), 2)
         self.assertFalse(any(path.exists() for path in calls))
-        self.assertEqual(json.loads((layout.root / "run.json").read_text())["status"], "failed")
+        self.assertEqual(json.loads((layout.root / "run.json").read_text(encoding="utf-8"))["status"], "failed")
         self.assertEqual(len(list(layout.root.glob("lanes/*/stats/validation.json"))), 2)
 
     def test_discard_also_cleans_a_case_that_raises_before_returning_results(self):
@@ -139,7 +139,7 @@ class CiTests(unittest.TestCase):
             execute_cases(fixture, layout, Mock(measurements=[]), execute,
                           executable=self.root / "unused", discard_outputs=True)
         self.assertFalse((layout.root / "lanes/gutch/payload").exists())
-        self.assertEqual(json.loads((layout.root / "run.json").read_text())["status"], "failed")
+        self.assertEqual(json.loads((layout.root / "run.json").read_text(encoding="utf-8"))["status"], "failed")
 
     def test_bpt_install_preserves_engine_support_files(self):
         buffer = io.BytesIO()
@@ -271,7 +271,7 @@ class CiTests(unittest.TestCase):
         (self.root / "README.md").write_text(f"{ci.START}\nold\n{ci.END}")
         ci.publish("rustic", self.root / "incoming", "123", "1", self.root)
         report = next((self.root / "_docs/reports").glob("*/123-1/rustic.json"))
-        self.assertEqual(json.loads(report.read_text())["status"], "PASS")
+        self.assertEqual(json.loads(report.read_text(encoding="utf-8"))["status"], "PASS")
         self.assertNotIn(b"\r", report.read_bytes())
         readme = (self.root / "README.md").read_text(encoding="utf-8")
         self.assertIn("First capture RAM | First capture disk | Second capture RAM | Second capture disk", readme)
@@ -279,7 +279,7 @@ class CiTests(unittest.TestCase):
         self.assertIn("[Rustic](https://github.com/rustic-rs/rustic) | 4.0 | —", readme)
 
     def test_workflow_is_manual_only_and_pairs_share_one_cache_action(self):
-        workflow = yaml.load((ROOT / ".github/workflows/benchmarks.yml").read_text(), Loader=yaml.BaseLoader)
+        workflow = yaml.load((ROOT / ".github/workflows/benchmarks.yml").read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
         self.assertEqual(set(workflow["on"]), {"workflow_dispatch"})
         self.assertEqual(workflow["on"]["workflow_dispatch"]["inputs"]["pair"]["default"], "all")
         jobs = workflow["jobs"]
@@ -288,7 +288,7 @@ class CiTests(unittest.TestCase):
             self.assertTrue(any(step.get("uses") == "./.github/actions/blender-inputs" for step in jobs[job]["steps"]))
         self.assertEqual(workflow["permissions"]["contents"], "read")
         self.assertEqual(jobs["publish"]["permissions"]["contents"], "write")
-        composite = (ROOT / ".github/actions/blender-inputs/action.yml").read_text()
+        composite = (ROOT / ".github/actions/blender-inputs/action.yml").read_text(encoding="utf-8")
         self.assertNotIn("matrix.pair", composite)
 
     def test_markdown_tables_link_tools_and_keep_gutch_first(self):
@@ -344,7 +344,7 @@ class CiTests(unittest.TestCase):
         shutil.copytree(ROOT / ci.SOURCE / "fixtures", self.package / "fixtures",
                         ignore=shutil.ignore_patterns("builds", "__pycache__"))
         ci.write_fixture("rustic", 5, self.root)
-        fixture = yaml.safe_load((self.root / ".artifacts/tools/ci/fixture.yaml").read_text())
+        fixture = yaml.safe_load((self.root / ".artifacts/tools/ci/fixture.yaml").read_text(encoding="utf-8"))
         self.assertEqual(fixture["repetitions"], 5)
         self.assertIn("5 rotating measured repetitions", fixture["description"])
         self.assertEqual([lane["tool"] for lane in fixture["lanes"]], ["gutch", "rustic"])
