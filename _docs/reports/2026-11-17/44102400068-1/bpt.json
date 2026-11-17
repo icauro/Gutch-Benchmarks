@@ -1,0 +1,677 @@
+{
+  "dataset": {
+    "builds": [
+      {
+        "sha256": "14d491b6e491c35950b89bac8caa4ab7115596cc056775f427806d3ea2eac698",
+        "url": "https://download.blender.org/release/Blender5.0/blender-5.0.0-windows-x64.zip",
+        "version": "5.0.0"
+      },
+      {
+        "sha256": "bc184226962904e3f26c5809ba7ec86bbeb670060825b046930b0c02a30a4eee",
+        "url": "https://download.blender.org/release/Blender5.1/blender-5.1.0-windows-x64.zip",
+        "version": "5.1.0"
+      }
+    ],
+    "order": [
+      "v1",
+      "v2"
+    ]
+  },
+  "description": "BuildPatchTool uses a 1 MiB chunk window and its internal compression with FeatureLevel=Latest. Local InstallManifest recovery uses PrevManifest. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3 and 8 MiB compressed bundles. Chunk windows are not CDC averages; codecs and formats are unmatched. No native extra-file cleanup or separate repository check is available in this adapter. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 6 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+  "executables": {
+    "buildpatchtool": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a"
+    },
+    "gutch": {
+      "path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/linux-x64/gutch/gutch-cli",
+      "sha256": "e3091aa62e0c99a7799056140c807afc97524670b2333ee492fccad03b2be010"
+    }
+  },
+  "fixture": {
+    "corrupt_repair": true,
+    "delete_artifacts": true,
+    "description": "BuildPatchTool uses a 1 MiB chunk window and its internal compression with FeatureLevel=Latest. Local InstallManifest recovery uses PrevManifest. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3 and 8 MiB compressed bundles. Chunk windows are not CDC averages; codecs and formats are unmatched. No native extra-file cleanup or separate repository check is available in this adapter. Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and 6 rotating measured repetitions; profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both native and validation-inclusive durations are reported. Unsupported operations receive no timing.",
+    "lane_wait_seconds": 0.0,
+    "lanes": [
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "resource_sample": false,
+        "tool": "gutch",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "-ChunkWindowSize=1048576"
+        ],
+        "configuration_label": "",
+        "label": "buildpatchtool",
+        "profile": null,
+        "resource_sample": false,
+        "tool": "buildpatchtool",
+        "warmup": true,
+        "workload": "individual"
+      },
+      {
+        "arguments": [],
+        "configuration_label": "",
+        "label": "gutch",
+        "profile": {
+          "bundle_profile": "bundle_8MiB",
+          "chunk_profile": "chunk_1MiB",
+          "chunker": "fastcdc",
+          "compression_algorithm": "zstd",
+          "compression_level": 3,
+          "jobs": 4,
+          "name": "gutch",
+          "storage_mode": "bundled"
+        },
+        "resource_sample": false,
+        "tool": "gutch",
+        "warmup": false,
+        "workload": "individual"
+      },
+      {
+        "arguments": [
+          "-ChunkWindowSize=1048576"
+        ],
+        "configuration_label": "",
+        "label": "buildpatchtool",
+        "profile": null,
+        "resource_sample": false,
+        "tool": "buildpatchtool",
+        "warmup": false,
+        "workload": "individual"
+      }
+    ],
+    "name": "gutch_vs_bpt",
+    "open_perfetto": false,
+    "profile_mode": "off",
+    "repetitions": 6,
+    "resource_sampling": true,
+    "runner": "gutch-fixture",
+    "snapshot_limit": null,
+    "source_path": "/home/runner/work/Gutch-Benchmarks/Gutch-Benchmarks/.artifacts/tools/ci/fixture.yaml",
+    "step_wait_seconds": 0.0
+  },
+  "gutch_build": {
+    "commit": "c3465e71fd0859c49a40c55f2c0e49212633d8fc",
+    "compiler": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "release_url": "https://github.com/icauro/Gutch/releases/tag/v0.1.0",
+    "sha256": "e3091aa62e0c99a7799056140c807afc97524670b2333ee492fccad03b2be010",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.0"
+  },
+  "host": {
+    "cpu_count": 4,
+    "cpu_model": "Intel(R) Xeon(R) 6975P-C",
+    "disk_bytes": 154894188544,
+    "platform": "Linux-7.0.0-1014-aws-x86_64-with-glibc2.39"
+  },
+  "job_outcome": "success",
+  "measurement_contract": 2,
+  "operation_resources": {
+    "buildpatchtool": {
+      "incremental_capture": {
+        "peak_disk_bytes": 767917698,
+        "peak_rss_bytes": 540020736
+      },
+      "initial_capture": {
+        "peak_disk_bytes": 423271835,
+        "peak_rss_bytes": 405909504
+      },
+      "repair": {
+        "peak_disk_bytes": 2742917069,
+        "peak_rss_bytes": 136847360
+      },
+      "restore": {
+        "peak_disk_bytes": 2742917069,
+        "peak_rss_bytes": 239255552
+      }
+    },
+    "gutch": {
+      "incremental_capture": {
+        "peak_disk_bytes": 722848369,
+        "peak_rss_bytes": 141328384
+      },
+      "initial_capture": {
+        "peak_disk_bytes": 400681050,
+        "peak_rss_bytes": 144318464
+      },
+      "repair": {
+        "peak_disk_bytes": 2697847740,
+        "peak_rss_bytes": 156192768
+      },
+      "restore": {
+        "peak_disk_bytes": 2697847740,
+        "peak_rss_bytes": 131125248
+      }
+    }
+  },
+  "operations": {
+    "buildpatchtool": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "UNSUPPORTED: no native extra-file deletion in this adapter",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "repair": "PASS"
+    },
+    "gutch": {
+      "capture": "PASS",
+      "clean_restore": "PASS",
+      "exact_recovery": "PASS",
+      "full_restore_recovery": "PASS",
+      "hidden_repair": "PASS",
+      "in_place_repair": "PASS",
+      "no_op_restore": "NOT_RUN",
+      "repair": "PASS",
+      "rollback": "NOT_RUN",
+      "update": "NOT_RUN"
+    }
+  },
+  "pair": "bpt",
+  "provenance": {
+    "GITHUB_RUN_ATTEMPT": "1",
+    "GITHUB_RUN_ID": "44102400068",
+    "GITHUB_SHA": "860627cc645db57e9a5fcdb3cffab59c059e5940",
+    "GUTCH_REVISION": "c3465e71fd0859c49a40c55f2c0e49212633d8fc",
+    "GUTCH_VERSION": "0.1.0",
+    "ImageOS": "ubuntu24",
+    "ImageVersion": "20261111.127.1",
+    "RUNNER_OS": "Linux"
+  },
+  "reasons": [],
+  "resources": [
+    {
+      "kind": "gutch-individual",
+      "label": "gutch-resources",
+      "metadata": {
+        "case": "gutch",
+        "configuration": {
+          "arguments": [],
+          "configuration_label": "gutch",
+          "label": "gutch-resources",
+          "profile": {
+            "bundle_profile": "bundle_8MiB",
+            "chunk_profile": "chunk_1MiB",
+            "chunker": "fastcdc",
+            "compression_algorithm": "zstd",
+            "compression_level": 3,
+            "jobs": 4,
+            "name": "gutch",
+            "storage_mode": "bundled"
+          },
+          "resource_sample": true,
+          "tool": "gutch",
+          "warmup": false,
+          "workload": "individual"
+        },
+        "corrupt_repair_after_reconstruct": true,
+        "dataset_sha256": "2459919520ae7c15db29601a5aec5877d3a6f6b71a2bf4e7f491de231abdc259",
+        "differences": [],
+        "disk_sampling": {
+          "peak_disk_bytes": 2697847764,
+          "sample_count": 101,
+          "sampling_interval_seconds": 0.1,
+          "scope": "owned apparent file bytes"
+        },
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "measurement_contract": 2,
+        "memory_profile": true,
+        "operations": {
+          "capture": "PASS",
+          "clean_restore": "PASS",
+          "exact_recovery": "PASS",
+          "full_restore_recovery": "PASS",
+          "hidden_repair": "PASS",
+          "in_place_repair": "PASS",
+          "no_op_restore": "NOT_RUN",
+          "repair": "PASS",
+          "rollback": "NOT_RUN",
+          "update": "NOT_RUN"
+        },
+        "profile_mode": "off",
+        "repetition": 0,
+        "resource_sample": true,
+        "snapshot_metrics": {
+          "v1": {
+            "backup": 1.9695382190000146,
+            "input_bytes": 965509154,
+            "repo_growth_bytes": 400679967,
+            "restore": 1.739848646999917
+          },
+          "v2": {
+            "backup": 1.9152271340001334,
+            "input_bytes": 1009490217,
+            "repo_growth_bytes": 322167319,
+            "restore": 1.0127965970000332
+          }
+        },
+        "snapshots": [
+          "v1",
+          "v2"
+        ],
+        "status": "PASS",
+        "utilization_scope": "sampled process-tree RSS; direct-process CPU (100% = one core); excludes harness",
+        "verify_invocations": 2,
+        "verify_source": "reconstruct_stats.verify_timings.total_seconds",
+        "warmup": false
+      },
+      "metrics": {
+        "backup": 3.884765353000148,
+        "compare": 0.0,
+        "corrupt": 0.01969006400008766,
+        "cpu_percent": 292.0437534625225,
+        "exact_recovery": 3.0259438640000553,
+        "exact_recovery_validated": 6.680770674000087,
+        "full_restore_recovery": 2.5060910839999906,
+        "full_restore_recovery_validated": 6.211785817999953,
+        "hidden_repair": 3.132898393999767,
+        "hidden_repair_validated": 6.838893760999781,
+        "incremental_capture": 1.9152271340001334,
+        "initial_capture": 1.9695382190000146,
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "peak_disk_bytes": 2697847764,
+        "peak_rss_bytes": 156192768,
+        "repair": 3.2406904420001865,
+        "repair_validated": 6.889861022000105,
+        "repo_files": 120,
+        "repo_growth_bytes": 322167319,
+        "repo_size": 722848369,
+        "restore": 2.7526452439999503,
+        "restore_validated": 6.430560932999924,
+        "sampled_cpu_seconds": 25.42,
+        "verify": null
+      },
+      "traces": {
+        "capture": [
+          "lanes/gutch-resources/traces/capture-001/trace.json",
+          "lanes/gutch-resources/traces/capture-002/trace.json"
+        ],
+        "corrupt": [],
+        "reconstruct": [
+          "lanes/gutch-resources/traces/reconstruct-001/trace.json",
+          "lanes/gutch-resources/traces/reconstruct-002/trace.json"
+        ],
+        "repair": []
+      }
+    },
+    {
+      "kind": "buildpatchtool-individual",
+      "label": "buildpatchtool-resources",
+      "metadata": {
+        "binary_sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a",
+        "case": "buildpatchtool",
+        "dataset_sha256": "2459919520ae7c15db29601a5aec5877d3a6f6b71a2bf4e7f491de231abdc259",
+        "disk_sampling": {
+          "peak_disk_bytes": 2742917069,
+          "sample_count": 334,
+          "sampling_interval_seconds": 0.1,
+          "scope": "owned apparent file bytes"
+        },
+        "extra_file_policy": "no_native_delete_option",
+        "input_bytes": 1974999371,
+        "input_files": 12346,
+        "measurement_contract": 2,
+        "memory_profile": true,
+        "operations": {
+          "capture": "PASS",
+          "clean_restore": "PASS",
+          "exact_recovery": "UNSUPPORTED: no native extra-file deletion in this adapter",
+          "full_restore_recovery": "PASS",
+          "hidden_repair": "PASS",
+          "repair": "PASS"
+        },
+        "profile_mode": "off",
+        "recovery_mode": "restore_existing",
+        "repetition": 0,
+        "resource_sample": true,
+        "snapshot_metrics": {
+          "v1": {
+            "backup": 11.940097657000024,
+            "input_bytes": 965509154,
+            "repo_growth_bytes": 423271835,
+            "restore": 10.018011085999888
+          },
+          "v2": {
+            "backup": 20.868145824000067,
+            "input_bytes": 1009490217,
+            "repo_growth_bytes": 344645863,
+            "restore": 10.058660061999944
+          }
+        },
+        "snapshots": [
+          "v1",
+          "v2"
+        ],
+        "status": "PASS",
+        "utilization_scope": "sampled process-tree RSS; direct-process CPU (100% = one core); excludes harness",
+        "warmup": false
+      },
+      "metrics": {
+        "backup": 32.80824348100009,
+        "corrupt": 0.019186043000217978,
+        "cpu_percent": 227.77509417480525,
+        "full_restore_recovery": 19.905559237000034,
+        "full_restore_recovery_validated": 23.58045576099994,
+        "hidden_repair": 4.850946914999895,
+        "hidden_repair_validated": 8.526005830999793,
+        "incremental_capture": 20.868145824000067,
+        "initial_capture": 11.940097657000024,
+        "peak_disk_bytes": 2742917069,
+        "peak_rss_bytes": 540020736,
+        "repair": 4.712526406000279,
+        "repair_validated": 8.427846552000346,
+        "repo_files": 1789,
+        "repo_growth_bytes": 344645863,
+        "repo_size": 767917698,
+        "restore": 20.076671147999832,
+        "restore_validated": 23.832334793999962,
+        "sampled_cpu_seconds": 168.68
+      },
+      "traces": {}
+    }
+  ],
+  "rows": [
+    [
+      "gutch",
+      "PASS",
+      "3.705",
+      "1.377",
+      "0.660",
+      "1.404",
+      "689.362",
+      "-",
+      "148.957",
+      "2572.868"
+    ],
+    [
+      "buildpatchtool",
+      "PASS",
+      "29.807",
+      "16.026",
+      "1.859",
+      "15.782",
+      "732.343",
+      "-",
+      "515.004",
+      "2615.850"
+    ]
+  ],
+  "run_status": "passed",
+  "status": "PASS",
+  "summary": {
+    "buildpatchtool": {
+      "backup": {
+        "maximum": 30.01472812899999,
+        "median": 29.806615583500047,
+        "minimum": 29.575868555000056,
+        "samples": 6
+      },
+      "corrupt": {
+        "maximum": 0.02193159499995545,
+        "median": 0.017425898499993764,
+        "minimum": 0.016593372999977873,
+        "samples": 6
+      },
+      "full_restore_recovery": {
+        "maximum": 15.920821186000012,
+        "median": 15.78235168599997,
+        "minimum": 15.661750273000052,
+        "samples": 6
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 18.397205723999946,
+        "median": 18.24621715799998,
+        "minimum": 18.103143645000046,
+        "samples": 6
+      },
+      "hidden_repair": {
+        "maximum": 1.8757609589999902,
+        "median": 1.7950016899999355,
+        "minimum": 1.769840993999992,
+        "samples": 6
+      },
+      "hidden_repair_validated": {
+        "maximum": 4.358441966999976,
+        "median": 4.242957947500031,
+        "minimum": 4.217173496999976,
+        "samples": 6
+      },
+      "incremental_capture": {
+        "maximum": 19.043249124,
+        "median": 18.89754220750001,
+        "minimum": 18.776359996999986,
+        "samples": 6
+      },
+      "initial_capture": {
+        "maximum": 10.996459704000017,
+        "median": 10.911749344000043,
+        "minimum": 10.79950855800007,
+        "samples": 6
+      },
+      "peak_disk_bytes": {
+        "maximum": 2742917069,
+        "median": 2742917069,
+        "minimum": 2742917069,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "peak_rss_bytes": {
+        "maximum": 540020736,
+        "median": 540020736,
+        "minimum": 540020736,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "repair": {
+        "maximum": 1.8812048519999962,
+        "median": 1.858862573500005,
+        "minimum": 1.8049303059999602,
+        "samples": 6
+      },
+      "repair_validated": {
+        "maximum": 4.353691985000069,
+        "median": 4.324390777000019,
+        "minimum": 4.260683578999988,
+        "samples": 6
+      },
+      "repo_files": {
+        "maximum": 1789,
+        "median": 1789.0,
+        "minimum": 1789,
+        "samples": 6
+      },
+      "repo_growth_bytes": {
+        "maximum": 344645879,
+        "median": 344645859.5,
+        "minimum": 344645843,
+        "samples": 6
+      },
+      "repo_size": {
+        "maximum": 767917726,
+        "median": 767917703.5,
+        "minimum": 767917682,
+        "samples": 6
+      },
+      "restore": {
+        "maximum": 16.319213264999917,
+        "median": 16.025700631500058,
+        "minimum": 15.83512210099991,
+        "samples": 6
+      },
+      "restore_validated": {
+        "maximum": 18.800018797999883,
+        "median": 18.46799097500002,
+        "minimum": 18.28741697099997,
+        "samples": 6
+      }
+    },
+    "gutch": {
+      "backup": {
+        "maximum": 3.835673134999979,
+        "median": 3.7049573515000134,
+        "minimum": 3.5082952699999623,
+        "samples": 6
+      },
+      "compare": {
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "samples": 6
+      },
+      "corrupt": {
+        "maximum": 0.02246230899999091,
+        "median": 0.01738223949996609,
+        "minimum": 0.01685276000000613,
+        "samples": 6
+      },
+      "exact_recovery": {
+        "maximum": 0.343289053000035,
+        "median": 0.33626341149999917,
+        "minimum": 0.31827110699998684,
+        "samples": 6
+      },
+      "exact_recovery_validated": {
+        "maximum": 2.8664614379999875,
+        "median": 2.8353673900000445,
+        "minimum": 2.761663479000049,
+        "samples": 6
+      },
+      "full_restore_recovery": {
+        "maximum": 1.4472560259998772,
+        "median": 1.4037459389999754,
+        "minimum": 1.3302231649997793,
+        "samples": 6
+      },
+      "full_restore_recovery_validated": {
+        "maximum": 3.9864130269999123,
+        "median": 3.9144246804999625,
+        "minimum": 3.784988599999906,
+        "samples": 6
+      },
+      "hidden_repair": {
+        "maximum": 0.6765980509999281,
+        "median": 0.6594651475000433,
+        "minimum": 0.6397551100000101,
+        "samples": 6
+      },
+      "hidden_repair_validated": {
+        "maximum": 3.19757988799995,
+        "median": 3.146949507000045,
+        "minimum": 3.0902849980000155,
+        "samples": 6
+      },
+      "incremental_capture": {
+        "maximum": 1.9481408320000355,
+        "median": 1.8116908310000213,
+        "minimum": 1.7201787970000169,
+        "samples": 6
+      },
+      "initial_capture": {
+        "maximum": 1.917026109999938,
+        "median": 1.878519616999995,
+        "minimum": 1.7881164729999455,
+        "samples": 6
+      },
+      "input_bytes": {
+        "maximum": 1974999371,
+        "median": 1974999371.0,
+        "minimum": 1974999371,
+        "samples": 6
+      },
+      "input_files": {
+        "maximum": 12346,
+        "median": 12346.0,
+        "minimum": 12346,
+        "samples": 6
+      },
+      "peak_disk_bytes": {
+        "maximum": 2697847764,
+        "median": 2697847764,
+        "minimum": 2697847764,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "peak_rss_bytes": {
+        "maximum": 156192768,
+        "median": 156192768,
+        "minimum": 156192768,
+        "samples": 1,
+        "source": "separate_resource_pass"
+      },
+      "repair": {
+        "maximum": 0.6739190340000505,
+        "median": 0.6603244570000015,
+        "minimum": 0.6387658430001011,
+        "samples": 6
+      },
+      "repair_validated": {
+        "maximum": 3.1542078319999973,
+        "median": 3.1374409000000014,
+        "minimum": 3.0816583320000746,
+        "samples": 6
+      },
+      "repo_files": {
+        "maximum": 120,
+        "median": 120.0,
+        "minimum": 120,
+        "samples": 6
+      },
+      "repo_growth_bytes": {
+        "maximum": 322167321,
+        "median": 322167321.0,
+        "minimum": 322167321,
+        "samples": 6
+      },
+      "repo_size": {
+        "maximum": 722848373,
+        "median": 722848373.0,
+        "minimum": 722848373,
+        "samples": 6
+      },
+      "restore": {
+        "maximum": 1.399420947000067,
+        "median": 1.3774300205000714,
+        "minimum": 1.3108043180000095,
+        "samples": 6
+      },
+      "restore_validated": {
+        "maximum": 3.9320091619999857,
+        "median": 3.878317920000029,
+        "minimum": 3.7706543470000042,
+        "samples": 6
+      },
+      "verify": null
+    }
+  },
+  "tools": [
+    {
+      "archive_sha256": "9d56626cc073c1c5f12134a43e5d3be9e4c68146ecbe882f1645f0d3435b2660",
+      "path": "linux-x64/buildpatchtool/Engine/Binaries/Linux/BuildPatchTool",
+      "platform": "linux-x64",
+      "sha256": "8651f51b2b76010a965f2d1e7c78f3fefd802600db38807596763a29fdee7f4a",
+      "source_url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/BuildPatchTool.zip",
+      "tool": "buildpatchtool",
+      "verification": "matches current official package; publisher does not provide a separate checksum here",
+      "verified_at": "2026-10-31",
+      "version": "1.8.8"
+    }
+  ]
+}

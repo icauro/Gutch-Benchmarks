@@ -3,11 +3,11 @@
 Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic and Rustic
 using shared Blender inputs, pair-specific settings and SHA-256 output validation.
 
-![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=4768eb0be20c)
+![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=7c7132392672)
 
-![Peak RAM by operation](_docs/reports/ram.svg?v=177867000b57)
+![Peak RAM by operation](_docs/reports/ram.svg?v=5d572c1400c0)
 
-![Peak disk by operation](_docs/reports/disk.svg?v=920140d60f8e)
+![Peak disk by operation](_docs/reports/disk.svg?v=f387322e60ed)
 
 <details>
 <summary>Comparison differences and limits</summary>
@@ -46,29 +46,29 @@ Sampling may miss short spikes; RAM includes child processes.
 </details>
 
 <!-- latest-benchmarks:start -->
-Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-10-31 · measurement contract 2
+Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-11-17 · measurement contract 2
 
-[This run's report](_docs/reports/2026-10-31/41218304728-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/41218304728)
+[This run's report](_docs/reports/2026-11-17/44102400068-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/44102400068)
 
 <details>
 <summary>Detailed results and source reports</summary>
 
-[Source: Gutch vs restic](_docs/reports/2026-10-31/41218304728-1/restic.json)
+[Source: Gutch vs restic](_docs/reports/2026-11-17/44102400068-1/restic.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Restic](https://github.com/restic/restic) (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | PASS | 4.525 | 1.911 | 1.028 | 689.361 |
-| [Restic](https://github.com/restic/restic) | PASS | 8.939 | 5.840 | 4.225 | 717.455 |
-| **Gutch relative** | - | 1.98x faster | 3.06x faster | 4.11x faster | 3.9% smaller |
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 4.640 | 1.371 | 0.759 | 689.362 |
+| [Restic](https://github.com/restic/restic) | PASS | 8.500 | 5.036 | 3.783 | 714.621 |
+| **Gutch relative** | - | 1.83x faster | 3.67x faster | 4.98x faster | 3.5% smaller |
 
 **Resources by operation (MiB)**
 
 | Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | 140.7 | 382.1 | 131.2 | 689.4 | 131.2 | 2,572.9 | 116.0 | 2,572.9 |
-| [Restic](https://github.com/restic/restic) | 196.9 | 398.1 | 193.0 | 716.9 | 110.7 | 2,600.4 | 63.0 | 2,600.4 |
+| [Gutch](https://github.com/icauro/Gutch) | 132.1 | 382.1 | 124.7 | 689.4 | 123.1 | 2,572.9 | 134.0 | 2,572.9 |
+| [Restic](https://github.com/restic/restic) | 234.9 | 398.3 | 196.9 | 718.5 | 111.2 | 2,602.0 | 66.2 | 2,602.0 |
 
 RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
@@ -76,31 +76,31 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | [Gutch](https://github.com/icauro/Gutch) | [Restic](https://github.com/restic/restic) |
 |---|---:|---:|
-| First capture s | 2.289 (2.289–2.289; n=1) | 4.540 (4.540–4.540; n=1) |
-| Later-version capture s | 2.236 (2.236–2.236; n=1) | 4.399 (4.399–4.399; n=1) |
-| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 335731784.000 (335731784.000–335731784.000; n=1) |
-| Restore + independent validation s | 5.604 (5.604–5.604; n=1) | 9.474 (9.474–9.474; n=1) |
-| Content repair + validation s | 4.671 (4.671–4.671; n=1) | 7.903 (7.903–7.903; n=1) |
-| Preserved-mtime repair + validation s | 4.626 (4.626–4.626; n=1) | 7.804 (7.804–7.804; n=1) |
-| Extra-file cleanup + validation s | 4.144 (4.144–4.144; n=1) | 7.628 (7.628–7.628; n=1) |
-| Full restore recovery + validation s | 5.611 (5.611–5.611; n=1) | 9.526 (9.526–9.526; n=1) |
+| First capture s | 2.346 (2.193–2.597; n=6) | 4.247 (4.164–5.119; n=6) |
+| Later-version capture s | 2.200 (2.047–2.520; n=6) | 4.173 (3.957–4.362; n=6) |
+| Later-version stored growth bytes | 322167321.000 (322167321.000–322167321.000; n=6) | 332748894.500 (331165047.000–333271878.000; n=6) |
+| Restore + independent validation s | 4.148 (4.121–4.297; n=6) | 7.794 (7.721–7.829; n=6) |
+| Content repair + validation s | 3.479 (3.451–3.517; n=6) | 6.534 (6.502–6.687; n=6) |
+| Preserved-mtime repair + validation s | 3.483 (3.461–3.510; n=6) | 6.691 (6.568–6.769; n=6) |
+| Extra-file cleanup + validation s | 3.151 (3.132–3.173; n=6) | 6.367 (6.317–6.415; n=6) |
+| Full restore recovery + validation s | 4.158 (4.144–4.253; n=6) | 7.830 (7.728–7.878; n=6) |
 
-[Source: Gutch vs kopia](_docs/reports/2026-10-31/41218304728-1/kopia.json)
+[Source: Gutch vs kopia](_docs/reports/2026-11-17/44102400068-1/kopia.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Kopia](https://github.com/kopia/kopia) (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | PASS | 10.462 | 0.963 | 0.628 | 1758.175 |
-| [Kopia](https://github.com/kopia/kopia) | PASS | 9.861 | 17.341 | 10.450 | 1754.498 |
-| **Gutch relative** | - | 1.06x slower | 18.02x faster | 16.64x faster | 0.2% larger |
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 8.445 | 0.770 | 0.466 | 1758.176 |
+| [Kopia](https://github.com/kopia/kopia) | PASS | 6.845 | 13.866 | 9.375 | 1754.518 |
+| **Gutch relative** | - | 1.23x slower | 18.02x faster | 20.12x faster | 0.2% larger |
 
 **Resources by operation (MiB)**
 
 | Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | 208.7 | 912.0 | 225.1 | 1,758.2 | 108.6 | 3,641.7 | 109.0 | 3,641.7 |
-| [Kopia](https://github.com/kopia/kopia) | 241.7 | 912.9 | 219.2 | 1,755.9 | 240.5 | 5,392.1 | 227.6 | 5,392.1 |
+| [Gutch](https://github.com/icauro/Gutch) | 196.2 | 912.0 | 205.1 | 1,758.2 | 86.9 | 3,641.7 | 110.7 | 3,641.7 |
+| [Kopia](https://github.com/kopia/kopia) | 214.5 | 912.9 | 170.3 | 1,755.9 | 262.7 | 5,392.1 | 268.3 | 5,392.1 |
 
 RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
@@ -108,31 +108,31 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | [Gutch](https://github.com/icauro/Gutch) | [Kopia](https://github.com/kopia/kopia) |
 |---|---:|---:|
-| First capture s | 5.301 (5.301–5.301; n=1) | 5.106 (5.106–5.106; n=1) |
-| Later-version capture s | 5.161 (5.161–5.161; n=1) | 4.755 (4.755–4.755; n=1) |
-| Later-version stored growth bytes | 887308595.000 (887308595.000–887308595.000; n=1) | 883223714.000 (883223714.000–883223714.000; n=1) |
-| Restore + independent validation s | 3.623 (3.623–3.623; n=1) | 20.006 (20.006–20.006; n=1) |
-| Content repair + validation s | 3.253 (3.253–3.253; n=1) | 13.135 (13.135–13.135; n=1) |
-| Preserved-mtime repair + validation s | 3.216 (3.216–3.216; n=1) | 13.013 (13.013–13.013; n=1) |
-| Extra-file cleanup + validation s | 3.041 (3.041–3.041; n=1) | 14.291 (14.291–14.291; n=1) |
-| Full restore recovery + validation s | 3.625 (3.625–3.625; n=1) | 5.074 (5.074–5.074; n=1) |
+| First capture s | 3.738 (2.985–4.146; n=6) | 2.907 (2.784–3.433; n=6) |
+| Later-version capture s | 4.734 (3.954–5.002; n=6) | 3.955 (3.926–3.959; n=6) |
+| Later-version stored growth bytes | 887308673.000 (887308673.000–887308673.000; n=6) | 883233865.000 (883223438.000–883239604.000; n=6) |
+| Restore + independent validation s | 3.262 (3.253–3.268; n=6) | 16.382 (14.843–18.681; n=6) |
+| Content repair + validation s | 2.943 (2.911–2.976; n=6) | 11.865 (10.622–13.163; n=6) |
+| Preserved-mtime repair + validation s | 2.928 (2.898–2.948; n=6) | 10.630 (10.558–10.639; n=6) |
+| Extra-file cleanup + validation s | 2.800 (2.768–2.829; n=6) | 10.604 (9.953–10.691; n=6) |
+| Full restore recovery + validation s | 3.272 (3.217–3.291; n=6) | 4.705 (4.626–4.739; n=6) |
 
-[Source: Gutch vs borg](_docs/reports/2026-10-31/41218304728-1/borg.json)
+[Source: Gutch vs borg](_docs/reports/2026-11-17/44102400068-1/borg.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | PASS | 7.093 | 1.745 | 0.880 | 913.570 |
-| [Borg](https://github.com/borgbackup/borg) | PASS | 11.321 | 9.861 | 3.602 | 916.128 |
-| **Gutch relative** | - | 1.60x faster | 5.65x faster | 4.09x faster | 0.3% smaller |
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 4.545 | 1.164 | 0.545 | 913.570 |
+| [Borg](https://github.com/borgbackup/borg) | PASS | 9.681 | 5.974 | 2.564 | 915.832 |
+| **Gutch relative** | - | 2.13x faster | 5.13x faster | 4.70x faster | 0.2% smaller |
 
 **Resources by operation (MiB)**
 
 | Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | 117.5 | 496.0 | 97.2 | 913.6 | 66.8 | 2,797.1 | 134.3 | 2,797.1 |
-| [Borg](https://github.com/borgbackup/borg) | 253.1 | 533.2 | 242.5 | 952.5 | 343.6 | 2,800.5 | 290.4 | 2,836.1 |
+| [Gutch](https://github.com/icauro/Gutch) | 108.4 | 496.0 | 121.4 | 913.6 | 68.3 | 2,797.1 | 133.7 | 2,797.1 |
+| [Borg](https://github.com/borgbackup/borg) | 239.4 | 533.5 | 237.2 | 954.1 | 348.9 | 2,802.1 | 284.0 | 2,837.6 |
 
 RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
@@ -140,33 +140,33 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | [Gutch](https://github.com/icauro/Gutch) | [Borg](https://github.com/borgbackup/borg) |
 |---|---:|---:|
-| First capture s | 3.528 (3.528–3.528; n=1) | 5.715 (5.715–5.715; n=1) |
-| Later-version capture s | 3.565 (3.565–3.565; n=1) | 5.606 (5.606–5.606; n=1) |
-| Later-version stored growth bytes | 437891774.000 (437891774.000–437891774.000; n=1) | 439122352.000 (439122352.000–439122352.000; n=1) |
-| Restore + independent validation s | 5.432 (5.432–5.432; n=1) | 13.468 (13.468–13.468; n=1) |
-| Content repair + validation s | 4.481 (4.481–4.481; n=1) | 7.186 (7.186–7.186; n=1) |
-| Preserved-mtime repair + validation s | 4.416 (4.416–4.416; n=1) | - |
-| Extra-file cleanup + validation s | 4.084 (4.084–4.084; n=1) | - |
-| Full restore recovery + validation s | 5.418 (5.418–5.418; n=1) | 13.415 (13.415–13.415; n=1) |
+| First capture s | 2.330 (1.392–2.337; n=6) | 4.840 (4.319–5.575; n=6) |
+| Later-version capture s | 2.215 (1.979–2.262; n=6) | 4.842 (4.267–5.484; n=6) |
+| Later-version stored growth bytes | 437891852.000 (437891852.000–437891852.000; n=6) | 438877551.500 (437630391.000–439549059.000; n=6) |
+| Restore + independent validation s | 3.652 (3.635–3.693; n=6) | 8.437 (8.352–8.639; n=6) |
+| Content repair + validation s | 2.996 (2.968–3.024; n=6) | 5.028 (4.974–5.151; n=6) |
+| Preserved-mtime repair + validation s | 2.997 (2.974–3.025; n=6) | - |
+| Extra-file cleanup + validation s | 2.810 (2.787–2.817; n=6) | - |
+| Full restore recovery + validation s | 3.680 (3.627–3.748; n=6) | 8.402 (8.331–8.666; n=6) |
 
 borg: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter; hidden_repair: UNSUPPORTED: native resume trusts size and mtime
 
-[Source: Gutch vs rustic](_docs/reports/2026-10-31/41218304728-1/rustic.json)
+[Source: Gutch vs rustic](_docs/reports/2026-11-17/44102400068-1/rustic.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Rustic](https://github.com/rustic-rs/rustic) (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | PASS | 4.487 | 1.906 | 1.020 | 689.361 |
-| [Rustic](https://github.com/rustic-rs/rustic) | PASS | 14.735 | 5.621 | 4.208 | 701.205 |
-| **Gutch relative** | - | 3.28x faster | 2.95x faster | 4.13x faster | 1.7% smaller |
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 4.367 | 1.139 | 0.607 | 689.362 |
+| [Rustic](https://github.com/rustic-rs/rustic) | PASS | 10.147 | 4.105 | 3.371 | 699.070 |
+| **Gutch relative** | - | 2.32x faster | 3.60x faster | 5.55x faster | 1.4% smaller |
 
 **Resources by operation (MiB)**
 
 | Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | 142.0 | 382.1 | 135.5 | 689.4 | 121.3 | 2,572.9 | 186.2 | 2,572.9 |
-| [Rustic](https://github.com/rustic-rs/rustic) | 136.6 | 389.3 | 136.6 | 700.1 | 337.9 | 2,583.7 | 136.6 | 2,583.7 |
+| [Gutch](https://github.com/icauro/Gutch) | 130.6 | 382.1 | 131.6 | 689.4 | 122.3 | 2,572.9 | 162.2 | 2,572.9 |
+| [Rustic](https://github.com/rustic-rs/rustic) | 136.6 | 388.9 | 136.6 | 700.9 | 318.7 | 2,584.4 | 136.6 | 2,584.4 |
 
 RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
@@ -174,31 +174,31 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | [Gutch](https://github.com/icauro/Gutch) | [Rustic](https://github.com/rustic-rs/rustic) |
 |---|---:|---:|
-| First capture s | 2.275 (2.275–2.275; n=1) | 7.819 (7.819–7.819; n=1) |
-| Later-version capture s | 2.213 (2.213–2.213; n=1) | 6.916 (6.916–6.916; n=1) |
-| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 327885067.000 (327885067.000–327885067.000; n=1) |
-| Restore + independent validation s | 5.576 (5.576–5.576; n=1) | 9.286 (9.286–9.286; n=1) |
-| Content repair + validation s | 4.640 (4.640–4.640; n=1) | 7.872 (7.872–7.872; n=1) |
-| Preserved-mtime repair + validation s | 4.598 (4.598–4.598; n=1) | 7.862 (7.862–7.862; n=1) |
-| Extra-file cleanup + validation s | 4.120 (4.120–4.120; n=1) | 7.807 (7.807–7.807; n=1) |
-| Full restore recovery + validation s | 5.582 (5.582–5.582; n=1) | 9.351 (9.351–9.351; n=1) |
+| First capture s | 2.293 (2.065–2.391; n=6) | 5.440 (5.270–5.609; n=6) |
+| Later-version capture s | 2.079 (2.052–2.183; n=6) | 4.689 (4.572–4.835; n=6) |
+| Later-version stored growth bytes | 322167321.000 (322167321.000–322167321.000; n=6) | 326499429.000 (324300577.000–327692740.000; n=6) |
+| Restore + independent validation s | 3.298 (3.223–3.330; n=6) | 6.289 (6.124–6.622; n=6) |
+| Content repair + validation s | 2.737 (2.670–2.795; n=6) | 5.521 (5.384–5.626; n=6) |
+| Preserved-mtime repair + validation s | 2.726 (2.689–2.785; n=6) | 5.523 (5.409–5.585; n=6) |
+| Extra-file cleanup + validation s | 2.431 (2.399–2.514; n=6) | 5.406 (5.321–5.532; n=6) |
+| Full restore recovery + validation s | 3.331 (3.306–3.371; n=6) | 6.312 (6.283–6.407; n=6) |
 
-[Source: Gutch vs plakar](_docs/reports/2026-10-31/41218304728-1/plakar.json)
+[Source: Gutch vs plakar](_docs/reports/2026-11-17/44102400068-1/plakar.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [Plakar](https://github.com/PlakarKorp/plakar) (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | PASS | 6.921 | 1.398 | 0.735 | 913.907 |
-| [Plakar](https://github.com/PlakarKorp/plakar) | PASS | 11.476 | 5.327 | 14.778 | 916.557 |
-| **Gutch relative** | - | 1.66x faster | 3.81x faster | 20.12x faster | 0.3% smaller |
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 3.762 | 1.164 | 0.571 | 913.908 |
+| [Plakar](https://github.com/PlakarKorp/plakar) | PASS | 9.256 | 3.921 | 15.634 | 915.683 |
+| **Gutch relative** | - | 2.46x faster | 3.37x faster | 27.38x faster | 0.2% smaller |
 
 **Resources by operation (MiB)**
 
 | Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | 67.3 | 496.0 | 70.9 | 913.9 | 48.3 | 2,797.4 | 148.6 | 2,797.4 |
-| [Plakar](https://github.com/PlakarKorp/plakar) | 336.7 | 678.0 | 330.1 | 1,076.2 | 417.3 | 2,818.9 | 422.2 | 2,952.2 |
+| [Gutch](https://github.com/icauro/Gutch) | 67.6 | 496.0 | 87.2 | 913.9 | 49.4 | 2,797.4 | 117.9 | 2,797.4 |
+| [Plakar](https://github.com/PlakarKorp/plakar) | 344.0 | 520.4 | 333.4 | 982.2 | 416.0 | 2,819.8 | 434.4 | 2,921.5 |
 
 RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
@@ -206,33 +206,33 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | [Gutch](https://github.com/icauro/Gutch) | [Plakar](https://github.com/PlakarKorp/plakar) |
 |---|---:|---:|
-| First capture s | 3.599 (3.599–3.599; n=1) | 6.332 (6.332–6.332; n=1) |
-| Later-version capture s | 3.323 (3.323–3.323; n=1) | 5.144 (5.144–5.144; n=1) |
-| Later-version stored growth bytes | 438186069.000 (438186069.000–438186069.000; n=1) | 438225230.000 (438225230.000–438225230.000; n=1) |
-| Restore + independent validation s | 4.091 (4.091–4.091; n=1) | 8.034 (8.034–8.034; n=1) |
-| Content repair + validation s | 3.378 (3.378–3.378; n=1) | 17.492 (17.492–17.492; n=1) |
-| Preserved-mtime repair + validation s | 3.396 (3.396–3.396; n=1) | 13.848 (13.848–13.848; n=1) |
-| Extra-file cleanup + validation s | 3.148 (3.148–3.148; n=1) | - |
-| Full restore recovery + validation s | 4.070 (4.070–4.070; n=1) | 6.799 (6.799–6.799; n=1) |
+| First capture s | 1.782 (1.143–2.376; n=6) | 5.665 (5.507–5.834; n=6) |
+| Later-version capture s | 1.981 (1.914–1.983; n=6) | 3.583 (3.569–3.617; n=6) |
+| Later-version stored growth bytes | 438186147.000 (438186147.000–438186147.000; n=6) | 438109563.500 (436344036.000–438614916.000; n=6) |
+| Restore + independent validation s | 3.656 (3.627–3.675; n=6) | 6.427 (6.356–6.453; n=6) |
+| Content repair + validation s | 3.031 (3.013–3.072; n=6) | 18.110 (13.634–18.464; n=6) |
+| Preserved-mtime repair + validation s | 3.049 (3.029–3.059; n=6) | 10.553 (10.519–10.566; n=6) |
+| Extra-file cleanup + validation s | 2.820 (2.765–2.825; n=6) | - |
+| Full restore recovery + validation s | 3.647 (3.616–3.684; n=6) | 6.067 (5.992–6.141; n=6) |
 
 plakar: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
-[Source: Gutch vs bpt](_docs/reports/2026-10-31/41218304728-1/bpt.json)
+[Source: Gutch vs bpt](_docs/reports/2026-11-17/44102400068-1/bpt.json)
 
 ### [Gutch](https://github.com/icauro/Gutch) vs [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) (PASS)
 
 | Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
 |---|---|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | PASS | 4.487 | 1.914 | 1.008 | 689.361 |
-| [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | PASS | 36.714 | 28.158 | 2.278 | 732.343 |
-| **Gutch relative** | - | 8.18x faster | 14.71x faster | 2.26x faster | 5.9% smaller |
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 3.705 | 1.377 | 0.660 | 689.362 |
+| [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | PASS | 29.807 | 16.026 | 1.859 | 732.343 |
+| **Gutch relative** | - | 8.05x faster | 11.63x faster | 2.82x faster | 5.9% smaller |
 
 **Resources by operation (MiB)**
 
 | Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| [Gutch](https://github.com/icauro/Gutch) | 142.4 | 382.1 | 133.1 | 689.4 | 126.7 | 2,572.9 | 112.4 | 2,572.9 |
-| [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | 386.4 | 403.7 | 520.0 | 732.3 | 232.8 | 2,615.8 | 129.8 | 2,719.3 |
+| [Gutch](https://github.com/icauro/Gutch) | 137.6 | 382.1 | 134.8 | 689.4 | 125.1 | 2,572.9 | 149.0 | 2,572.9 |
+| [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | 387.1 | 403.7 | 515.0 | 732.3 | 228.2 | 2,615.8 | 130.5 | 2,615.8 |
 
 RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
 
@@ -240,14 +240,14 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 
 | Measurement | [Gutch](https://github.com/icauro/Gutch) | [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) |
 |---|---:|---:|
-| First capture s | 2.256 (2.256–2.256; n=1) | 13.658 (13.658–13.658; n=1) |
-| Later-version capture s | 2.231 (2.231–2.231; n=1) | 23.057 (23.057–23.057; n=1) |
-| Later-version stored growth bytes | 322167243.000 (322167243.000–322167243.000; n=1) | 344645885.000 (344645885.000–344645885.000; n=1) |
-| Restore + independent validation s | 5.621 (5.621–5.621; n=1) | 31.839 (31.839–31.839; n=1) |
-| Content repair + validation s | 4.646 (4.646–4.646; n=1) | 5.886 (5.886–5.886; n=1) |
-| Preserved-mtime repair + validation s | 4.605 (4.605–4.605; n=1) | 5.838 (5.838–5.838; n=1) |
-| Extra-file cleanup + validation s | 4.146 (4.146–4.146; n=1) | - |
-| Full restore recovery + validation s | 5.647 (5.647–5.647; n=1) | 32.226 (32.226–32.226; n=1) |
+| First capture s | 1.879 (1.788–1.917; n=6) | 10.912 (10.800–10.996; n=6) |
+| Later-version capture s | 1.812 (1.720–1.948; n=6) | 18.898 (18.776–19.043; n=6) |
+| Later-version stored growth bytes | 322167321.000 (322167321.000–322167321.000; n=6) | 344645859.500 (344645843.000–344645879.000; n=6) |
+| Restore + independent validation s | 3.878 (3.771–3.932; n=6) | 18.468 (18.287–18.800; n=6) |
+| Content repair + validation s | 3.137 (3.082–3.154; n=6) | 4.324 (4.261–4.354; n=6) |
+| Preserved-mtime repair + validation s | 3.147 (3.090–3.198; n=6) | 4.243 (4.217–4.358; n=6) |
+| Extra-file cleanup + validation s | 2.835 (2.762–2.866; n=6) | - |
+| Full restore recovery + validation s | 3.914 (3.785–3.986; n=6) | 18.246 (18.103–18.397; n=6) |
 
 buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 
