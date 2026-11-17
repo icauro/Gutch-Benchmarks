@@ -8,7 +8,10 @@ import unittest
 import xml.etree.ElementTree as ET
 
 from comparison_benchmark_suite.tools.report import markdown_tool_name, pair_peer
-from comparison_benchmark_suite.tools.chart import BLUE, ORANGE, latest_records, render_svg, render_resources_svg
+from comparison_benchmark_suite.tools.chart import (BLUE, ORANGE, SINGLE_WORKER_NOTE, latest_records, render_svg,
+                                                    render_resources_svg)
+from comparison_benchmark_suite.tools.config import load_fixture
+from comparison_benchmark_suite import FIXTURES
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +38,18 @@ class ChartTests(unittest.TestCase):
             root = ET.fromstring(chart)
             labels = [node.text for node in root.iter("{http://www.w3.org/2000/svg}text")]
             self.assertEqual([label for label in labels if label in expected], expected)
+
+    def test_single_worker_borg_pair_is_marked_with_an_asterisk_and_footnote(self):
+        fixture = load_fixture(FIXTURES / "gutch_vs_borg.yaml")
+        self.assertEqual(fixture.lanes[0].profile.jobs, 1)
+        labels = [node.text for node in ET.fromstring(render_svg([pair_record("borg"), pair_record("kopia")]))
+                  .iter("{http://www.w3.org/2000/svg}text")]
+        self.assertEqual(labels.count("Gutch* vs"), 1)
+        self.assertEqual(labels.count("Gutch vs"), 1)
+        self.assertIn(SINGLE_WORKER_NOTE, labels)
+        kopia_only = [node.text for node in ET.fromstring(render_svg([pair_record("kopia")]))
+                      .iter("{http://www.w3.org/2000/svg}text")]
+        self.assertNotIn(SINGLE_WORKER_NOTE, kopia_only)
 
     def test_bar_lengths_are_linear_and_rendering_is_deterministic(self):
         chart = render_svg([pair_record()])

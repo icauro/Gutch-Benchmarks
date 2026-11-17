@@ -20,11 +20,14 @@ with SHA-256. Numbers match the chart; cells read **Gutch / other tool**.
 |---|---|---|---|---|---|---|
 | 1 | [Restic](https://github.com/restic/restic) | FastCDC 1 MiB / Rabin ~1 MiB | Zstd 3 / Zstd auto | AES-256 / AES-256 | 4 / 4 | — |
 | 2 | [Kopia](https://github.com/kopia/kopia) | FastCDC 4 MiB / Buzhash 4 MiB | None / none | AES-256 / AES-256 | 4 / 4 | — |
-| 3 | [Borg](https://github.com/borgbackup/borg) | FastCDC 2 MiB / FastCDC 2 MiB | LZ4 / LZ4 | None / authenticated only | 4 / 1 | Extra-file cleanup, unchanged-timestamp repair |
+| 3 | [Borg](https://github.com/borgbackup/borg) | FastCDC 2 MiB / FastCDC 2 MiB | LZ4 / LZ4 | None / authenticated only | 1\* / 1 | Extra-file cleanup, unchanged-timestamp repair |
 | 4 | [Rustic](https://github.com/rustic-rs/rustic) | FastCDC / Rabin, both 256 KiB–1 MiB–4 MiB | Zstd 3 / Zstd 3 | AES-256 / AES-256 | 4 / 4 | — |
 | 5 | [Plakar](https://github.com/PlakarKorp/plakar) | FastCDC 1 MiB / FastCDC ~1 MiB | LZ4 / LZ4 | None / none | 4 / 4 | Extra-file cleanup |
 | 6 | [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | FastCDC 1 MiB / fixed 1 MiB window | Zstd 3 / built-in | None / none | 4 / native | Extra-file cleanup |
 | 7 | [Encrypted Gutch](https://github.com/icauro/Gutch) | Identical | Identical | None / AES-256 | 4 / 4 | — |
+
+\* Gutch runs one worker in the Borg pair (marked **Gutch\*** in the charts) to match
+single-threaded Borg; every other pair gives Gutch four.
 
 **What the table cannot show**
 
@@ -33,7 +36,7 @@ with SHA-256. Numbers match the chart; cells read **Gutch / other tool**.
 2. **Kopia:** Gutch uses 16 MiB bundles here (8 MiB elsewhere) to suit 4 MiB chunks.
 3. **Borg:** Borg 2 (a prerelease) is needed for FastCDC. Its resume trusts file size
    and modification time, so it cannot find damage that keeps both; that check is
-   skipped. Borg is single-threaded by design.
+   skipped. Borg is single-threaded by design, so Gutch also runs one worker here.
 4. **Rustic:** Both use 8 MiB packs, but Gutch compresses whole bundles while Rustic
    compresses each chunk, so compression work still differs.
 5. **Plakar:** Restores write over existing files, while Gutch repairs only damaged
@@ -48,7 +51,8 @@ with SHA-256. Numbers match the chart; cells read **Gutch / other tool**.
 Even with matched targets, different chunking methods split files at different
 places, so deduplication and stored size differ. Reports before 2026-11-17 left
 Gutch unencrypted in the Restic, Kopia and Rustic pairs, ran Restic restores with
-`--verify`, and gave Rustic 512 KiB / 8 MiB chunk bounds. Pinned tool versions are in
+`--verify`, gave Rustic 512 KiB / 8 MiB chunk bounds, and ran Gutch with four workers
+against Borg. Pinned tool versions are in
 [the tool manifest](src/comparison_benchmark_suite/resources/tools.json).
 
 **How to read the numbers**

@@ -18,6 +18,9 @@ RESOURCE_OPERATIONS = (("initial_capture", "First capture"), ("incremental_captu
 # Restic 36,901; Kopia 14,541; Borg 13,897; Rustic 3,356; Plakar 2,103.
 # BuildPatchTool has no comparable public repository and stays last.
 PAIR_NOTES = {"restic": 1, "kopia": 2, "borg": 3, "rustic": 4, "plakar": 5, "bpt": 6, "encrypted": 7}
+# Pairs where Gutch runs one worker to match a single-threaded peer; marked with an asterisk.
+SINGLE_WORKER_PAIRS = frozenset({"borg"})
+SINGLE_WORKER_NOTE = "* Gutch runs one worker to match single-threaded Borg."
 BLUE, ORANGE = "#2474f5", "#f78b32"
 
 
@@ -57,7 +60,8 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
     width = 2 * margin + pair_width + len(metrics) * cell_width
     table_top, header_height, row_height = 52, 46, 90
     table_bottom = table_top + header_height + row_height * len(records)
-    height = table_bottom + 10
+    single_worker = any(record["pair"] in SINGLE_WORKER_PAIRS for record in records)
+    height = table_bottom + (34 if single_worker else 10)
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title description">',
              f'<title id="title">{escape(title)}</title>',
              '<desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>',
@@ -92,7 +96,8 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
         line(margin, y, width - margin, y)
         other = pair_peer(record["pair"])
         title = display_name(other)
-        text(margin + 6, y + 23, "Gutch vs", size=14, color="#a3afc2")
+        gutch = "Gutch*" if record["pair"] in SINGLE_WORKER_PAIRS else "Gutch"
+        text(margin + 6, y + 23, f"{gutch} vs", size=14, color="#a3afc2")
         reference = PAIR_NOTES.get(record["pair"])
         label = f"{title} [{reference}]" if reference is not None else title
         text(margin + 6, y + 47, label, size=14 if len(title) > 10 else 17, weight=650)
@@ -122,6 +127,8 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
         x = margin + pair_width + column * cell_width
         line(x, table_top, x, table_bottom)
     line(margin, table_bottom, width - margin, table_bottom)
+    if single_worker:
+        text(margin + 6, table_bottom + 22, SINGLE_WORKER_NOTE, size=13, color="#a3afc2")
     parts.extend(["</g>", "</svg>"])
     return "\n".join(parts) + "\n"
 

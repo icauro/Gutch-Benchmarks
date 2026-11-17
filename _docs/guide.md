@@ -150,11 +150,11 @@ Nested dataset references are not supported.
 | Kopia 0.23.1 | Buzhash 4 MiB target; file compression off | `chunk_4MiB`, compression `none`, `bundle_16MiB` |
 | Restic 0.19.1 | Rabin approximately 1 MiB; Zstd `auto` | `chunk_1MiB`, Zstd 3 |
 | Rustic 0.11.4 | Rabin approximately 1 MiB; Zstd 3; 8 MiB data/tree packs | `chunk_1MiB`, Zstd 3 |
-| Borg 2.0.0b25 | FastCDC approximately 2 MiB, normalization 2; LZ4 | `chunk_2MiB`, LZ4 0 |
+| Borg 2.0.0b25 | FastCDC approximately 2 MiB, normalization 2; LZ4 | `chunk_2MiB`, LZ4 0, one worker |
 | Plakar 1.1.8 | FastCDC approximately 1 MiB; default LZ4 stream writer | `chunk_1MiB`, LZ4 0 |
 | BPT 1.8.8 | 1 MiB window; internal compression | `chunk_1MiB`, Zstd 3 (codec unmatched) |
 
-Gutch uses four workers and its native FastCDC algorithm. Bundles use the
+Gutch uses four workers (one against Borg) and its native FastCDC algorithm. Bundles use the
 8 MiB profile except the Kopia pair, which requires the 16 MiB profile because
 its 4 MiB chunk profile allows chunks up to 16 MiB.
 Chunk bounds, normalization, codec implementations, metadata compression and
@@ -215,7 +215,8 @@ The existing saved public results use the earlier contract and are not rewritten
 - Full restore recovery removes the owned destination before native restoration. Strict validation follows every supported operation. Wrong bytes or unexpected files fail the case.
 - Detailed tables show medians, minimum, maximum and sample counts. These ranges are descriptive, not confidence intervals.
 
-Gutch uses four workers. Go tools use `GOMAXPROCS=4`; Rustic uses
+Gutch uses four workers, except one in the Borg pair to match single-threaded Borg
+(charts mark that row **Gutch\***). Go tools use `GOMAXPROCS=4`; Rustic uses
 `RAYON_NUM_THREADS=4`; Kopia file/restore parallelism and Plakar concurrency are
 explicitly four. Borg/BPT keep native scheduling; these controls are not identical
 CPU or memory limits. Encryption is matched per pair as described above.
