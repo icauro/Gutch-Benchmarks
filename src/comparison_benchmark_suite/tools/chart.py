@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 
 from .. import FIXTURES
-from .report import relative_metric
+from .report import display_name, pair_peer, relative_metric
 
 
 METRICS = (("backup", "Capture", "seconds"), ("restore", "Restore", "seconds"),
@@ -17,7 +17,7 @@ RESOURCE_OPERATIONS = (("initial_capture", "First capture"), ("incremental_captu
 # Order and note numbers follow GitHub stars checked on 2026-10-31:
 # Restic 36,901; Kopia 14,541; Borg 13,897; Rustic 3,356; Plakar 2,103.
 # BuildPatchTool has no comparable public repository and stays last.
-PAIR_NOTES = {"restic": 1, "kopia": 2, "borg": 3, "rustic": 4, "plakar": 5, "bpt": 6}
+PAIR_NOTES = {"restic": 1, "kopia": 2, "borg": 3, "rustic": 4, "plakar": 5, "bpt": 6, "encrypted": 7}
 BLUE, ORANGE = "#2474f5", "#f78b32"
 
 
@@ -90,12 +90,12 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
         y = table_top + header_height + index * row_height
         rect(margin, y, width - 2 * margin, row_height, "#000000" if index % 2 == 0 else "#0d1117")
         line(margin, y, width - margin, y)
-        other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
-        title = "BuildPatchTool" if record["pair"] == "bpt" else record["pair"].title()
+        other = pair_peer(record["pair"])
+        title = display_name(other)
         text(margin + 6, y + 23, "Gutch vs", size=14, color="#a3afc2")
         reference = PAIR_NOTES.get(record["pair"])
         label = f"{title} [{reference}]" if reference is not None else title
-        text(margin + 6, y + 47, label, size=14 if record["pair"] == "bpt" else 17, weight=650)
+        text(margin + 6, y + 47, label, size=14 if len(title) > 10 else 17, weight=650)
         status = record["status"]
         if status != "PASS":
             text(margin + 6, y + 77, status, size=13, color="#ffba78", weight=650)

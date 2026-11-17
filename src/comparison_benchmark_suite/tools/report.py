@@ -17,7 +17,18 @@ TOOL_SOURCES = {
     "rustic": ("Rustic", "https://github.com/rustic-rs/rustic"),
     "plakar": ("Plakar", "https://github.com/PlakarKorp/plakar"),
     "buildpatchtool": ("BuildPatchTool", "https://github.com/EpicGames/UnrealEngine"),
+    "gutch_encrypted": ("Encrypted Gutch", "https://github.com/icauro/Gutch"),
 }
+# Each pair compares the "gutch" case with one peer case, usually named after the pair.
+PAIR_PEERS = {"bpt": "buildpatchtool", "encrypted": "gutch_encrypted"}
+
+
+def pair_peer(pair):
+    return PAIR_PEERS.get(pair, pair)
+
+
+def display_name(label):
+    return TOOL_SOURCES[label][0] if label in TOOL_SOURCES else label.title()
 
 
 def markdown_tool_name(label):
@@ -27,7 +38,7 @@ def markdown_tool_name(label):
 
 def relative_metric(record: dict, metric: str, *, size_metric: bool = False) -> str:
     """Compare valid, equally sampled raw medians for a successful pair."""
-    other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
+    other = pair_peer(record["pair"])
     statuses = {row[0]: row[1] for row in record.get("rows", [])}
     if record["status"] != "PASS" or any(statuses.get(label) != "PASS" for label in ("gutch", other)):
         return "-"
@@ -89,7 +100,7 @@ def operation_resource_table(record):
     resources = record.get("operation_resources", {})
     if not resources:
         return []
-    other = "buildpatchtool" if record["pair"] == "bpt" else record["pair"]
+    other = pair_peer(record["pair"])
     lines = ["**Resources by operation (MiB)**", "",
              "| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |",
              "|---|" + "---:|" * 8]

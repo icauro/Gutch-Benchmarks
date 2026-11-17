@@ -1,5 +1,6 @@
 """Rustic command contracts and pairwise presets, without executing any tool."""
 
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 import tempfile
@@ -16,6 +17,7 @@ from comparison_benchmark_suite.support.models import GutchProfile
 from comparison_benchmark_suite.tools.config import load_fixture
 from comparison_benchmark_suite.tools.external import ExternalTools, run_external
 from comparison_benchmark_suite.tools.models import LaneSpec
+from comparison_benchmark_suite.tools.report import pair_peer
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,7 +98,7 @@ class RusticTests(unittest.TestCase):
 
     def test_shipped_catalog_has_only_gutch_versus_one_tool(self):
         fixtures = ROOT / "src/comparison_benchmark_suite/fixtures"
-        expected = {"borg", "bpt", "kopia", "plakar", "restic", "rustic"}
+        expected = {"borg", "bpt", "kopia", "plakar", "restic", "rustic", "encrypted"}
         self.assertEqual({p.stem.removeprefix("gutch_vs_") for p in fixtures.glob("*.yaml")}, expected)
         shared = yaml.safe_load((fixtures / "blender/dataset.yaml").read_text(encoding="utf-8"))
         self.assertNotIn("lanes", shared)
@@ -105,11 +107,16 @@ class RusticTests(unittest.TestCase):
             path = fixtures / f"gutch_vs_{other}.yaml"
             fixture = load_fixture(path)
             self.assertEqual([lane.tool for lane in fixture.lanes],
-                             ["gutch", "buildpatchtool" if other == "bpt" else other])
+                             ["gutch", "gutch" if other == "encrypted" else pair_peer(other)])
             document = yaml.safe_load(path.read_text(encoding="utf-8"))
             self.assertEqual(document["dataset"], "blender/dataset.yaml")
             # Gutch encrypts exactly where the other tool cannot run unencrypted.
             self.assertEqual(fixture.lanes[0].profile.encrypted, other in {"kopia", "restic", "rustic"})
+            if other == "encrypted":
+                # Identical settings except encryption, so the ratio isolates its cost.
+                plain, sealed = (lane.profile for lane in fixture.lanes)
+                self.assertTrue(sealed.encrypted)
+                self.assertEqual(replace(sealed, name=plain.name, encrypted=False), plain)
         rustic = load_fixture(fixtures / "gutch_vs_rustic.yaml")
         self.assertIn("--set-compression", rustic.lanes[1].arguments)
         self.assertIn("--set-datapack-size", rustic.lanes[1].arguments)

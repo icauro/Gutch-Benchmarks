@@ -299,7 +299,7 @@ class CiTests(unittest.TestCase):
         self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Borg](https://github.com/borgbackup/borg) (ERROR)", updated)
         self.assertEqual((self.root / "_docs/reports/comparison.svg").read_bytes(),
                          next((self.root / "_docs/reports").glob("*/124-1/comparison.svg")).read_bytes())
-        self.assertEqual(len(list((self.root / "_docs/reports").rglob("*.json"))), 7)
+        self.assertEqual(len(list((self.root / "_docs/reports").rglob("*.json"))), len(ci.PAIRS) + 1)
         self.assertFalse(list((self.root / "_docs/reports").rglob("command.log")))
         with self.assertRaises(ValueError):
             ci.publish("all", self.root / "incoming", "../escape", "1", self.root)

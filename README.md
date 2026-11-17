@@ -21,6 +21,7 @@ files, and we check restored content with SHA-256.
 4. **[Rustic](https://github.com/rustic-rs/rustic):** Both select Zstd level 3, but Rustic uses Rabin chunking and Gutch uses FastCDC. Gutch compresses whole bundles, so matching the level and pack size still does not make the compression work identical.
 5. **[Plakar](https://github.com/PlakarKorp/plakar):** Both use FastCDC and LZ4, but compress and pack data differently. Plakar restores over existing files, while Gutch selectively repairs damaged content; their recovery commands do different work.
 6. **[BuildPatchTool](https://github.com/EpicGames/UnrealEngine):** Its chunk window and internal compression do not match Gutch's FastCDC and Zstd settings. Recovery uses a previous installation manifest, so this compares two artifact-delivery workflows. Its source repository requires [Epic-authorized access](https://dev.epicgames.com/documentation/unreal-engine/downloading-source-code-in-unreal-engine).
+7. **[Encrypted Gutch](https://github.com/icauro/Gutch):** Not a competitor: the same Gutch release and settings run with and without repository encryption on one runner, so the ratio shows only what encryption costs. Gutch encrypts in the Kopia, Restic and Rustic pairs.
 
 Kopia, Restic and Rustic require encryption, so Gutch also encrypts its repository
 in those pairs. Earlier recorded runs left Gutch unencrypted. New runs separate damaged-file repair,
@@ -259,9 +260,10 @@ buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in th
 <summary>Run on GitHub</summary>
 
 Open **Actions > Manual Linux benchmarks > Run workflow**. Choose `all` or one
-pair, a Gutch release, and repetitions. Defaults: Ubuntu 24.04, all six pairs,
+pair, a Gutch release, and repetitions. Defaults: Ubuntu 24.04, all seven pairs
+(six tools plus the Gutch encryption-cost pair),
 one warm-up and six measured repetitions.
-All six pairs can run concurrently, each on its own runner.
+All pairs can run concurrently, each on its own runner.
 
 All jobs share a validated Blender input cache. Repositories and restored outputs
 are discarded after each sample. Runs on the default branch save compact reports

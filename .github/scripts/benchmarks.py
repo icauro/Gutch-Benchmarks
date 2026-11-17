@@ -17,13 +17,13 @@ from comparison_benchmark_suite.datasets import extract_archive, prepare_dataset
 from comparison_benchmark_suite.support.memory import summarize_operation_resources
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.support.retention import remove_owned
-from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details, operation_resource_table, markdown_tool_name
+from comparison_benchmark_suite.tools.report import COMPARISON_HEADERS, comparison_rows, relative_metric, measurement_details, pair_peer, operation_resource_table, markdown_tool_name
 from comparison_benchmark_suite.tools.chart import latest_records, render_svg, render_resources_svg, PAIR_NOTES
 
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path("src/comparison_benchmark_suite")
-PAIRS = ("borg", "bpt", "kopia", "plakar", "restic", "rustic")
+PAIRS = ("borg", "bpt", "kopia", "plakar", "restic", "rustic", "encrypted")
 START = "<!-- latest-benchmarks:start -->"
 END = "<!-- latest-benchmarks:end -->"
 GUTCH_RELEASES = "https://github.com/icauro/Gutch/releases"
@@ -98,7 +98,9 @@ def install_gutch(version="", root=ROOT):
 
 def install_tool(pair, root=ROOT):
     """Provision only the explicitly selected tool, checking archive AND executable."""
-    tool = "buildpatchtool" if pair == "bpt" else pair
+    tool = pair_peer(pair)
+    if tool.startswith("gutch"):
+        return  # Gutch-only pairs need just the Gutch release.
     manifest = json.loads((root / SOURCE / "resources/tools.json").read_text(encoding="utf-8"))
     record = next(item for item in manifest["executables"]
                   if item["platform"] == "linux-x64" and item["tool"] == tool)
@@ -205,7 +207,7 @@ def collect(pair, outcome, root=ROOT):
         compact["host"]["cpu_model"] = next((line.split(":", 1)[1].strip()
             for line in cpuinfo.read_text(encoding="utf-8").splitlines() if line.startswith("model name")), "unknown")
     compact["tools"] = [record for record in json.loads((root / SOURCE / "resources/tools.json").read_text(encoding="utf-8"))["executables"]
-                        if record["platform"] == "linux-x64" and record["tool"] == ("buildpatchtool" if pair == "bpt" else pair)]
+                        if record["platform"] == "linux-x64" and record["tool"] == pair_peer(pair)]
     build = root / ".artifacts/build/provenance.json"
     if build.exists():
         compact["gutch_build"] = json.loads(build.read_text(encoding="utf-8"))
@@ -222,7 +224,7 @@ def collect(pair, outcome, root=ROOT):
 def pair_overview(record):
     """Render one pair; derive ratios from raw medians, never rounded cells."""
     pair = record["pair"]
-    other = "buildpatchtool" if pair == "bpt" else pair
+    other = pair_peer(pair)
     lines = [f"### {markdown_tool_name('gutch')} vs {markdown_tool_name(other)} ({record['status']})", "",
              "| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |",
              "|---|---|---:|---:|---:|---:|"]

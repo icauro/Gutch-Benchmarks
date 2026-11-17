@@ -7,7 +7,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
-from comparison_benchmark_suite.tools.report import markdown_tool_name
+from comparison_benchmark_suite.tools.report import markdown_tool_name, pair_peer
 from comparison_benchmark_suite.tools.chart import BLUE, ORANGE, latest_records, render_svg, render_resources_svg
 
 
@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def pair_record(pair="restic", status="PASS"):
-    other = "buildpatchtool" if pair == "bpt" else pair
+    other = pair_peer(pair)
     return {"pair": pair, "status": status,
             "rows": [[label, "PASS"] for label in ("gutch", other)],
             "summary": {label: {metric: {"median": value, "samples": 3}
@@ -25,7 +25,7 @@ def pair_record(pair="restic", status="PASS"):
 
 class ChartTests(unittest.TestCase):
     def test_pair_order_and_note_numbers_match_popularity_order(self):
-        pairs = ["bpt", "plakar", "rustic", "borg", "kopia", "restic"]
+        pairs = ["encrypted", "bpt", "plakar", "rustic", "borg", "kopia", "restic"]
         records = [pair_record(pair) for pair in pairs]
         with tempfile.TemporaryDirectory() as directory:
             self.assertEqual([record["pair"] for record in latest_records(Path(directory))], list(reversed(pairs)))
@@ -134,10 +134,11 @@ class ChartTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for pair, title, number in (("restic", "Restic", 1), ("kopia", "Kopia", 2),
                                     ("borg", "Borg", 3), ("rustic", "Rustic", 4),
-                                    ("plakar", "Plakar", 5), ("bpt", "BuildPatchTool", 6)):
+                                    ("plakar", "Plakar", 5), ("bpt", "BuildPatchTool", 6),
+                                    ("encrypted", "Encrypted Gutch", 7)):
             chart = render_svg([pair_record(pair)])
             self.assertIn(f"{title} [{number}]", chart)
-            label = "buildpatchtool" if pair == "bpt" else pair
+            label = pair_peer(pair)
             self.assertIn(f"{number}. **{markdown_tool_name(label)}:**", readme)
 
     def test_latest_selection_uses_numeric_run_order_and_keeps_bad_reports_visible(self):

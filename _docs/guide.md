@@ -178,6 +178,8 @@ Encryption is disabled wherever supported; an empty password is not treated as
 plaintext. Kopia, Restic and Rustic remain encrypted because they have no supported
 plaintext mode, so their pairs also encrypt Gutch (`encrypted: true` in the Gutch
 profile: `repo init --encrypt` with a fixed local test `GUTCH_REPO_PASSWORD`).
+The `encrypted` pair runs the same Gutch settings with and without encryption on
+one runner, so its ratio isolates encryption cost from runner hardware differences.
 
 Existing operational choices remain: isolated repositories/caches, no encryption
 for Borg/Plakar, encryption for both tools in the Kopia/Restic/Rustic pairs, independent validation, and native
