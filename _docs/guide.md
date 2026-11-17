@@ -12,31 +12,31 @@ repository, Rust, Docker, or cloud credentials.
 Open **Actions > Manual Linux benchmarks > Run workflow**. The default runs all
 six Gutch-vs-tool pairs on Ubuntu 24.04, each in a separate job. All selected
 pair jobs can run concurrently; tools within a pair run sequentially. Choose a
-single pair, a Gutch branch/tag/commit, and measured repetitions if needed.
+single pair, a Gutch release such as `0.1.0`, and measured repetitions if needed.
 One warm-up is always included. Nothing runs on pushes, pull requests or a schedule.
 
 The workflow prepares Blender once, then every pair restores the same validated
 input cache. The cache key depends on the dataset recipe and preparation code,
-not the pair or Gutch revision. Any future test job in this repository that needs
+not the pair or Gutch release. Any future test job in this repository that needs
 these inputs should reuse `.github/actions/blender-inputs` after installing the
 suite. A preparation job uses `populate: 'true'`; consumers restore and validate.
 GitHub caches are repository-scoped; a different repository cannot directly
 restore this cache. Synthetic unit tests still generate their own tiny inputs.
 
-Gutch is built once from the selected revision with the locked Rust dependencies;
-all pairs use that executable. The build artifact includes the source and
-dependency notices produced by Gutch's `tools/package_cli.py`. While Gutch is
-private, source checkout uses the
-read-only deploy key stored as the `GUTCH_DEPLOY_KEY` Actions secret in this
-repository. External tools are explicitly downloaded for CI
+Each pair downloads the selected Gutch release's Linux x86-64 package from
+[GitHub Releases](https://github.com/icauro/Gutch/releases); leaving the release
+empty uses the version in the tool manifest. The archive is checked against the
+release's `SHA256SUMS` and the executable against the package's own `SHA256SUMS`.
+The package keeps its license and dependency notices, and its `build.json` commit
+is recorded in each report. No secret or Rust toolchain is needed.
+External tools are explicitly downloaded for CI
 from `src/comparison_benchmark_suite/resources/tools.json`, with archive and executable checksum verification.
 BPT retains its accompanying Engine files. Tools and datasets never enter Git.
-Input restoration, validation, downloads and builds are outside benchmark timing.
+Input restoration, validation and downloads are outside benchmark timing.
 
 Every case discards its tool repository, restored output and caches after its
 measurements, including failures. The immutable input cache survives. Detailed
-reports, logs and traces are Actions artifacts retained for 30 days. The Gutch
-build artifact lasts seven days. Nothing uploads repository/output payloads.
+reports, logs and traces are Actions artifacts retained for 30 days. Nothing uploads repository/output payloads.
 
 Default-branch runs commit compact JSON reports and a Markdown report under
 `reports/<UTC-date>/<run-id>-<attempt>/`, then update the latest-results section

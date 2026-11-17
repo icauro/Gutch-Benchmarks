@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import tarfile
 import tempfile
 from types import SimpleNamespace
 import unittest
@@ -95,6 +96,40 @@ class CiTests(unittest.TestCase):
             ci.install_tool("restic", self.root)
             self.assertEqual(download.call_count, 1)
         self.assertEqual(target.read_bytes(), binary)
+
+    def test_gutch_install_verifies_release_archive_and_executable_without_launching(self):
+        binary = b"synthetic gutch"
+        name = "gutch-cli-0.1.0-linux-x86_64"
+        package = io.BytesIO()
+        with tarfile.open(fileobj=package, mode="w:gz") as archive:
+            for member, data in {"gutch-cli": binary,
+                                 "SHA256SUMS": f"{hashlib.sha256(binary).hexdigest()}  gutch-cli\n".encode(),
+                                 "build.json": b'{"commit": "abc123", "compiler": "rustc 1.100.0"}'}.items():
+                info = tarfile.TarInfo(f"{name}/{member}")
+                info.size = len(data)
+                archive.addfile(info, io.BytesIO(data))
+        package = package.getvalue()
+        sums = f"{hashlib.sha256(package).hexdigest()}  {name}.tar.gz\n".encode()
+        (self.package / "resources").mkdir(parents=True)
+        (self.package / "resources/tools.json").write_text(json.dumps({"executables": [
+            {"platform": "linux-x64", "tool": "gutch", "version": "0.1.0", "path": "linux-x64/gutch/gutch-cli"}]}))
+        target = self.root / ".artifacts/tools/linux-x64/gutch/gutch-cli"
+
+        def release(files):
+            return lambda url, timeout: io.BytesIO(files[url.rsplit("/", 1)[1]])
+
+        with patch.object(ci, "urlopen", side_effect=release({f"{name}.tar.gz": b"tampered", "SHA256SUMS": sums})):
+            with self.assertRaisesRegex(ValueError, "Archive checksum"):
+                ci.install_gutch("", self.root)
+        self.assertFalse(target.exists())
+        with self.assertRaisesRegex(ValueError, "Not a Gutch release"):
+            ci.install_gutch("main", self.root)
+        with patch.object(ci, "urlopen", side_effect=release({f"{name}.tar.gz": package, "SHA256SUMS": sums})) as download:
+            ci.install_gutch("v0.1.0", self.root)
+        self.assertIn("/download/v0.1.0/", download.call_args_list[0].args[0])
+        self.assertEqual(target.read_bytes(), binary)
+        provenance = json.loads((self.root / ".artifacts/build/provenance.json").read_text())
+        self.assertEqual((provenance["version"], provenance["commit"]), ("0.1.0", "abc123"))
 
     def test_discard_cleans_failed_samples_before_next_case_and_keeps_evidence(self):
         layout = RunLayout(self.root / "runs/test", retain_evidence=True)
@@ -287,6 +322,7 @@ class CiTests(unittest.TestCase):
         for job in ("inputs", "compare"):
             self.assertTrue(any(step.get("uses") == "./.github/actions/blender-inputs" for step in jobs[job]["steps"]))
         self.assertEqual(workflow["permissions"]["contents"], "read")
+        self.assertNotIn("secrets.", (ROOT / ".github/workflows/benchmarks.yml").read_text(encoding="utf-8"))
         self.assertEqual(jobs["publish"]["permissions"]["contents"], "write")
         composite = (ROOT / ".github/actions/blender-inputs/action.yml").read_text(encoding="utf-8")
         self.assertNotIn("matrix.pair", composite)

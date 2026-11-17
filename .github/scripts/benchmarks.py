@@ -26,6 +26,7 @@ SOURCE = Path("src/comparison_benchmark_suite")
 PAIRS = ("borg", "bpt", "kopia", "plakar", "restic", "rustic")
 START = "<!-- latest-benchmarks:start -->"
 END = "<!-- latest-benchmarks:end -->"
+GUTCH_RELEASES = "https://github.com/icauro/Gutch/releases"
 
 
 def selected_pairs(pair):
@@ -45,6 +46,54 @@ def prepare_inputs(root=ROOT):
     recipe = root / SOURCE / "fixtures/blender/dataset.yaml"
     values = yaml.safe_load(recipe.read_text(encoding="utf-8"))
     return prepare_dataset(values, recipe, root / ".artifacts")
+
+
+def download(url, path):
+    with urlopen(url, timeout=120) as response, path.open("wb") as output:
+        shutil.copyfileobj(response, output)
+
+
+def read_checksums(path):
+    """Map file names to digests in a `sha256sum` listing."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return {name.lstrip("*"): digest for digest, name in (line.split(maxsplit=1) for line in lines if line.strip())}
+
+
+def install_gutch(version="", root=ROOT):
+    """Provision a published Gutch release, checking archive AND executable against its checksums.
+
+    An empty version selects the one recorded in the tool manifest.
+    """
+    manifest = json.loads((root / SOURCE / "resources/tools.json").read_text(encoding="utf-8"))
+    record = next(item for item in manifest["executables"]
+                  if item["platform"] == "linux-x64" and item["tool"] == "gutch")
+    version = version.strip().removeprefix("v") or record["version"]
+    if not re.fullmatch(r"\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?", version):
+        raise ValueError(f"Not a Gutch release version: {version}")
+    name = f"gutch-cli-{version}-linux-x86_64"
+    work = root / ".artifacts/provision/gutch"
+    remove_owned(work, root / ".artifacts")
+    work.mkdir(parents=True)
+    archive = work / f"{name}.tar.gz"
+    download(f"{GUTCH_RELEASES}/download/v{version}/{archive.name}", archive)
+    download(f"{GUTCH_RELEASES}/download/v{version}/SHA256SUMS", work / "SHA256SUMS")
+    if file_sha256(archive) != read_checksums(work / "SHA256SUMS").get(archive.name):
+        raise ValueError(f"Archive checksum mismatch: gutch {version}")
+    extract_archive(archive, work / "extract")
+    package = work / "extract" / name
+    binary = package / "gutch-cli"
+    if not binary.is_file() or file_sha256(binary) != read_checksums(package / "SHA256SUMS").get(binary.name):
+        raise ValueError(f"Executable checksum mismatch: gutch {version}")
+    build = json.loads((package / "build.json").read_text(encoding="utf-8"))
+    target = root / ".artifacts/tools" / record["path"]
+    remove_owned(target.parent, root / ".artifacts/tools")
+    shutil.copytree(package, target.parent)
+    target.chmod(0o755)
+    write_json(root / ".artifacts/build/provenance.json", {
+        "version": version, "release_url": f"{GUTCH_RELEASES}/tag/v{version}",
+        "commit": build.get("commit", "unknown"), "compiler": build.get("compiler", "unknown"),
+        "target": build.get("target", "unknown"), "sha256": file_sha256(target)})
+    remove_owned(work, root / ".artifacts")
 
 
 def install_tool(pair, root=ROOT):
@@ -147,7 +196,7 @@ def collect(pair, outcome, root=ROOT):
                     shutil.copytree(lane / folder, destination / "lanes" / lane.name / folder)
     compact["provenance"] = {
         key: os.environ.get(key, "unknown") for key in
-        ("GITHUB_SHA", "GUTCH_REVISION", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "RUNNER_OS", "ImageOS", "ImageVersion")
+        ("GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "RUNNER_OS", "ImageOS", "ImageVersion")
     }
     compact["host"] = {"platform": platform.platform(), "cpu_count": os.cpu_count(),
                        "disk_bytes": shutil.disk_usage(root).total}
@@ -160,6 +209,9 @@ def collect(pair, outcome, root=ROOT):
     build = root / ".artifacts/build/provenance.json"
     if build.exists():
         compact["gutch_build"] = json.loads(build.read_text(encoding="utf-8"))
+    gutch = compact.get("gutch_build", {})
+    compact["provenance"]["GUTCH_VERSION"] = gutch.get("version", "unknown")
+    compact["provenance"]["GUTCH_REVISION"] = gutch.get("commit", "unknown")
     write_json(destination / "compact.json", compact)
     # A setup error can prevent the runtime's finally block from being reached.
     for run in (root / ".artifacts/benchmarks/runs").glob("*"):
@@ -244,7 +296,8 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
         name = record["pair"]
         provenance = record.get("provenance", {})
         lines.extend([f"## Gutch vs {name}: {record['status']}", "", record.get("description", ""), "",
-                      f"Suite commit: `{provenance.get('GITHUB_SHA', 'unknown')}`; Gutch commit: `{provenance.get('GUTCH_REVISION', 'unknown')}`.", "",
+                      f"Suite commit: `{provenance.get('GITHUB_SHA', 'unknown')}`; Gutch release: `{provenance.get('GUTCH_VERSION', 'unknown')}`;"
+                      f" Gutch commit: `{provenance.get('GUTCH_REVISION', 'unknown')}`.", "",
                       f"Host: `{record.get('host', {})}`", "",
                       f"[Machine-readable report]({name}.json)", "",
                       "| " + " | ".join(COMPARISON_HEADERS) + " |", "|" + "---|" * len(COMPARISON_HEADERS)])
@@ -272,6 +325,8 @@ def main():
     matrix = commands.add_parser("matrix")
     matrix.add_argument("--pair", choices=("all", *PAIRS), required=True)
     commands.add_parser("dataset")
+    gutch = commands.add_parser("gutch")
+    gutch.add_argument("--version", default="", help="Gutch release, such as 0.1.0; empty uses the tool manifest")
     install = commands.add_parser("tool")
     install.add_argument("--pair", choices=PAIRS, required=True)
     fixture = commands.add_parser("fixture")
@@ -291,6 +346,8 @@ def main():
             output.write("pairs=" + json.dumps(selected_pairs(args.pair)) + "\n")
     elif args.command == "dataset":
         prepare_inputs()
+    elif args.command == "gutch":
+        install_gutch(args.version)
     elif args.command == "tool":
         install_tool(args.pair)
     elif args.command == "fixture":

@@ -7,10 +7,10 @@ on:
         type: choice
         default: all
         options: [all, borg, bpt, kopia, plakar, restic, rustic]
-      gutch_ref:
-        description: Branch, tag or commit in icauro/Gutch (resolved once per run)
+      gutch_version:
+        description: Gutch release to download, such as 0.1.0 (empty uses the tool manifest)
         type: string
-        default: main
+        default: ''
       repetitions:
         description: Measured repetitions per pair (1-10), plus one warm-up
         type: choice
@@ -46,58 +46,8 @@ jobs:
         with:
           populate: 'true'
 
-  build:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    outputs:
-      revision: ${{ steps.revision.outputs.sha }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: icauro/Gutch
-          ref: ${{ inputs.gutch_ref }}
-          ssh-key: ${{ secrets.GUTCH_DEPLOY_KEY }}
-          path: .artifacts/gutch-source
-          persist-credentials: false
-      - id: revision
-        working-directory: .artifacts/gutch-source
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: gutch-dependencies-${{ runner.os }}-${{ hashFiles('.artifacts/gutch-source/Cargo.lock') }}
-      - name: Build once for every pair
-        working-directory: .artifacts/gutch-source
-        run: |
-          rustup update stable --no-self-update
-          rustup default stable
-          cargo build --locked --release --package gutch-cli --target x86_64-unknown-linux-gnu
-          python3 tools/package_cli.py --target x86_64-unknown-linux-gnu --toolchain stable
-      - name: Package executable
-        run: |
-          mkdir -p .artifacts/build
-          cp -a .artifacts/gutch-source/.builds/releases/x86_64-unknown-linux-gnu/. .artifacts/build/
-          gzip .artifacts/build/gutch-cli
-          python3 - <<'PY'
-          import json, subprocess
-          from pathlib import Path
-          source = Path('.artifacts/gutch-source')
-          record = {name: subprocess.check_output(command, cwd=source, text=True).strip()
-                    for name, command in {'revision': ['git', 'rev-parse', 'HEAD'],
-                                          'rustc': ['rustc', '--version'], 'cargo': ['cargo', '--version']}.items()}
-          Path('.artifacts/build/provenance.json').write_text(json.dumps(record))
-          PY
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: gutch-linux
-          path: .artifacts/build/
-          include-hidden-files: true
-          retention-days: 7
-
   compare:
-    needs: [inputs, build]
+    needs: inputs
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     strategy:
@@ -107,7 +57,7 @@ jobs:
     env:
       PAIR: ${{ matrix.pair }}
       REPETITIONS: ${{ inputs.repetitions }}
-      GUTCH_REVISION: ${{ needs.build.outputs.revision }}
+      GUTCH_VERSION: ${{ inputs.gutch_version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
@@ -116,15 +66,9 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -e .
       - uses: ./.github/actions/blender-inputs
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: gutch-linux
-          path: .artifacts/build
       - name: Install selected executables and fixture
         run: |
-          mkdir -p .artifacts/tools/linux-x64/gutch
-          gzip -dc .artifacts/build/gutch-cli.gz > .artifacts/tools/linux-x64/gutch/gutch-cli
-          chmod +x .artifacts/tools/linux-x64/gutch/gutch-cli
+          python .github/scripts/benchmarks.py gutch --version "$GUTCH_VERSION"
           python .github/scripts/benchmarks.py tool --pair "$PAIR"
           python .github/scripts/benchmarks.py fixture --pair "$PAIR" --repetitions "$REPETITIONS"
       - name: Compare one pair, discarding each case's outputs
@@ -145,7 +89,7 @@ jobs:
           retention-days: 30
 
   publish:
-    needs: [inputs, build, compare]
+    needs: [inputs, compare]
     # Experimental branches retain artifacts but cannot update the default README.
     if: always() && !cancelled() && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-24.04

@@ -1,12 +1,15 @@
 {
-  "gutch_source_commit": "def61847d1e77e6d4e75cd2e6ca2866ca75b1c37",
+  "gutch_release_policy": "Manual CI downloads the selected Gutch release and verifies it against that release's SHA256SUMS.",
   "executables": [
     {
       "platform": "windows-x64",
       "tool": "gutch",
-      "version": "0.2.0",
+      "version": "0.1.0",
       "path": "windows-x64/gutch/gutch-cli.exe",
-      "sha256": "9f1fd420176d84c207aa9da962ffa25290e7f3b2c927bbd749c11842032f558c"
+      "release_url": "https://github.com/icauro/Gutch/releases/tag/v0.1.0",
+      "source_url": "https://github.com/icauro/Gutch/releases/download/v0.1.0/gutch-cli-0.1.0-windows-x86_64.zip",
+      "prerelease": false,
+      "verification": "release SHA256SUMS verified when provisioned"
     },
     {
       "platform": "windows-x64",
@@ -75,9 +78,12 @@
     {
       "platform": "linux-x64",
       "tool": "gutch",
-      "version": "0.2.0",
+      "version": "0.1.0",
       "path": "linux-x64/gutch/gutch-cli",
-      "sha256": "2372a4f0f2eaa1059de9b650135f67c5acf8a41c8d697cfd5171b0b034e7088d"
+      "release_url": "https://github.com/icauro/Gutch/releases/tag/v0.1.0",
+      "source_url": "https://github.com/icauro/Gutch/releases/download/v0.1.0/gutch-cli-0.1.0-linux-x86_64.tar.gz",
+      "prerelease": false,
+      "verification": "release SHA256SUMS verified when provisioned"
     },
     {
       "platform": "linux-x64",

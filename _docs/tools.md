@@ -15,7 +15,9 @@ complete `Engine/Binaries/Win64/` or `Engine/Binaries/Linux/` layout under
 `buildpatchtool/`. Keep its support files alongside the executable.
 
 The local runner never downloads executables. Manual CI explicitly provisions
-its selected tool and verifies both archive and executable checksums. Borg uses
+its selected tool and verifies both archive and executable checksums. It takes
+Gutch from a published release, verified against that release's `SHA256SUMS`;
+the manifest's Gutch entries name the default release. Borg uses
 the latest recorded 2.x prerelease for FastCDC; its recorded Linux asset requires
 glibc 2.39 or newer. Other external tools track stable releases.
 

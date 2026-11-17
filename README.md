@@ -259,7 +259,7 @@ buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in th
 <summary>Run on GitHub</summary>
 
 Open **Actions > Manual Linux benchmarks > Run workflow**. Choose `all` or one
-pair, the Gutch revision, and repetitions. Defaults: Ubuntu 24.04, all six pairs,
+pair, a Gutch release, and repetitions. Defaults: Ubuntu 24.04, all six pairs,
 one warm-up and six measured repetitions.
 All six pairs can run concurrently, each on its own runner.
 
