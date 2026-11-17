@@ -223,9 +223,11 @@ CPU or memory limits. Encryption is matched per pair as described above.
 Borg explicitly selects `fastcdc,19,23,21,2` and LZ4. Kopia explicitly selects
 `DYNAMIC-4M-BUZHASH`, no content compression and AES256-GCM-HMAC-SHA256.
 Restic selects Zstd auto and an 8 MiB pack target. Rustic selects Rabin with a
-1 MiB average, 512 KiB minimum and 8 MiB maximum, Zstd 3, and 8 MiB data/tree
+1 MiB average, 256 KiB minimum and 4 MiB maximum (the Gutch 1 MiB preset bounds), Zstd 3, and 8 MiB data/tree
 pack targets with growth disabled. BPT explicitly selects a 1 MiB chunk window.
 Gutch bundle compression and native peer compression units still differ.
+Restic restore omits `--verify`: it would re-read every restored file, work no other
+tool does, and the suite's SHA-256 validation already checks the output.
 Actual commands, binary checksums and fixture settings are recorded with each run.
 
 ## Use your own builds
@@ -391,7 +393,7 @@ on its behalf. Strict validation follows every supported check.
 | Tool | Native recovery | Preserved-mtime damage | Extra-file cleanup |
 |---|---|---|---|
 | Gutch | Installation repair | Supported | Supported |
-| Restic | `restore --overwrite always --delete --verify` | Supported | Supported, scoped to selected build |
+| Restic | `restore --overwrite always --delete` | Supported | Supported, scoped to selected build |
 | Rustic | `restore --verify-existing --no-ownership --delete` | Supported | Supported, scoped to selected build |
 | Kopia | `snapshot restore --delete-extra` | Supported | Supported |
 | Borg | `extract --continue` | Unsupported: trusts matching size/mtime | Unsupported in adapter |

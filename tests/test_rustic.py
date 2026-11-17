@@ -86,6 +86,18 @@ class RusticTests(unittest.TestCase):
         self.assertEqual(result.metrics["repair"], 0.5)
         self.assertEqual(result.metrics["repository_check"], 0.25)
 
+    def test_restic_restores_without_rereading_output_the_suite_validates(self):
+        binary, lane, dataset, commands = self.adapter_inputs()
+        summary = '{"message_type": "summary", "snapshot_id": "abc"}'
+        commands.run.return_value = CommandResult((), 0.25, 0, summary, "")
+        with patch("comparison_benchmark_suite.tools.external.validate_installation", return_value=0.0):
+            run_external(ExternalTools(commands, restic=binary), lane, self.root / "product",
+                         LaneSpec("restic", "restic"), dataset=dataset)
+        restores = [call.args[0] for call in commands.run.call_args_list if call.args[0][1] == "restore"]
+        self.assertEqual(len(restores), 2)
+        for command in restores:
+            self.assertNotIn("--verify", command)
+
     def test_backup_failure_stops_before_restore_and_validation(self):
         binary, lane, dataset, commands = self.adapter_inputs()
         failure = CommandError(CommandResult(("rustic", "backup"), 0.25, 1, "", "failed"), "backup")
@@ -120,6 +132,13 @@ class RusticTests(unittest.TestCase):
         rustic = load_fixture(fixtures / "gutch_vs_rustic.yaml")
         self.assertIn("--set-compression", rustic.lanes[1].arguments)
         self.assertIn("--set-datapack-size", rustic.lanes[1].arguments)
+        # Rustic's bounds match the Gutch 1 MiB preset (256 KiB / 1 MiB / 4 MiB).
+        arguments = rustic.lanes[1].arguments
+        bounds = {flag: arguments[arguments.index(flag) + 1] for flag in
+                  ("--set-chunk-min-size", "--set-chunk-size", "--set-chunk-max-size")}
+        self.assertEqual(bounds, {"--set-chunk-min-size": "256kiB", "--set-chunk-size": "1MiB",
+                                  "--set-chunk-max-size": "4MiB"})
+        self.assertEqual(rustic.lanes[0].profile.chunk_profile, "chunk_1MiB")
 
     def test_local_rustic_discovery_on_both_platforms(self):
         for system, folder, name in (("Windows", "windows-x64", "rustic.exe"),

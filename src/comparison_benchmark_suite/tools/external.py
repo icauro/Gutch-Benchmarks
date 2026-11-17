@@ -255,7 +255,7 @@ def run_external(
         for source in reversed(sources):
             if kind == "restic":
                 execute(
-                    [executable, "restore", identifiers[source.name], *restic_options, "--verify", "--repo", repo, "--target", output, "--include", source.name],
+                    [executable, "restore", identifiers[source.name], *restic_options, "--repo", repo, "--target", output, "--include", source.name],
                     description=f"{lane_spec.label} {operation} {source.name}",
                     env=env,
                 )

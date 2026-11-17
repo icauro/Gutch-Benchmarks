@@ -1,7 +1,8 @@
 name: gutch_vs_rustic
-description: Rustic explicitly uses Rabin with a 1 MiB average, 512 KiB minimum and 8 MiB maximum,
+description: Rustic explicitly uses Rabin with a 1 MiB average, 256 KiB minimum and 4 MiB maximum,
+  matching the Gutch 1 MiB preset bounds,
   Zstd 3, and 8 MiB data/tree pack targets with growth disabled. Gutch uses a nominal 1 MiB FastCDC
-  target, Zstd 3 and 8 MiB compressed bundles. Chunk boundaries, compression units and hashes differ;
+  target, Zstd 3 and 8 MiB compressed bundles. Chunk boundaries (Rabin versus FastCDC), compression units and hashes differ;
   both repositories are encrypted. Recovery verifies existing bytes and deletes extra files. Fresh repositories
   and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and six
   rotating measured repetitions; profiling off. Measurement contract 2 separates content repair,
@@ -39,9 +40,9 @@ lanes:
   - --set-chunk-size
   - 1MiB
   - --set-chunk-min-size
-  - 512kiB
+  - 256kiB
   - --set-chunk-max-size
-  - 8MiB
+  - 4MiB
   - --set-datapack-size
   - 8MiB
   - --set-datapack-growfactor
