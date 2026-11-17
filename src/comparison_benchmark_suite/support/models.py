@@ -11,5 +11,6 @@ class GutchProfile:
     storage_mode: str = "bundled"
     jobs: int | None = None
     chunker: str = "fastcdc"
+    encrypted: bool = False
 
 

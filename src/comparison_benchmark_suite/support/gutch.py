@@ -47,10 +47,17 @@ class GutchOperations:
     cli: GutchCli
     commands: CommandRunner
 
-    def init_repo(self, repo: Path, label: str) -> None:
+    @staticmethod
+    def environment(profile: GutchProfile) -> dict[str, str]:
+        # A fixed local test password, like the other tools' lanes use.
+        return {"GUTCH_REPO_PASSWORD": "bench"} if profile.encrypted else {}
+
+    def init_repo(self, repo: Path, profile: GutchProfile, label: str) -> None:
+        encryption = ["--encrypt"] if profile.encrypted else []
         self.commands.run(
-            self.cli.command("repo", "init", "--repo", repo),
+            self.cli.command("repo", "init", "--repo", repo, *encryption),
             description=f"{label} repository init",
+            env=self.environment(profile),
         )
 
     def capture(
@@ -83,6 +90,7 @@ class GutchOperations:
                 trace_path.parent,
             ),
             description=f"{tag} capture {source.name}",
+            env=self.environment(profile),
         )
         return result.elapsed_seconds, read_stats(stats_path)
 
@@ -114,6 +122,7 @@ class GutchOperations:
                 trace_path.parent,
             ),
             description=f"reconstruct {label}",
+            env=self.environment(profile),
         )
         return result.elapsed_seconds, read_stats(stats_path)
 
@@ -124,6 +133,7 @@ class GutchOperations:
                 "installation", "repair", "--repo", repo, "--snapshot", snapshot,
                 "--destination", destination, "--remove-extra-files", "--yes",
                 *GutchCli.runtime_args(profile), "--json", "--output", lane.stats / f"{operation}-{index}.json",
-                "--profile-dir", lane.traces / f"{operation}-{index}"), description=f"{label} {operation} {name}")
+                "--profile-dir", lane.traces / f"{operation}-{index}"), description=f"{label} {operation} {name}",
+                env=self.environment(profile))
             total += result.elapsed_seconds
         return total

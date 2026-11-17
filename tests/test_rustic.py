@@ -10,6 +10,9 @@ import yaml
 
 from comparison_benchmark_suite.benchmark import resolve_executable
 from comparison_benchmark_suite.support.command import CommandError, CommandResult
+from comparison_benchmark_suite.support.commands import GutchCli
+from comparison_benchmark_suite.support.gutch import GutchOperations
+from comparison_benchmark_suite.support.models import GutchProfile
 from comparison_benchmark_suite.tools.config import load_fixture
 from comparison_benchmark_suite.tools.external import ExternalTools, run_external
 from comparison_benchmark_suite.tools.models import LaneSpec
@@ -105,6 +108,8 @@ class RusticTests(unittest.TestCase):
                              ["gutch", "buildpatchtool" if other == "bpt" else other])
             document = yaml.safe_load(path.read_text(encoding="utf-8"))
             self.assertEqual(document["dataset"], "blender/dataset.yaml")
+            # Gutch encrypts exactly where the other tool cannot run unencrypted.
+            self.assertEqual(fixture.lanes[0].profile.encrypted, other in {"kopia", "restic", "rustic"})
         rustic = load_fixture(fixtures / "gutch_vs_rustic.yaml")
         self.assertIn("--set-compression", rustic.lanes[1].arguments)
         self.assertIn("--set-datapack-size", rustic.lanes[1].arguments)
@@ -117,6 +122,19 @@ class RusticTests(unittest.TestCase):
             binary.touch()
             with patch("platform.system", return_value=system), patch("platform.machine", return_value="AMD64"), patch("shutil.which", return_value=None):
                 self.assertEqual(resolve_executable("rustic", self.root / "fixture.yaml", self.root / "bin"), binary)
+
+    def test_encrypted_gutch_profile_initializes_and_unlocks_with_the_test_password(self):
+        commands = Mock()
+        commands.run.return_value = SimpleNamespace(elapsed_seconds=1.0)
+        operations = GutchOperations(GutchCli(Path("gutch-cli")), commands)
+        repo = self.root / "repo"
+        operations.init_repo(repo, GutchProfile("plain"), "gutch")
+        operations.init_repo(repo, GutchProfile("sealed", encrypted=True), "gutch")
+        plain, sealed = commands.run.call_args_list
+        self.assertNotIn("--encrypt", plain.args[0])
+        self.assertEqual(plain.kwargs["env"], {})
+        self.assertIn("--encrypt", sealed.args[0])
+        self.assertEqual(sealed.kwargs["env"], {"GUTCH_REPO_PASSWORD": "bench"})
 
 
 if __name__ == "__main__":

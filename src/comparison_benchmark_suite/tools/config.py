@@ -77,7 +77,7 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
         raw = {}
     if not isinstance(raw, dict):
         raise ValueError(f"{name} profile must be a mapping")
-    unknown_fields = set(raw) - {"chunk", "chunker", "bundle", "compression", "storage", "jobs"}
+    unknown_fields = set(raw) - {"chunk", "chunker", "bundle", "compression", "storage", "jobs", "encrypted"}
     if unknown_fields:
         fields = ", ".join(sorted(unknown_fields))
         raise ValueError(f"{name} profile contains unsupported fields: {fields}")
@@ -114,6 +114,9 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
     jobs = raw.get("jobs")
     if jobs is not None and (isinstance(jobs, bool) or not isinstance(jobs, int) or jobs < 1):
         raise ValueError("profile jobs must be a positive integer")
+    encrypted = raw.get("encrypted", False)
+    if not isinstance(encrypted, bool):
+        raise ValueError(f"{name} encrypted must be true or false")
     return GutchProfile(
         name,
         chunk,
@@ -123,6 +126,7 @@ def _profile(values: dict[str, Any], name: str) -> GutchProfile:
         storage,
         jobs,
         chunker,
+        encrypted,
     )
 
 

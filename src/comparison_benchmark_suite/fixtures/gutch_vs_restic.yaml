@@ -1,7 +1,7 @@
 name: gutch_vs_restic
 description: Restic uses native Rabin around 1 MiB, explicit Zstd auto, 8 MiB pack targets and mandatory
-  encryption. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3, 8 MiB compressed bundles and no
-  encryption. Zstd auto is not an exact level-3 match; bounds, codec implementations and compression
+  encryption. Gutch uses a nominal 1 MiB FastCDC target, Zstd 3, 8 MiB compressed bundles and AES-256-GCM
+  repository encryption. Both encrypt, with different schemes. Zstd auto is not an exact level-3 match; bounds, codec implementations and compression
   units differ. Restore retains --verify; recovery verifies existing bytes and deletes extra files.
   Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling.
   One warm-up and six rotating measured repetitions; profiling off. Measurement contract 2 separates
@@ -28,6 +28,7 @@ lanes:
       algorithm: zstd
       level: 3
     jobs: 4
+    encrypted: true
 - label: restic
   tool: restic
   arguments:

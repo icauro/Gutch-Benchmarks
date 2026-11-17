@@ -46,7 +46,7 @@ class LocalFixtureRunner:
         output = lane.payload / "installation"
         remove_tree(repo)
         remove_tree(output)
-        self.gutch.init_repo(repo, lane_spec.label)
+        self.gutch.init_repo(repo, lane_spec.profile, lane_spec.label)
         sources = list(dataset.sources)
         if not sources:
             raise ValueError(f"product has no target directories: {product}")

@@ -176,10 +176,11 @@ checks every restored build. Earlier `none-sha256` measurements are not directly
 comparable with this authenticated mode.
 Encryption is disabled wherever supported; an empty password is not treated as
 plaintext. Kopia, Restic and Rustic remain encrypted because they have no supported
-plaintext mode.
+plaintext mode, so their pairs also encrypt Gutch (`encrypted: true` in the Gutch
+profile: `repo init --encrypt` with a fixed local test `GUTCH_REPO_PASSWORD`).
 
 Existing operational choices remain: isolated repositories/caches, no encryption
-for Borg/Plakar, encryption for Kopia/Restic/Rustic, independent validation, and native
+for Borg/Plakar, encryption for both tools in the Kopia/Restic/Rustic pairs, independent validation, and native
 recovery options. Thus these preserve performance defaults where practical;
 they are not unmodified default invocations. Contract 2 validates supported recovery outcomes strictly.
 Use detailed profiling only in a separate diagnostic run.
@@ -215,7 +216,7 @@ The existing saved public results use the earlier contract and are not rewritten
 Gutch uses four workers. Go tools use `GOMAXPROCS=4`; Rustic uses
 `RAYON_NUM_THREADS=4`; Kopia file/restore parallelism and Plakar concurrency are
 explicitly four. Borg/BPT keep native scheduling; these controls are not identical
-CPU or memory limits. Encryption remains disabled where supported.
+CPU or memory limits. Encryption is matched per pair as described above.
 
 Borg explicitly selects `fastcdc,19,23,21,2` and LZ4. Kopia explicitly selects
 `DYNAMIC-4M-BUZHASH`, no content compression and AES256-GCM-HMAC-SHA256.

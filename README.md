@@ -22,8 +22,8 @@ files, and we check restored content with SHA-256.
 5. **[Plakar](https://github.com/PlakarKorp/plakar):** Both use FastCDC and LZ4, but compress and pack data differently. Plakar restores over existing files, while Gutch selectively repairs damaged content; their recovery commands do different work.
 6. **[BuildPatchTool](https://github.com/EpicGames/UnrealEngine):** Its chunk window and internal compression do not match Gutch's FastCDC and Zstd settings. Recovery uses a previous installation manifest, so this compares two artifact-delivery workflows. Its source repository requires [Epic-authorized access](https://dev.epicgames.com/documentation/unreal-engine/downloading-source-code-in-unreal-engine).
 
-Kopia, Restic and Rustic require encryption; Gutch does not encrypt in these tests,
-so that extra work remains in their timings. New runs separate damaged-file repair,
+Kopia, Restic and Rustic require encryption, so Gutch also encrypts its repository
+in those pairs. Earlier recorded runs left Gutch unencrypted. New runs separate damaged-file repair,
 damage with unchanged timestamps, extra-file cleanup and full restoration. Borg,
 Plakar and BuildPatchTool have no native extra-file cleanup in these adapters;
 unsupported checks receive no timing.

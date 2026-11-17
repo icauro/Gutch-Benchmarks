@@ -1,7 +1,7 @@
 name: gutch_vs_kopia
 description: Kopia explicitly uses DYNAMIC-4M-BUZHASH, disabled content compression and AES256-GCM-HMAC-SHA256
-  encryption. Gutch uses a nominal 4 MiB FastCDC target, no compression, 16 MiB bundles and no encryption.
-  Bounds, metadata, hashes and packing differ. Kopia recovery requests native extra-file deletion.
+  encryption. Gutch uses a nominal 4 MiB FastCDC target, no compression, 16 MiB bundles and AES-256-GCM repository
+  encryption. Bounds, metadata, hashes and packing differ. Kopia recovery requests native extra-file deletion.
   Fresh repositories and isolated caches. Four workers where exposed; native Borg/BPT scheduling.
   One warm-up and six rotating measured repetitions; profiling off. Measurement contract 2 separates
   content repair, preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived
@@ -27,6 +27,7 @@ lanes:
       algorithm: none
     bundle: bundle_16MiB
     jobs: 4
+    encrypted: true
 - label: kopia
   tool: kopia
   arguments:

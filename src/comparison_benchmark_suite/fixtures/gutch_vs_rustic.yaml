@@ -2,7 +2,7 @@ name: gutch_vs_rustic
 description: Rustic explicitly uses Rabin with a 1 MiB average, 512 KiB minimum and 8 MiB maximum,
   Zstd 3, and 8 MiB data/tree pack targets with growth disabled. Gutch uses a nominal 1 MiB FastCDC
   target, Zstd 3 and 8 MiB compressed bundles. Chunk boundaries, compression units and hashes differ;
-  Rustic remains encrypted. Recovery verifies existing bytes and deletes extra files. Fresh repositories
+  both repositories are encrypted. Recovery verifies existing bytes and deletes extra files. Fresh repositories
   and isolated caches. Four workers where exposed; native Borg/BPT scheduling. One warm-up and six
   rotating measured repetitions; profiling off. Measurement contract 2 separates content repair,
   preserved-mtime damage, extra-file cleanup and full restoration. Strict source-derived SHA-256
@@ -28,6 +28,7 @@ lanes:
       algorithm: zstd
       level: 3
     jobs: 4
+    encrypted: true
 - label: rustic
   tool: rustic
   arguments:
