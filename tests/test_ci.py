@@ -78,6 +78,18 @@ class CiTests(unittest.TestCase):
             prepare_dataset(yaml.safe_load(copy.read_text(encoding="utf-8")), copy, artifacts)
             self.assertEqual((other / "v1/file.txt").read_text(encoding="utf-8"), "immutable Blender stand-in")
 
+    def test_ci_prepares_inputs_where_the_cache_and_runner_find_them(self):
+        recipe = self.package / "fixtures/blender/dataset.yaml"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text("builds: []")
+        with patch.object(ci, "prepare_dataset", return_value=(None, {})) as prepare:
+            ci.prepare_inputs(self.root)
+        datasets = (prepare.call_args.args[2] / "datasets").relative_to(self.root).as_posix()
+        action = yaml.safe_load((ROOT / ".github/actions/blender-inputs/action.yml").read_text(encoding="utf-8"))
+        self.assertTrue(all(step["with"]["path"] == datasets for step in action["runs"]["steps"] if "with" in step))
+        runner = (ROOT / "src/comparison_benchmark_suite/benchmark.py").read_text(encoding="utf-8")
+        self.assertIn(f'artifacts = root / "{Path(datasets).parent.as_posix()}"', runner)
+
     def test_tool_install_verifies_archive_and_executable_without_launching(self):
         binary = b"synthetic executable"
         archive = bz2.compress(binary)

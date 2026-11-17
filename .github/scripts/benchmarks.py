@@ -45,7 +45,7 @@ def write_json(path, value):
 def prepare_inputs(root=ROOT):
     recipe = root / SOURCE / "fixtures/blender/dataset.yaml"
     values = yaml.safe_load(recipe.read_text(encoding="utf-8"))
-    return prepare_dataset(values, recipe, root / ".artifacts")
+    return prepare_dataset(values, recipe, root / ".artifacts/benchmarks")
 
 
 def download(url, path):
