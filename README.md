@@ -1,7 +1,13 @@
 # Gutch benchmarks
 
-Compare Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic and Rustic
-using shared Blender inputs, pair-specific settings and SHA-256 output validation.
+Reproducible benchmarks for [Gutch](https://github.com/icauro/Gutch), a fast
+deduplicating store and installer. In the latest run Gutch installs 2.2–4.6×
+faster and repairs 2.4–29× faster than Restic, Kopia, Borg, Rustic and Plakar,
+while storing the same amount of data or less.
+
+Each pair compares Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic or
+Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
+validation.
 
 ![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=94822f2e48bc)
 
