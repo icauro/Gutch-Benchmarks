@@ -12,37 +12,62 @@ using shared Blender inputs, pair-specific settings and SHA-256 output validatio
 <details>
 <summary>Comparison differences and limits</summary>
 
-The numbers in the chart refer to these notes. Every pair processes the same
-files, and we check restored content with SHA-256.
+Each pair matches Gutch's settings to the other tool as closely as that tool allows.
+Every pair processes the same files on one runner, and we check every restored file
+with SHA-256. Numbers match the chart; cells read **Gutch / other tool**.
 
-1. **[Restic](https://github.com/restic/restic):** Restic uses Rabin chunking and automatic Zstd compression; Gutch uses FastCDC and Zstd level 3. These settings do not produce identical chunks or compression work.
-2. **[Kopia](https://github.com/kopia/kopia):** Compression is disabled on both sides. Kopia uses Buzhash to split files into chunks; Gutch uses FastCDC. Matching the target chunk size does not produce identical chunks.
-3. **[Borg](https://github.com/borgbackup/borg):** Both use FastCDC chunking and LZ4 compression, but split and store data differently. Borg's resume command can skip files whose size and modification time match, even if their contents are damaged. We therefore mark that repair scenario as unsupported.
-4. **[Rustic](https://github.com/rustic-rs/rustic):** Both select Zstd level 3, but Rustic uses Rabin chunking and Gutch uses FastCDC. Gutch compresses whole bundles, so matching the level and pack size still does not make the compression work identical.
-5. **[Plakar](https://github.com/PlakarKorp/plakar):** Both use FastCDC and LZ4, but compress and pack data differently. Plakar restores over existing files, while Gutch selectively repairs damaged content; their recovery commands do different work.
-6. **[BuildPatchTool](https://github.com/EpicGames/UnrealEngine):** Its chunk window and internal compression do not match Gutch's FastCDC and Zstd settings. Recovery uses a previous installation manifest, so this compares two artifact-delivery workflows. Its source repository requires [Epic-authorized access](https://dev.epicgames.com/documentation/unreal-engine/downloading-source-code-in-unreal-engine).
-7. **[Encrypted Gutch](https://github.com/icauro/Gutch):** Not a competitor: the same Gutch release and settings run with and without repository encryption on one runner, so the ratio shows only what encryption costs. Gutch encrypts in the Kopia, Restic and Rustic pairs.
+| # | Pair | Chunking | Compression | Encryption | Workers | Checks without timing |
+|---|---|---|---|---|---|---|
+| 1 | [Restic](https://github.com/restic/restic) | FastCDC 1 MiB / Rabin ~1 MiB | Zstd 3 / Zstd auto | AES-256 / AES-256 | 4 / 4 | — |
+| 2 | [Kopia](https://github.com/kopia/kopia) | FastCDC 4 MiB / Buzhash 4 MiB | None / none | AES-256 / AES-256 | 4 / 4 | — |
+| 3 | [Borg](https://github.com/borgbackup/borg) | FastCDC 2 MiB / FastCDC 2 MiB | LZ4 / LZ4 | None / authenticated only | 4 / 1 | Extra-file cleanup, unchanged-timestamp repair |
+| 4 | [Rustic](https://github.com/rustic-rs/rustic) | FastCDC 1 MiB / Rabin 1 MiB | Zstd 3 / Zstd 3 | AES-256 / AES-256 | 4 / 4 | — |
+| 5 | [Plakar](https://github.com/PlakarKorp/plakar) | FastCDC 1 MiB / FastCDC ~1 MiB | LZ4 / LZ4 | None / none | 4 / 4 | Extra-file cleanup |
+| 6 | [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | FastCDC 1 MiB / fixed 1 MiB window | Zstd 3 / built-in | None / none | 4 / native | Extra-file cleanup |
+| 7 | [Encrypted Gutch](https://github.com/icauro/Gutch) | Identical | Identical | None / AES-256 | 4 / 4 | — |
 
-Kopia, Restic and Rustic require encryption, so Gutch also encrypts its repository
-in those pairs. Earlier recorded runs left Gutch unencrypted. New runs separate damaged-file repair,
-damage with unchanged timestamps, extra-file cleanup and full restoration. Borg,
-Plakar and BuildPatchTool have no native extra-file cleanup in these adapters;
-unsupported checks receive no timing.
+**What the table cannot show**
 
-Chart times include each tool's own checks. Detailed reports also show timings
-with our shared validation added and sample ranges. Metadata handling and when
-tools flush writes can still differ. New performance runs default to six measured
-repetitions with alternating order; OS caches are not reset. A single local smoke
-run checks compatibility only. Older reports retain their original settings.
+1. **Restic:** "auto" is close to, but not exactly, Zstd level 3. Restore runs with
+   `--verify`, which reads every restored file back from disk; Gutch checks data in
+   memory before writing, so Restic's restore does extra work.
+2. **Kopia:** Gutch uses 16 MiB bundles here (8 MiB elsewhere) to suit 4 MiB chunks.
+3. **Borg:** Borg 2 (a prerelease) is needed for FastCDC. Its resume trusts file size
+   and modification time, so it cannot find damage that keeps both; that check is
+   skipped. Borg is single-threaded by design.
+4. **Rustic:** Both use 8 MiB packs, but Gutch compresses whole bundles while Rustic
+   compresses each chunk, so compression work still differs.
+5. **Plakar:** Restores write over existing files, while Gutch repairs only damaged
+   content, so the recovery commands do different work.
+6. **BuildPatchTool:** A chunk window is not a content-defined average, and its codec
+   and format do not match. Recovery uses a previous installation manifest, so this
+   compares two delivery workflows. Its source requires
+   [Epic-authorized access](https://dev.epicgames.com/documentation/unreal-engine/downloading-source-code-in-unreal-engine).
+7. **Encrypted Gutch:** Not a competitor. The same release runs with and without
+   encryption on one runner, so the ratio shows only what encryption costs.
 
-The second SVG shows peak RAM; the third shows peak disk footprint. Both reuse the
-same paired-bar template with first capture, second capture, restore and repair
-columns in MiB from a separate monitored pass. Text versions
-remain below each pair in the details. New runs record disk peaks per command;
-older reports without those samples show `—`. Disk includes existing repository,
-cache and output files, rather than growth or bytes written. Whole-workflow peaks
-are not substituted for missing command measurements.
-Sampling may miss short spikes; RAM includes child processes.
+Even with matched targets, different chunking methods split files at different
+places, so deduplication and stored size differ. Reports before 2026-11-17 left
+Gutch unencrypted in the Restic, Kopia and Rustic pairs. Pinned tool versions are in
+[the tool manifest](src/comparison_benchmark_suite/resources/tools.json).
+
+**How to read the numbers**
+
+- **Timing:** chart times include each tool's own checks. Detailed reports add timings
+  with our shared validation and the range across samples.
+- **Repetitions:** six measured runs per pair after one warm-up, in alternating order.
+  OS caches are not reset, and metadata handling and write flushing still differ.
+- **Recovery:** damaged-file repair, damage with unchanged timestamps, extra-file
+  cleanup and full restoration are timed separately. Checks a tool cannot do are
+  marked unsupported and get no timing.
+- **Hardware:** GitHub assigns runners with different CPUs, so compare ratios within a
+  pair, not seconds across pairs or runs.
+- **RAM and disk charts:** peaks per command, in MiB, from a separate monitored pass.
+  Disk includes existing repository, cache and output files, not bytes written. RAM
+  includes child processes. Sampling may miss short spikes. Older reports without
+  per-command samples show `—`.
+- **History:** older reports keep their original settings. A single local smoke run
+  checks compatibility only.
 
 </details>
 

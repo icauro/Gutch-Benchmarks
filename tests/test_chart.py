@@ -139,7 +139,7 @@ class ChartTests(unittest.TestCase):
             chart = render_svg([pair_record(pair)])
             self.assertIn(f"{title} [{number}]", chart)
             label = pair_peer(pair)
-            self.assertIn(f"{number}. **{markdown_tool_name(label)}:**", readme)
+            self.assertIn(f"| {number} | {markdown_tool_name(label)} |", readme)
 
     def test_latest_selection_uses_numeric_run_order_and_keeps_bad_reports_visible(self):
         owner = ROOT / ".artifacts/tests"
