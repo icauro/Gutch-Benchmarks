@@ -2,8 +2,11 @@
 
 Reproducible benchmarks for [Gutch](https://github.com/icauro/Gutch), a fast
 deduplicating store and installer. In the latest run Gutch installs 2.2–4.6×
-faster and repairs 2.4–29× faster than Restic, Kopia, Borg, Rustic and Plakar,
-while storing the same amount of data or less.
+faster than Restic, Kopia, Borg, Rustic and Plakar, and repairs 2.3–8× faster
+than the first four. Against Plakar, whose repair rewrites every file, the
+repair is 29× faster, but a fresh Plakar restore takes only 1.6× longer than
+Gutch's. Gutch captures faster in four pairs and 1.2× slower than Kopia. It
+stores up to 3.7% less, except 0.2% more than Kopia.
 
 Each pair compares Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic or
 Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
