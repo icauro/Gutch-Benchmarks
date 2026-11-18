@@ -13,7 +13,8 @@ Open **Actions > Manual Linux benchmarks > Run workflow**. The default runs all
 six Gutch-vs-tool pairs on Ubuntu 24.04, each in a separate job. All selected
 pair jobs can run concurrently; tools within a pair run sequentially. Choose a
 single pair, a Gutch release such as `0.1.0`, and measured repetitions if needed.
-One warm-up is always included. Nothing runs on pushes, pull requests or a schedule.
+One warm-up is always included. **cold_cache** drops the OS file caches before
+every timed command (see [Cold-cache runs](#cold-cache-runs)). Nothing runs on pushes, pull requests or a schedule.
 
 The workflow prepares Blender once, then every pair restores the same validated
 input cache. The cache key depends on the dataset recipe and preparation code,
@@ -91,7 +92,19 @@ under `.artifacts/`. Existing prepared inputs are inventoried before reuse.
 Use local `path` builds in a custom fixture to work without downloading inputs.
 Each fixture runs one warm-up and six measured repetitions, rotating tool order.
 Preparation and independent output validation are outside tool-command timings.
-OS cache state is uncontrolled; these are not cold-cache measurements.
+OS cache state is uncontrolled unless the fixture sets `cold_cache: true`.
+
+### Cold-cache runs
+
+With `cold_cache: true` in a fixture, or `--cold-cache` for the CI `fixture`
+command, the harness writes dirty pages and empties Linux's page, dentry and
+inode caches (`/proc/sys/vm/drop_caches`) before every tool command, outside
+its timing. Every tool then reads its repository and output from disk. This
+needs Linux and root or passwordless `sudo`, which GitHub's hosted runners have;
+elsewhere the run stops before its first case. The manifest's `cache_state`
+records the choice, and reports label the pair "cold cache". Cold-cache reports
+are kept but never replace the warm results in the README's latest view.
+In-process steps, such as Plakar's folder delete, are not preceded by a drop.
 
 Comparison executables are supplied locally. Install tools on PATH, set their
 paths in the fixture, or place them in the ignored `.artifacts/tools/windows-x64/` or
@@ -211,7 +224,7 @@ The existing saved public results use the earlier contract and are not rewritten
 - Every native adapter uses the same strict output inventory and SHA-256 validator. Validation-inclusive metrics add its duration to native command time; native verification work is not subtracted.
 - A source-derived corruption plan flips bytes in the smallest and largest writable nonempty files, and deletes a distinct file when available. The same source paths are selected for every tool.
 - Content repair and preserved-mtime repair are separate. The latter keeps file length and mtime unchanged. Borg resume cannot detect that damage and receives an explicit unsupported outcome.
-- Extra-file cleanup is a separate exact-directory check. Borg, Plakar and BPT have no native deletion in these adapters and receive unsupported outcomes; the harness does not delete extras on their behalf.
+- Extra-file cleanup is a separate exact-directory check. Borg and BPT have no native deletion in these adapters and receive unsupported outcomes; the harness does not delete extras on their behalf. Plakar recovery instead deletes the build's destination and restores it whole (below), so it passes this check.
 - Full restore recovery removes the owned destination before native restoration. Strict validation follows every supported operation. Wrong bytes or unexpected files fail the case.
 - Detailed tables show medians, minimum, maximum and sample counts. These ranges are descriptive, not confidence intervals.
 
@@ -389,7 +402,9 @@ Missing or failed samples remain unavailable rather than becoming zero.
 Contract 2 changes file content without changing permissions. Content damage,
 preserved-mtime damage, unexpected files, and full restoration are separate
 checks. The harness does not identify damaged files for the tool or remove extras
-on its behalf. Strict validation follows every supported check.
+on its behalf, except that Plakar recovery deletes that build's destination
+before restoring it, with the delete included in the timing. Strict validation
+follows every supported check.
 
 | Tool | Native recovery | Preserved-mtime damage | Extra-file cleanup |
 |---|---|---|---|
@@ -398,7 +413,7 @@ on its behalf. Strict validation follows every supported check.
 | Rustic | `restore --verify-existing --no-ownership --delete` | Supported | Supported, scoped to selected build |
 | Kopia | `snapshot restore --delete-extra` | Supported | Supported |
 | Borg | `extract --continue` | Unsupported: trusts matching size/mtime | Unsupported in adapter |
-| Plakar | Restore over existing destination | Supported | Unsupported in adapter |
+| Plakar | Delete the build's destination, then `restore` | Supported | Supported by the delete |
 | BuildPatchTool | `InstallManifest -PrevManifest=...` | Supported | Unsupported in adapter |
 
 All six pairs passed a Windows functional smoke test on 2026-10-31 using two

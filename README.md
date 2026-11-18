@@ -31,7 +31,7 @@ with SHA-256. Numbers match the chart; cells read **Gutch / other tool**.
 | 2 | [Kopia](https://github.com/kopia/kopia) | FastCDC 4 MiB / Buzhash 4 MiB | None / none | AES-256 / AES-256 | 4 / 4 | — |
 | 3 | [Borg](https://github.com/borgbackup/borg) | FastCDC 2 MiB / FastCDC 2 MiB | LZ4 / LZ4 | None / authenticated only | 1\* / 1 | Extra-file cleanup, unchanged-timestamp repair |
 | 4 | [Rustic](https://github.com/rustic-rs/rustic) | FastCDC / Rabin, both 256 KiB–1 MiB–4 MiB | Zstd 3 / Zstd 3 | AES-256 / AES-256 | 4 / 4 | — |
-| 5 | [Plakar](https://github.com/PlakarKorp/plakar) | FastCDC 1 MiB / FastCDC ~1 MiB | LZ4 / LZ4 | None / none | 4 / 4 | Extra-file cleanup |
+| 5 | [Plakar](https://github.com/PlakarKorp/plakar) | FastCDC 1 MiB / FastCDC ~1 MiB | LZ4 / LZ4 | None / none | 4 / 4 | — |
 | 6 | [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | FastCDC 1 MiB / fixed 1 MiB window | Zstd 3 / built-in | None / none | 4 / native | Extra-file cleanup |
 | 7 | [Encrypted Gutch](https://github.com/icauro/Gutch) | Identical | Identical | None / AES-256 | 4 / 4 | — |
 
@@ -48,8 +48,10 @@ single-threaded Borg; every other pair gives Gutch four.
    skipped. Borg is single-threaded by design, so Gutch also runs one worker here.
 4. **Rustic:** Both use 8 MiB packs, but Gutch compresses whole bundles while Rustic
    compresses each chunk, so compression work still differs.
-5. **Plakar:** Restores write over existing files, while Gutch repairs only damaged
-   content, so the recovery commands do different work.
+5. **Plakar:** Plakar cannot remove files that are not in a snapshot, so its
+   recovery deletes the build's folder and restores it whole; the timing includes
+   the delete. Gutch repairs only damaged content. Reports up to 2026-11-17 instead
+   restored over the existing folder and skipped extra-file cleanup.
 6. **BuildPatchTool:** A chunk window is not a content-defined average, and its codec
    and format do not match. Recovery uses a previous installation manifest, so this
    compares two delivery workflows. Its source requires
@@ -69,7 +71,8 @@ against Borg. Pinned tool versions are in
 - **Timing:** chart times include each tool's own checks. Detailed reports add timings
   with our shared validation and the range across samples.
 - **Repetitions:** six measured runs per pair after one warm-up, in alternating order.
-  OS caches are not reset, and metadata handling and write flushing still differ.
+  OS caches are not reset unless a run is marked cold cache, and metadata handling
+  and write flushing still differ. Cold-cache runs never replace the latest results.
 - **Recovery:** damaged-file repair, damage with unchanged timestamps, extra-file
   cleanup and full restoration are timed separately. Checks a tool cannot do are
   marked unsupported and get no timing.
@@ -338,7 +341,8 @@ All pairs can run concurrently, each on its own runner.
 All jobs share a validated Blender input cache. Repositories and restored outputs
 are discarded after each sample. Runs on the default branch save compact reports
 in Git and update this page; detailed logs and traces remain Actions artifacts
-for 30 days. Hosted-runner timings are indicative; OS caches are uncontrolled.
+for 30 days. Hosted-runner timings are indicative; OS caches are uncontrolled
+unless you tick **cold_cache**, which drops them before every command.
 
 </details>
 
