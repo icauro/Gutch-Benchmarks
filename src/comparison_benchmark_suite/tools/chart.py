@@ -25,11 +25,15 @@ BLUE, ORANGE = "#2474f5", "#f78b32"
 
 
 def latest_records(reports: Path) -> list[dict]:
-    """Select by report date, numeric run ID and attempt; keep failures visible."""
+    """Select by report date, numeric run ID and attempt; keep failures visible.
+
+    Cold-cache runs measure a different condition, so they never replace the
+    warm-cache record that the README compares.
+    """
     records = []
     for fixture in sorted(FIXTURES.glob("gutch_vs_*.yaml")):
         pair = fixture.stem.removeprefix("gutch_vs_")
-        candidates = list(reports.glob(f"*/*/{pair}.json"))
+        candidates = [path for path in reports.glob(f"*/*/{pair}.json") if not _cold_report(path)]
         record = {"pair": pair, "status": "NOT_RUN", "rows": []}
         if candidates:
             source = max(candidates, key=lambda path: (
@@ -46,6 +50,14 @@ def latest_records(reports: Path) -> list[dict]:
                 record["operation_resources"] = json.loads(resources.read_text(encoding="utf-8"))["operation_resources"]
         records.append(record)
     return sorted(records, key=lambda record: PAIR_NOTES.get(record["pair"], len(PAIR_NOTES) + 1))
+
+
+def _cold_report(path: Path) -> bool:
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return isinstance(record, dict) and bool((record.get("fixture") or {}).get("cold_cache"))
 
 
 def _median(record, label, metric, unit):

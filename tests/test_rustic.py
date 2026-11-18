@@ -86,6 +86,31 @@ class RusticTests(unittest.TestCase):
         self.assertEqual(result.metrics["repair"], 0.5)
         self.assertEqual(result.metrics["repository_check"], 0.25)
 
+    def test_plakar_recovery_wipes_each_build_and_restores_it_whole(self):
+        binary, lane, dataset, commands = self.adapter_inputs()
+        output = lane.payload / "installation"
+        def recovery(dataset, lane, output_root, repair, restore, **options):
+            self.assertTrue(options["delete_extra"])
+            extra = output_root / "v2" / "extra.bin"
+            extra.parent.mkdir(parents=True, exist_ok=True)
+            extra.write_bytes(b"not in the snapshot")
+            elapsed = repair("repair")
+            self.assertFalse(extra.exists())
+            self.assertTrue((output_root / "v2").is_dir())
+            return {"repair": elapsed}, {"repair": "PASS"}
+        with patch("comparison_benchmark_suite.tools.external.recovery_checks", side_effect=recovery), patch(
+            "comparison_benchmark_suite.tools.external.validate_installation", return_value=0.0
+        ):
+            result = run_external(ExternalTools(commands, plakar=binary), lane, self.root / "product",
+                                  LaneSpec("plakar", "plakar"), recovery_enabled=True, dataset=dataset)
+        restores = [call.args[0] for call in commands.run.call_args_list if "restore" in call.args[0]]
+        self.assertEqual(len(restores), 4)
+        self.assertIn(output / "v2", restores[-2])
+        self.assertEqual(result.metadata["recovery_mode"], "wipe_and_restore")
+        self.assertEqual(result.metadata["extra_file_policy"], "wipe_and_restore")
+        # Two timed restores plus the two timed wipes.
+        self.assertGreaterEqual(result.metrics["repair"], 0.5)
+
     def test_restic_restores_without_rereading_output_the_suite_validates(self):
         binary, lane, dataset, commands = self.adapter_inputs()
         summary = '{"message_type": "summary", "snapshot_id": "abc"}'

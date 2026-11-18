@@ -17,7 +17,7 @@ from .datasets import prepare_dataset
 from .scheduling.runner import execute_cases
 from .scheduling.dataset import DatasetSelection
 from .support.artifacts import RunLayout, create_run_dir
-from .support.command import CommandRunner, redact_output
+from .support.command import CommandRunner, drop_os_caches, redact_output
 from .support.commands import GutchCli
 from .support.filesystem import file_sha256
 from .tools.config import load_fixture
@@ -121,7 +121,9 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
         print(fixture.description, flush=True)
     layout.write_manifest("preparing", suite_source_sha256=suite_source_hash(), dataset=dataset_metadata,
                           executables={label: {"path": str(path), "sha256": file_sha256(path)} for label, path in resolved.items()})
-    commands = CommandRunner(memory_profile=fixture.profile_mode == "detailed",
+    if fixture.cold_cache:
+        drop_os_caches()  # Fail before any lane when caches cannot be dropped.
+    commands = CommandRunner(memory_profile=fixture.profile_mode == "detailed", cold_cache=fixture.cold_cache,
                              on_step=lambda description: print(f"Step: {description}", flush=True))
     runners = {}
     for lane in fixture.lanes:
@@ -164,6 +166,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
     execute_cases(fixture, layout, commands, execute, executable=resolved.get("gutch", Path("unavailable")),
                             discard_outputs=discard_outputs,
                             on_lane_complete=completed_case,
-                            on_run_complete=partial(write_comparison_report, layout.root, fixture.description))
+                            on_run_complete=partial(write_comparison_report, layout.root, fixture.description,
+                                                    cold_cache=fixture.cold_cache))
     print(f"Report: {layout.root / 'summary.md'}", flush=True)
     return 1 if json.loads((layout.root / "run.json").read_text(encoding="utf-8"))["status"] == "failed" else 0

@@ -196,4 +196,5 @@ def load_fixture(path: Path, *, gutch_workloads=("individual",)) -> FixtureSpec:
         repetitions=repetitions,
         profile_mode=mode,
         resource_sampling=_bool(values, "resource_sampling", False),
+        cold_cache=_bool(values, "cold_cache", False),
     )

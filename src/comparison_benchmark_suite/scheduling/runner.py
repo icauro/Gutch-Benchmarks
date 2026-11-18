@@ -36,7 +36,7 @@ def execute_cases(fixture, layout, commands, execute, *, executable, keep_artifa
     layout.write_manifest('running', schema_version=1, fixture=asdict(fixture),
         host={'platform': platform.platform(), 'python': platform.python_version()},
         source_revision=revision, binary_sha256=file_sha256(executable) if executable.is_file() else None,
-        profile_mode=fixture.profile_mode, memory_profile=fixture.profile_mode == "detailed", resource_sampling=fixture.resource_sampling, cache_state='fresh_repository_os_cache_uncontrolled')
+        profile_mode=fixture.profile_mode, memory_profile=fixture.profile_mode == "detailed", resource_sampling=fixture.resource_sampling, cache_state='fresh_repository_os_cache_dropped_per_command' if fixture.cold_cache else 'fresh_repository_os_cache_uncontrolled')
     try:
         for index, (specification, repetition) in enumerate(schedule):
             label = specification.label

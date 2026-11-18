@@ -50,6 +50,28 @@ def redact_output(value: str) -> str:
     return re.sub(r"https?://[^\s\"<>]+", lambda match: _redact(match.group()), value)
 
 
+DROP_CACHES = Path("/proc/sys/vm/drop_caches")
+
+
+def drop_os_caches() -> None:
+    """Write dirty pages, then empty Linux's page, dentry and inode caches.
+
+    Needs root, or passwordless sudo for `tee` on drop_caches. Other systems
+    have no supported equivalent, so they fail instead of running warm.
+    """
+    if not DROP_CACHES.exists():
+        raise RuntimeError("cold-cache runs need Linux's /proc/sys/vm/drop_caches")
+    os.sync()
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        DROP_CACHES.write_text("3\n", encoding="ascii")
+        return
+    result = subprocess.run(["sudo", "-n", "tee", str(DROP_CACHES)], input="3\n", text=True,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=False)
+    if result.returncode != 0:
+        raise RuntimeError("cold-cache runs need root or passwordless sudo to drop OS caches: "
+                           + result.stderr.strip())
+
+
 class CommandRunner:
     def __init__(
         self,
@@ -60,7 +82,9 @@ class CommandRunner:
         on_step: Callable[[str], None] | None = None,
         memory_profile: bool = False,
         timeout_seconds: float | None = None,
+        cold_cache: bool = False,
     ):
+        self.cold_cache = cold_cache
         self.timeout_seconds = float(timeout_seconds if timeout_seconds is not None else os.environ.get("GUTCH_BENCHMARK_TIMEOUT_SECONDS", "900"))
         if not 0 < self.timeout_seconds < float("inf"):
             raise ValueError("benchmark command timeout must be finite and positive")
@@ -123,6 +147,8 @@ class CommandRunner:
         self._wait_for_step(description)
         if self.on_step is not None:
             self.on_step(description)
+        if self.cold_cache:
+            drop_os_caches()
         self._print_progress("run", description)
         started = time.perf_counter()
         memory = {} if self.memory_profile else None

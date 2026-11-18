@@ -142,7 +142,14 @@ def install_tool(pair, root=ROOT):
     remove_owned(work, root / ".artifacts")
 
 
-def write_fixture(pair, repetitions, root=ROOT):
+COLD_CACHE_NOTE = " Cold cache: OS file caches are dropped before every command."
+
+
+def is_cold(record):
+    return bool(record.get("fixture", {}).get("cold_cache"))
+
+
+def write_fixture(pair, repetitions, root=ROOT, cold_cache=False):
     if not 1 <= repetitions <= 10:
         raise ValueError("Repetitions must be between 1 and 10")
     document = yaml.safe_load((root / SOURCE / f"fixtures/gutch_vs_{pair}.yaml").read_text(encoding="utf-8"))
@@ -152,6 +159,9 @@ def write_fixture(pair, repetitions, root=ROOT):
         "six rotating measured repetitions", f"{repetitions} rotating measured repetitions"
     )
     document["open_perfetto"] = False
+    if cold_cache:
+        document["cold_cache"] = True
+        document["description"] = document["description"].rstrip() + COLD_CACHE_NOTE
     path = root / ".artifacts/tools/ci/fixture.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8", newline="\n")
@@ -283,11 +293,13 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     repository = os.environ.get("GITHUB_REPOSITORY", "icauro/Gutch-Benchmarks")
     url = f"https://github.com/{repository}/actions/runs/{run_id}"
     lines = ["# Linux benchmark results", "", f"Run: [{run_id}, attempt {attempt}]({url}) | UTC date: {stamp}", "",
-             "Each pair has its own settings. Hosted-runner timings are indicative; OS cache state is uncontrolled.", ""]
+             "Each pair has its own settings. Hosted-runner timings are indicative; "
+             + ("OS file caches are dropped before every command (cold cache)." if any(map(is_cold, records))
+                else "OS cache state is uncontrolled."), ""]
     dates = sorted({item["source_report"].split("/")[0] for item in latest if item.get("source_report")})
     protocol_note = " · includes earlier measurement protocols" if any(item.get("measurement_contract") != 2 for item in latest) else " · measurement contract 2"
     overview = ["Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · " + ", ".join(dates) + protocol_note, "",
-                f"[This run's report]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
+                f"[This run's report{' (cold cache)' if any(map(is_cold, records)) else ''}]({relative.as_posix()}/README.md) · [Actions logs and artifacts]({url})", "",
                 "<details>", "<summary>Detailed results and source reports</summary>", ""]
     for item in latest:
         if item.get("source_report"):
@@ -297,7 +309,8 @@ def publish(pair, inputs, run_id, attempt, root=ROOT):
     for record in sorted(records, key=lambda record: PAIR_NOTES[record["pair"]]):
         name = record["pair"]
         provenance = record.get("provenance", {})
-        lines.extend([f"## Gutch vs {name}: {record['status']}", "", record.get("description", ""), "",
+        cold = " (cold cache)" if is_cold(record) else ""
+        lines.extend([f"## Gutch vs {name}{cold}: {record['status']}", "", record.get("description", ""), "",
                       f"Suite commit: `{provenance.get('GITHUB_SHA', 'unknown')}`; Gutch release: `{provenance.get('GUTCH_VERSION', 'unknown')}`;"
                       f" Gutch commit: `{provenance.get('GUTCH_REVISION', 'unknown')}`.", "",
                       f"Host: `{record.get('host', {})}`", "",
@@ -334,6 +347,7 @@ def main():
     fixture = commands.add_parser("fixture")
     fixture.add_argument("--pair", choices=PAIRS, required=True)
     fixture.add_argument("--repetitions", type=int, required=True)
+    fixture.add_argument("--cold-cache", action="store_true", help="Drop OS file caches before every command")
     export = commands.add_parser("collect")
     export.add_argument("--pair", choices=PAIRS, required=True)
     export.add_argument("--outcome", required=True)
@@ -353,7 +367,7 @@ def main():
     elif args.command == "tool":
         install_tool(args.pair)
     elif args.command == "fixture":
-        write_fixture(args.pair, args.repetitions)
+        write_fixture(args.pair, args.repetitions, cold_cache=args.cold_cache)
     elif args.command == "collect":
         collect(args.pair, args.outcome)
     elif args.command == "publish":

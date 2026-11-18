@@ -140,10 +140,11 @@ def measurement_details(summary):
     return ["Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.", "", *lines, ""]
 
 
-def write_comparison_report(directory: Path, description: str, results: list[LaneResult]) -> None:
+def write_comparison_report(directory: Path, description: str, results: list[LaneResult], *, cold_cache=False) -> None:
+    cache = "dropped before every command" if cold_cache else "uncontrolled"
     utilization_note = "RAM/disk: sampled in a separate resource pass; RSS includes descendants. Disk is owned apparent file bytes. CPU 100% = one core; harness excluded."
     summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
-    lines = ["# Comparison benchmark", "", description, "", "OS cache state: uncontrolled. Times are median seconds.", "",
+    lines = ["# Comparison benchmark", "", description, "", f"OS cache state: {cache}. Times are median seconds.", "",
              "| " + " | ".join(COMPARISON_HEADERS) + " |",
              "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     rows = comparison_rows(summary, [result.as_json() for result in results])
@@ -161,7 +162,7 @@ def write_comparison_report(directory: Path, description: str, results: list[Lan
     print("\nComparison: median seconds across measured runs; warm-ups excluded.")
     print(ascii_comparison_table(rows))
     print("Repair = in-place; recovery = full restore. '-' = not measured.")
-    print("Independent validation is outside timings. OS cache is uncontrolled.")
+    print(f"Independent validation is outside timings. OS cache is {cache}.")
     print(utilization_note)
     for reason in reasons:
         print(reason)

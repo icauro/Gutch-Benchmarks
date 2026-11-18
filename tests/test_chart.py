@@ -173,3 +173,9 @@ class ChartTests(unittest.TestCase):
             self.assertIn("10-1", records["bpt"]["source_report"])
             self.assertEqual(records["restic"]["status"], "ERROR")
             self.assertEqual(records["borg"]["status"], "NOT_RUN")
+            cold = dict(pair_record("bpt", "PASS"), fixture={"cold_cache": True})
+            path = reports / "2026-10-31/12-1/bpt.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(cold), encoding="utf-8")
+            records = {record["pair"]: record for record in latest_records(reports)}
+            self.assertIn("10-1", records["bpt"]["source_report"])  # Cold runs never replace warm ones.

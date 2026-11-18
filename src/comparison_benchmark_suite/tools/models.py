@@ -40,6 +40,8 @@ class FixtureSpec:
     repetitions: int = 1
     profile_mode: str = "off"
     resource_sampling: bool = False
+    # Drop OS file caches before every command (Linux, root or sudo).
+    cold_cache: bool = False
 
 
 @dataclass

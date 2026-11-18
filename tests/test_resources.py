@@ -180,3 +180,37 @@ class ResourceTests(unittest.TestCase):
         self.assertEqual(len(json.loads((layout.root / "resources.json").read_text(encoding="utf-8"))), 1)
         self.assertEqual(seen, [(False, False, False), (True, True, True)])
         self.assertIsNone(commands.disk_roots)
+
+
+class ColdCacheTests(unittest.TestCase):
+    def test_runner_drops_caches_before_each_timed_command_only_when_asked(self):
+        from comparison_benchmark_suite.support.command import CommandRunner
+        for cold, calls in ((True, 2), (False, 0)):
+            runner = CommandRunner(progress=False, cold_cache=cold)
+            with patch("comparison_benchmark_suite.support.command.drop_os_caches") as drop:
+                for _ in range(2):
+                    runner.run([sys.executable, "-c", "pass"], description="noop")
+            self.assertEqual(drop.call_count, calls)
+
+    def test_drop_fails_clearly_without_linux_drop_caches(self):
+        from comparison_benchmark_suite.support import command
+        with patch.object(command, "DROP_CACHES", Path("/missing/drop_caches")):
+            with self.assertRaisesRegex(RuntimeError, "drop_caches"):
+                command.drop_os_caches()
+
+    def test_fixture_reads_the_cold_cache_switch(self):
+        from comparison_benchmark_suite import FIXTURES
+        from comparison_benchmark_suite.tools.config import load_fixture
+        import yaml
+        document = yaml.safe_load((FIXTURES / "gutch_vs_kopia.yaml").read_text(encoding="utf-8"))
+        self.assertFalse(load_fixture(FIXTURES / "gutch_vs_kopia.yaml").cold_cache)
+        owner = Path(__file__).resolve().parents[1] / ".artifacts/tests"
+        owner.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=owner) as temporary:
+            path = Path(temporary) / "cold.yaml"
+            document["cold_cache"] = True
+            document["dataset"] = str((FIXTURES / document["dataset"]).resolve()) if "dataset" in document else None
+            if document["dataset"] is None:
+                del document["dataset"]
+            path.write_text(yaml.safe_dump(document), encoding="utf-8")
+            self.assertTrue(load_fixture(path).cold_cache)

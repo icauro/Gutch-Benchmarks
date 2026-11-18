@@ -6,6 +6,7 @@ import json
 import re
 from pathlib import Path
 import tempfile
+import time
 import shutil
 
 from comparison_benchmark_suite.support.command import CommandRunner
@@ -14,6 +15,9 @@ from comparison_benchmark_suite.support.recovery import capture_metrics, recover
 from comparison_benchmark_suite.scheduling.dataset import DatasetSelection
 from comparison_benchmark_suite.support.filesystem import file_sha256
 from comparison_benchmark_suite.tools.models import LaneResult, LaneSpec
+
+# Tools whose restore deletes files that are not in the snapshot.
+NATIVE_DELETE_KINDS = {"restic", "rustic", "kopia"}
 
 
 @dataclass
@@ -277,6 +281,13 @@ def run_external(
                 )
             elif kind == "plakar":
                 destination = output / source.name
+                if not record_snapshots and not clean:
+                    # Plakar has no native extra-file deletion, so recovery
+                    # wipes this build's destination and restores it whole.
+                    # The timed wipe counts as part of the recovery.
+                    wipe_started = time.perf_counter()
+                    remove_tree(destination)
+                    elapsed_commands.append(time.perf_counter() - wipe_started)
                 destination.mkdir(parents=True, exist_ok=True)
                 execute(
                     _plakar_command(executable, repo, plakar_cache_directory, "restore", "-to", destination, "-tag", identifiers[source.name]),
@@ -301,7 +312,7 @@ def run_external(
     if recovery_enabled:
         recovery, operations = recovery_checks(dataset, lane, output, lambda operation: restore_output(),
             lambda: restore_output(clean=True),
-            delete_extra=kind in {"restic", "rustic", "kopia"}, hidden_damage=kind != "borg")
+            delete_extra=kind in NATIVE_DELETE_KINDS | {"plakar"}, hidden_damage=kind != "borg")
 
     verify_started = len(elapsed_commands)
     if kind == "restic":
@@ -346,8 +357,9 @@ def run_external(
             "status": "PASS",
             "operations": operations,
             "measurement_contract": 2,
-            "recovery_mode": "restore_existing",
-            "extra_file_policy": "native_delete" if kind in {"restic", "rustic", "kopia"} else "no_native_delete_option",
+            "recovery_mode": "wipe_and_restore" if kind == "plakar" else "restore_existing",
+            "extra_file_policy": ("native_delete" if kind in NATIVE_DELETE_KINDS
+                                  else "wipe_and_restore" if kind == "plakar" else "no_native_delete_option"),
             "snapshot_metrics": snapshot_metrics,
             "tool_version": tool_version,
             "binary_sha256": file_sha256(executable) if executable.is_file() else None,

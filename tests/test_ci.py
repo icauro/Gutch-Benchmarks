@@ -325,6 +325,25 @@ class CiTests(unittest.TestCase):
         self.assertIn("[Gutch](https://github.com/icauro/Gutch) | 2.0 | —", readme)
         self.assertIn("[Rustic](https://github.com/rustic-rs/rustic) | 4.0 | —", readme)
 
+    def test_cold_cache_fixture_is_marked_and_described(self):
+        shutil.copytree(ROOT / ci.SOURCE / "fixtures", self.package / "fixtures",
+                        ignore=shutil.ignore_patterns("builds", "__pycache__"))
+        ci.write_fixture("plakar", 2, self.root, cold_cache=True)
+        fixture = yaml.safe_load((self.root / ".artifacts/tools/ci/fixture.yaml").read_text(encoding="utf-8"))
+        self.assertTrue(fixture["cold_cache"])
+        self.assertTrue(fixture["description"].endswith(ci.COLD_CACHE_NOTE))
+        self.assertTrue(ci.is_cold({"fixture": fixture}))
+        ci.write_fixture("plakar", 2, self.root)
+        fixture = yaml.safe_load((self.root / ".artifacts/tools/ci/fixture.yaml").read_text(encoding="utf-8"))
+        self.assertNotIn("cold_cache", fixture)
+
+    def test_workflow_passes_the_cold_cache_choice_to_the_fixture(self):
+        text = (ROOT / ".github/workflows/benchmarks.yml").read_text(encoding="utf-8")
+        workflow = yaml.load(text, Loader=yaml.BaseLoader)
+        option = workflow["on"]["workflow_dispatch"]["inputs"]["cold_cache"]
+        self.assertEqual((option["type"], option["default"]), ("boolean", "false"))
+        self.assertIn("--cold-cache", text)
+
     def test_workflow_is_manual_only_and_pairs_share_one_cache_action(self):
         workflow = yaml.load((ROOT / ".github/workflows/benchmarks.yml").read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
         self.assertEqual(set(workflow["on"]), {"workflow_dispatch"})
