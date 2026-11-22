@@ -1,14 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="764" height="762" viewBox="0 0 764 762" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="764" height="852" viewBox="0 0 764 852" role="img" aria-labelledby="title description">
 <title id="title">Peak RAM by operation</title>
 <desc id="description">Blue bars show Gutch; orange bars show the paired tool. Lower values are better. Each cell has its own linear scale. Ratios use raw medians. Bracketed numbers refer to the README comparison notes.</desc>
-<rect width="764" height="762" fill="#000000"/>
+<rect width="764" height="852" fill="#000000"/>
 <g font-family="Segoe UI, Arial, sans-serif" fill="#edf2fa">
 <text x="8" y="34" font-size="25" font-weight="700" fill="#edf2fa" text-anchor="start">Peak RAM by operation</text>
 <rect x="490" y="23" width="16.00" height="13" rx="3" fill="#2474f5"/>
 <text x="513" y="34" font-size="16" font-weight="400" fill="#edf2fa" text-anchor="start">Gutch</text>
 <rect x="600" y="23" width="16.00" height="13" rx="3" fill="#f78b32"/>
 <text x="623" y="34" font-size="16" font-weight="400" fill="#edf2fa" text-anchor="start">Paired tool</text>
-<rect x="8" y="52" width="748.00" height="676" rx="10" fill="#161b22"/>
+<rect x="8" y="52" width="748.00" height="766" rx="10" fill="#161b22"/>
 <text x="14" y="80" font-size="13" font-weight="700" fill="#a3afc2" text-anchor="start">COMPARISON</text>
 <text x="163" y="73" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">First capture</text>
 <text x="163" y="90" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">MiB</text>
@@ -213,41 +213,71 @@
 <rect x="8" y="638" width="748.00" height="90" rx="0" fill="#000000"/>
 <path d="M8 638H756" stroke="#29313d"/>
 <text x="14" y="661" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
-<text x="14" y="685" font-size="14" font-weight="650" fill="#edf2fa" text-anchor="start">Encrypted Gutch [7]</text>
+<text x="14" y="685" font-size="17" font-weight="650" fill="#edf2fa" text-anchor="start">CAVS [7]</text>
 <rect x="163" y="654" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <rect x="163" y="654" width="42.00" height="12" rx="2" fill="#2474f5"/>
-<text x="214" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">134.0</text>
+<text x="214" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">152.3</text>
 <rect x="163" y="679" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="163" y="679" width="35.68" height="12" rx="2" fill="#f78b32"/>
-<text x="214" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">113.8</text>
-<text x="163" y="717" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">17.7% larger</text>
+<text x="214" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
+<text x="163" y="717" font-size="17" font-weight="700" fill="#a3afc2" text-anchor="start">-</text>
 <rect x="313" y="654" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="313" y="654" width="35.29" height="12" rx="2" fill="#2474f5"/>
-<text x="364" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">136.3</text>
+<rect x="313" y="654" width="42.00" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">155.8</text>
 <rect x="313" y="679" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="313" y="679" width="42.00" height="12" rx="2" fill="#f78b32"/>
-<text x="364" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">162.2</text>
-<text x="313" y="717" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">16% smaller</text>
+<text x="364" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">—</text>
+<text x="313" y="717" font-size="17" font-weight="700" fill="#a3afc2" text-anchor="start">-</text>
 <rect x="463" y="654" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="463" y="654" width="35.26" height="12" rx="2" fill="#2474f5"/>
-<text x="514" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">123.1</text>
+<rect x="463" y="654" width="42.00" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">163.9</text>
 <rect x="463" y="679" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="463" y="679" width="42.00" height="12" rx="2" fill="#f78b32"/>
-<text x="514" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">146.7</text>
-<text x="463" y="717" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">16.1% smaller</text>
+<rect x="463" y="679" width="13.09" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">51.1</text>
+<text x="463" y="717" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">220.8% larger</text>
 <rect x="613" y="654" width="42.00" height="12" rx="2" fill="#252d3a"/>
 <rect x="613" y="654" width="42.00" height="12" rx="2" fill="#2474f5"/>
-<text x="664" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">183.9</text>
+<text x="664" y="666" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">144.2</text>
 <rect x="613" y="679" width="42.00" height="12" rx="2" fill="#252d3a"/>
-<rect x="613" y="679" width="33.88" height="12" rx="2" fill="#f78b32"/>
-<text x="664" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">148.4</text>
-<text x="613" y="717" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">24% larger</text>
-<path d="M156 52V728" stroke="#29313d"/>
-<path d="M306 52V728" stroke="#29313d"/>
-<path d="M456 52V728" stroke="#29313d"/>
-<path d="M606 52V728" stroke="#29313d"/>
-<path d="M756 52V728" stroke="#29313d"/>
+<rect x="613" y="679" width="8.23" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="691" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">28.3</text>
+<text x="613" y="717" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">410.2% larger</text>
+<rect x="8" y="728" width="748.00" height="90" rx="0" fill="#0d1117"/>
 <path d="M8 728H756" stroke="#29313d"/>
-<text x="14" y="750" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">* Gutch runs one worker to match single-threaded Borg.</text>
+<text x="14" y="751" font-size="14" font-weight="400" fill="#a3afc2" text-anchor="start">Gutch vs</text>
+<text x="14" y="775" font-size="14" font-weight="650" fill="#edf2fa" text-anchor="start">Encrypted Gutch [8]</text>
+<rect x="163" y="744" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="744" width="42.00" height="12" rx="2" fill="#2474f5"/>
+<text x="214" y="756" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">134.0</text>
+<rect x="163" y="769" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="163" y="769" width="35.68" height="12" rx="2" fill="#f78b32"/>
+<text x="214" y="781" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">113.8</text>
+<text x="163" y="807" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">17.7% larger</text>
+<rect x="313" y="744" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="744" width="35.29" height="12" rx="2" fill="#2474f5"/>
+<text x="364" y="756" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">136.3</text>
+<rect x="313" y="769" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="313" y="769" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="364" y="781" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">162.2</text>
+<text x="313" y="807" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">16% smaller</text>
+<rect x="463" y="744" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="744" width="35.26" height="12" rx="2" fill="#2474f5"/>
+<text x="514" y="756" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">123.1</text>
+<rect x="463" y="769" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="463" y="769" width="42.00" height="12" rx="2" fill="#f78b32"/>
+<text x="514" y="781" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">146.7</text>
+<text x="463" y="807" font-size="17" font-weight="700" fill="#4ade80" text-anchor="start">16.1% smaller</text>
+<rect x="613" y="744" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="744" width="42.00" height="12" rx="2" fill="#2474f5"/>
+<text x="664" y="756" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">183.9</text>
+<rect x="613" y="769" width="42.00" height="12" rx="2" fill="#252d3a"/>
+<rect x="613" y="769" width="33.88" height="12" rx="2" fill="#f78b32"/>
+<text x="664" y="781" font-size="17" font-weight="400" fill="#c5cedc" text-anchor="start">148.4</text>
+<text x="613" y="807" font-size="17" font-weight="700" fill="#f87171" text-anchor="start">24% larger</text>
+<path d="M156 52V818" stroke="#29313d"/>
+<path d="M306 52V818" stroke="#29313d"/>
+<path d="M456 52V818" stroke="#29313d"/>
+<path d="M606 52V818" stroke="#29313d"/>
+<path d="M756 52V818" stroke="#29313d"/>
+<path d="M8 818H756" stroke="#29313d"/>
+<text x="14" y="840" font-size="13" font-weight="400" fill="#a3afc2" text-anchor="start">* Gutch runs one worker to match single-threaded Borg.</text>
 </g>
 </svg>

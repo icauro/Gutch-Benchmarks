@@ -12,11 +12,11 @@ Each pair compares Gutch against Borg, BuildPatchTool, CAVS, Kopia, Plakar, Rest
 or Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
 validation.
 
-![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=94822f2e48bc)
+![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=78c95e8a2788)
 
-![Peak RAM by operation](_docs/reports/ram.svg?v=48052c3ac2a8)
+![Peak RAM by operation](_docs/reports/ram.svg?v=4826763a9cdd)
 
-![Peak disk by operation](_docs/reports/disk.svg?v=fd2cea18b2c1)
+![Peak disk by operation](_docs/reports/disk.svg?v=21776d6c6b18)
 
 <details>
 <summary>Comparison differences and limits</summary>
@@ -95,9 +95,9 @@ against Borg. Pinned tool versions are in
 </details>
 
 <!-- latest-benchmarks:start -->
-Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-11-17 · measurement contract 2
+Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-11-17, 2026-11-22 · measurement contract 2
 
-[This run's report](_docs/reports/2026-11-17/44132299226-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/44132299226)
+[This run's report](_docs/reports/2026-11-22/44991366425-1/README.md) · [Actions logs and artifacts](https://github.com/icauro/Gutch-Benchmarks/actions/runs/44991366425)
 
 <details>
 <summary>Detailed results and source reports</summary>
@@ -299,6 +299,40 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 | Full restore recovery + validation s | 3.118 (3.065–3.227; n=6) | 26.769 (26.230–26.969; n=6) |
 
 buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
+
+[Source: Gutch vs cavs](_docs/reports/2026-11-22/44991366425-1/cavs.json)
+
+### [Gutch](https://github.com/icauro/Gutch) vs [CAVS](https://github.com/terragov/cavs) (PASS)
+
+| Tool | Status | Capture s | Restore s | Repair s | Stored MiB |
+|---|---|---:|---:|---:|---:|
+| [Gutch](https://github.com/icauro/Gutch) | PASS | 3.624 | 1.382 | 0.716 | 679.349 |
+| [CAVS](https://github.com/terragov/cavs) | PASS | 10.745 | 6.731 | 5.555 | 712.400 |
+| **Gutch relative** | - | 2.97x faster | 4.87x faster | 7.76x faster | 4.6% smaller |
+
+**Resources by operation (MiB)**
+
+| Tool | First capture RAM | First capture disk | Second capture RAM | Second capture disk | Restore RAM | Restore disk | Repair RAM | Repair disk |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| [Gutch](https://github.com/icauro/Gutch) | 152.3 | 379.7 | 155.8 | 679.3 | 163.9 | 2,562.9 | 144.2 | 2,562.9 |
+| [CAVS](https://github.com/terragov/cavs) | — | — | — | — | 51.1 | 4,322.2 | 28.3 | 4,442.1 |
+
+RAM is the largest sampled process-tree RSS across commands in that operation. Restore and repair each cover both versions. `—` means no per-operation measurement was recorded; whole-workflow disk peaks are not reused here.
+
+Median (minimum–maximum; measured samples). '-' means unavailable or unsupported.
+
+| Measurement | [Gutch](https://github.com/icauro/Gutch) | [CAVS](https://github.com/terragov/cavs) |
+|---|---:|---:|
+| First capture s | 1.800 (1.789–1.814; n=6) | 5.472 (4.591–5.564; n=6) |
+| Later-version capture s | 1.822 (1.806–1.833; n=6) | 5.269 (5.263–5.301; n=6) |
+| Later-version stored growth bytes | 314154379.000 (314154379.000–314154379.000; n=6) | 331724047.000 (331724047.000–331724047.000; n=6) |
+| Restore + independent validation s | 3.878 (3.865–3.913; n=6) | 9.230 (9.107–9.320; n=6) |
+| Content repair + validation s | 3.189 (3.165–3.197; n=6) | 8.046 (7.714–8.436; n=6) |
+| Preserved-mtime repair + validation s | 3.182 (3.170–3.221; n=6) | 6.411 (6.382–6.588; n=6) |
+| Extra-file cleanup + validation s | 2.823 (2.809–2.848; n=6) | - |
+| Full restore recovery + validation s | 3.894 (3.882–3.911; n=6) | 9.095 (8.842–9.385; n=6) |
+
+cavs: exact_recovery: UNSUPPORTED: cavs-client skips --prune when every managed file already matches
 
 [Source: Gutch vs encrypted](_docs/reports/2026-11-17/44132299226-1/encrypted.json)
 
