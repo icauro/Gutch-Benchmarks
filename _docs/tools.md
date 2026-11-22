@@ -12,7 +12,9 @@ your working directory:
 
 Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`. BuildPatchTool keeps its
 complete `Engine/Binaries/Win64/` or `Engine/Binaries/Linux/` layout under
-`buildpatchtool/`. Keep its support files alongside the executable.
+`buildpatchtool/`. Keep its support files alongside the executable. CAVS keeps
+`cavs`, `cavs-client` and `cavs-server` together in `cavs/`; the manifest pins all
+three.
 
 The local runner never downloads executables. Manual CI explicitly provisions
 its selected tool and verifies both archive and executable checksums. It takes

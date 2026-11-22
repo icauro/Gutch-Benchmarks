@@ -21,6 +21,7 @@ this project or a complete set of notices for a particular binary distribution.
 | Kopia | [kopia/kopia](https://github.com/kopia/kopia) | Apache-2.0; [license](../src/comparison_benchmark_suite/resources/licenses/kopia.txt). |
 | Plakar | [PlakarKorp/plakar](https://github.com/PlakarKorp/plakar) | ISC; [notice](../src/comparison_benchmark_suite/resources/licenses/plakar.txt). |
 | BuildPatchTool | Epic Games | Supplied and licensed by Epic Games under its applicable terms; this project supplies no Epic executable, runtime files or redistribution permission. |
+| CAVS | [terragov/cavs](https://github.com/terragov/cavs) | Apache-2.0 with a NOTICE; [license and notice](../src/comparison_benchmark_suite/resources/licenses/cavs.txt). |
 | Gutch | User-supplied executable | Original Gutch code is MIT; included third-party code and linked dependencies carry additional terms. Preserve the notices accompanying the executable you use. |
 
 `src/comparison_benchmark_suite/resources/tools.json` records a previously tested local toolset, not the contents

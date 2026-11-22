@@ -340,8 +340,8 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 <summary>Run on GitHub</summary>
 
 Open **Actions > Manual Linux benchmarks > Run workflow**. Choose `all` or one
-pair, a Gutch release, and repetitions. Defaults: Ubuntu 24.04, all seven pairs
-(six tools plus the Gutch encryption-cost pair),
+pair, a Gutch release, and repetitions. Defaults: Ubuntu 24.04, all eight pairs
+(seven tools plus the Gutch encryption-cost pair),
 one warm-up and six measured repetitions.
 All pairs can run concurrently, each on its own runner.
 

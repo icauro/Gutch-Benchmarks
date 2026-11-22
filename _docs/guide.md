@@ -122,7 +122,8 @@ executables:
 Local tools are discovered automatically under `.artifacts/tools/windows-x64/`
 or `.artifacts/tools/linux-x64/`, before searching PATH. Each tool has its own
 folder: `restic/restic.exe` on Windows or `restic/restic` on Linux, likewise for
-Borg, Rustic, Kopia and Plakar. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
+Borg, Rustic, Kopia and Plakar. CAVS needs `cavs-client` and `cavs-server` beside
+`cavs/cavs`. Gutch uses `gutch/gutch-cli.exe` or `gutch/gutch-cli`.
 BuildPatchTool keeps its Engine layout under `buildpatchtool/Engine/Binaries/`,
 with `Win64/BuildPatchTool.exe` or `Linux/BuildPatchTool`. Preserve its accompanying
 Engine files. Explicit fixture paths and `GUTCH_EXECUTABLE` still take precedence.
@@ -148,6 +149,7 @@ gutch-bench --fixture gutch_vs_rustic
 gutch-bench --fixture gutch_vs_borg
 gutch-bench --fixture gutch_vs_plakar
 gutch-bench --fixture gutch_vs_bpt
+gutch-bench --fixture gutch_vs_cavs
 ```
 
 These fixtures use one warm-up, six measured repetitions, rotating order and
@@ -166,6 +168,7 @@ Nested dataset references are not supported.
 | Borg 2.0.0b25 | FastCDC approximately 2 MiB, normalization 2; LZ4 | `chunk_2MiB`, LZ4 0, one worker |
 | Plakar 1.1.8 | FastCDC approximately 1 MiB; default LZ4 stream writer | `chunk_1MiB`, LZ4 0 |
 | BPT 1.8.8 | 1 MiB window; internal compression | `chunk_1MiB`, Zstd 3 (codec unmatched) |
+| CAVS 1.8.0 | FastCDC 64 KiB / 256 KiB / 1 MiB (`fastcdc-256k`); Zstd 3 per chunk | `chunk_256KiB`, Zstd 3 |
 
 Gutch uses four workers (one against Borg) and its native FastCDC algorithm. Bundles use the
 8 MiB profile except the Kopia pair, which requires the 16 MiB profile because
@@ -224,13 +227,13 @@ The existing saved public results use the earlier contract and are not rewritten
 - Every native adapter uses the same strict output inventory and SHA-256 validator. Validation-inclusive metrics add its duration to native command time; native verification work is not subtracted.
 - A source-derived corruption plan flips bytes in the smallest and largest writable nonempty files, and deletes a distinct file when available. The same source paths are selected for every tool.
 - Content repair and preserved-mtime repair are separate. The latter keeps file length and mtime unchanged. Borg resume cannot detect that damage and receives an explicit unsupported outcome.
-- Extra-file cleanup is a separate exact-directory check. Borg and BPT have no native deletion in these adapters and receive unsupported outcomes; the harness does not delete extras on their behalf. Plakar recovery instead deletes the build's destination and restores it whole (below), so it passes this check.
+- Extra-file cleanup is a separate exact-directory check. Borg and BPT have no native deletion in these adapters, and CAVS skips its `--prune` cleanup when every managed file already matches; all three receive unsupported outcomes. The harness does not delete extras on their behalf. Plakar recovery instead deletes the build's destination and restores it whole (below), so it passes this check.
 - Full restore recovery removes the owned destination before native restoration. Strict validation follows every supported operation. Wrong bytes or unexpected files fail the case.
 - Detailed tables show medians, minimum, maximum and sample counts. These ranges are descriptive, not confidence intervals.
 
 Gutch uses four workers, except one in the Borg pair to match single-threaded Borg
-(charts mark that row **Gutch\***). Go tools use `GOMAXPROCS=4`; Rustic uses
-`RAYON_NUM_THREADS=4`; Kopia file/restore parallelism and Plakar concurrency are
+(charts mark that row **Gutch\***). Go tools use `GOMAXPROCS=4`; Rustic and CAVS use
+`RAYON_NUM_THREADS=4`, and CAVS fetches use `--connections 4`; Kopia file/restore parallelism and Plakar concurrency are
 explicitly four. Borg/BPT keep native scheduling; these controls are not identical
 CPU or memory limits. Encryption is matched per pair as described above.
 
@@ -239,6 +242,8 @@ Borg explicitly selects `fastcdc,19,23,21,2` and LZ4. Kopia explicitly selects
 Restic selects Zstd auto and an 8 MiB pack target. Rustic selects Rabin with a
 1 MiB average, 256 KiB minimum and 4 MiB maximum (the Gutch 1 MiB preset bounds), Zstd 3, and 8 MiB data/tree
 pack targets with growth disabled. BPT explicitly selects a 1 MiB chunk window.
+CAVS explicitly selects `--profile fastcdc-256k` (never `auto`, which measures
+candidates during capture) and `--zstd-level 3`.
 Gutch bundle compression and native peer compression units still differ.
 Restic restore omits `--verify`: it would re-read every restored file, work no other
 tool does, and the suite's SHA-256 validation already checks the output.
@@ -302,7 +307,8 @@ image-generation dependency.
 
 Comparison rows and numbered README notes follow a saved GitHub star ranking
 checked on 2026-10-31: Restic, Kopia, Borg, Rustic, Plakar, then BuildPatchTool
-(which has no comparable public repository). Rendering does not query GitHub. Tables consistently place Gutch first and link
+(which has no comparable public repository), then CAVS (10 stars on 2026-11-22,
+placed after BuildPatchTool as the second delivery tool). Rendering does not query GitHub. Tables consistently place Gutch first and link
 tool names to their source repositories; BuildPatchTool links to the
 Epic-authorized Unreal Engine repository.
 
@@ -415,12 +421,15 @@ follows every supported check.
 | Borg | `extract --continue` | Unsupported: trusts matching size/mtime | Unsupported in adapter |
 | Plakar | Delete the build's destination, then `restore` | Supported | Supported by the delete |
 | BuildPatchTool | `InstallManifest -PrevManifest=...` | Supported | Unsupported in adapter |
+| CAVS | `cavs-client fetch --prune` from a local `cavs-server` | Supported: hashes every file | Unsupported: `--prune` skipped when all files match |
 
 All six pairs passed a Windows functional smoke test on 2026-10-31 using two
 small deterministic synthetic builds, one measured repetition and no warm-up.
 These checks validate command compatibility and supported outcomes, not Blender
 performance, Linux behavior, read-only-file recovery or statistical significance.
 The older public Blender results retain their original measurement protocol.
+The CAVS pair, added later, passed a Windows smoke test on 2026-11-22 with the
+Blender inputs, one measured repetition and no warm-up.
 Unexpected command failures or incorrect output fail the case; no fallback masks
 a native repair failure. Other scheduled lanes can still run.
 
@@ -447,6 +456,22 @@ Update, rollback and no-op restore remain `NOT_RUN`, as in the other lanes.
 BPT must preserve the fixture's files and supported metadata; unsupported content
 such as an unpreserved empty directory fails validation rather than being silently
 recreated by the harness. No publishing credentials are needed.
+
+## CAVS
+
+[CAVS](https://github.com/terragov/cavs) 1.8.0 release archives contain `cavs`,
+`cavs-client` and `cavs-server`; keep all three in one folder and point
+`executables.cavs` at `cavs`. Capture runs `cavs pack-dir` for each build, then
+`cavs store <store> add <version> --storage packfiles`; both commands are timed and
+the intermediate `.cavs` container is deleted, so stored size is the packfile
+store alone. After capture the adapter starts `cavs-server --store` on a free
+loopback port, untimed, and stops it after recovery; the server's RAM is not
+sampled. Every restore and repair runs `cavs-client fetch --prune` with an emptied
+client cache, so data always comes from the store. `cavs store verify` is the
+repository check. CAVS hashes every installed file, so content and preserved-mtime
+damage are repaired natively. Version 1.8.0 returns before pruning when every
+managed file already matches, so extra-file cleanup is unsupported and the
+harness does not delete extras on its behalf.
 
 Run the suite's own tests with:
 
