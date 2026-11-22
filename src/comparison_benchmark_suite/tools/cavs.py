@@ -3,7 +3,8 @@
 CAVS is a delivery tool: `cavs pack-dir` packages a build, `cavs store add`
 deduplicates it into a packfile store, and `cavs-client fetch` installs from a
 `cavs-server` serving that store. The server is a local origin, started after
-capture and stopped after verification; its startup is never timed.
+capture and stopped after verification; its startup is never timed. While it
+runs, its RAM is added to every sampled command, since each fetch depends on it.
 """
 
 from contextlib import contextmanager
@@ -57,10 +58,12 @@ def _wait_for_port(port: int, server: subprocess.Popen, log: Path) -> None:
 
 
 @contextmanager
-def serve_store(server_executable: Path, store: Path, lane_root: Path, log: Path, env: dict[str, str]):
+def serve_store(server_executable: Path, store: Path, lane_root: Path, log: Path, env: dict[str, str],
+                commands=None):
     """Run `cavs-server --store` on a free loopback port and always stop it.
 
-    The log lives with lane evidence so disk sampling excludes it.
+    The log lives with lane evidence so disk sampling excludes it. With
+    `commands`, the server's RAM is sampled with every command it serves.
     """
     port = _free_local_port()
     with log.open("wb") as output:
@@ -70,8 +73,12 @@ def serve_store(server_executable: Path, store: Path, lane_root: Path, log: Path
         )
         try:
             _wait_for_port(port, server, log)
+            if commands is not None:
+                commands.companion_pids = (server.pid,)
             yield f"http://127.0.0.1:{port}"
         finally:
+            if commands is not None:
+                commands.companion_pids = ()
             server.terminate()
             try:
                 server.wait(timeout=10)
@@ -99,11 +106,11 @@ def run_cavs(executable, commands, lane, product, specification, *, dataset=None
         before = scan_tree(store).total_bytes if store.exists() else 0
         packed = commands.run(
             [tools["cavs"], "pack-dir", source, "-o", package, *specification.arguments],
-            description=f"CAVS pack {source.name}", cwd=lane.root, env=env,
+            description=f"CAVS capture pack {source.name}", cwd=lane.root, env=env,
         )
         added = commands.run(
             [tools["cavs"], "store", store, "add", assets[source.name], package, "--storage", "packfiles"],
-            description=f"CAVS store add {source.name}", cwd=lane.root, env=env,
+            description=f"CAVS capture store add {source.name}", cwd=lane.root, env=env,
         )
         # The container is an intermediate; only the deduplicated store remains.
         package.unlink()
@@ -114,7 +121,8 @@ def run_cavs(executable, commands, lane, product, specification, *, dataset=None
     stored = scan_tree(store)
 
     server_env = {**os.environ, **env}
-    with serve_store(tools["cavs-server"], store, lane.root, lane.stats / "cavs-server.log", server_env) as origin:
+    with serve_store(tools["cavs-server"], store, lane.root, lane.stats / "cavs-server.log", server_env,
+                     commands=commands) as origin:
 
         def install(record_snapshots, *, clean=False):
             # A fresh client cache makes every operation read from the store,

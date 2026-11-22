@@ -59,8 +59,8 @@ single-threaded Borg; every other pair gives Gutch four.
    [Epic-authorized access](https://dev.epicgames.com/documentation/unreal-engine/downloading-source-code-in-unreal-engine).
 7. **CAVS:** A delivery tool like BuildPatchTool, with far fewer users than the other
    peers. Capture packs each build and adds it to a packfile store; installs fetch from
-   a local `cavs-server` with an empty client cache, and the server's own RAM is not
-   sampled. Gutch compresses whole bundles while CAVS compresses each chunk. CAVS
+   a local `cavs-server` with an empty client cache. The server's RAM is added to every
+   restore and repair command's RAM, since each fetch depends on it. Gutch compresses whole bundles while CAVS compresses each chunk. CAVS
    repairs by checking every file's SHA-256, but skips its `--prune` cleanup when all
    files already match, so extra-file cleanup is marked unsupported.
 8. **Encrypted Gutch:** Not a competitor. The same release runs with and without

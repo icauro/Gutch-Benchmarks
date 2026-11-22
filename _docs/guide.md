@@ -465,13 +465,16 @@ recreated by the harness. No publishing credentials are needed.
 `cavs store <store> add <version> --storage packfiles`; both commands are timed and
 the intermediate `.cavs` container is deleted, so stored size is the packfile
 store alone. After capture the adapter starts `cavs-server --store` on a free
-loopback port, untimed, and stops it after recovery; the server's RAM is not
-sampled. Every restore and repair runs `cavs-client fetch --prune` with an emptied
+loopback port, untimed, and stops it after recovery. While the server runs, its
+process-tree RSS is added to each sampled command's RSS. Every restore and repair runs `cavs-client fetch --prune` with an emptied
 client cache, so data always comes from the store. `cavs store verify` is the
 repository check. CAVS hashes every installed file, so content and preserved-mtime
 damage are repaired natively. Version 1.8.0 returns before pruning when every
 managed file already matches, so extra-file cleanup is unsupported and the
 harness does not delete extras on its behalf.
+On Windows, `cavs-client` opens many short loopback connections; repeated fetches
+can exhaust ephemeral ports (`os error 10048`) and fail a local run. Linux CI runs
+are unaffected; rerun later or on Linux rather than changing system port settings.
 
 Run the suite's own tests with:
 

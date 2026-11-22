@@ -2,8 +2,8 @@ name: gutch_vs_cavs
 description: CAVS packs each build with pack-dir (FastCDC 64 KiB / 256 KiB / 1 MiB, Zstd 3 per chunk) into a
   packfile store, and installs through cavs-client fetch from a local cavs-server serving that store. Gutch
   uses identical chunk bounds, Zstd 3 and 8 MiB compressed bundles; bundle and pack framing differ. CAVS
-  capture times pack-dir plus store add; the server starts untimed after capture and its own RAM is not
-  sampled. Every restore and repair starts with an empty client cache, so data comes from the store.
+  capture times pack-dir plus store add; the server starts untimed after capture, and its RAM is added to
+  every fetch's sampled RAM. Every restore and repair starts with an empty client cache, so data comes from the store.
   Repair uses CAVS's SHA-256 no-op detection with --prune; cavs-client skips pruning when every managed
   file already matches, so extra-file cleanup is unsupported. Fresh repositories and isolated caches. Four
   workers where exposed; native Borg/BPT scheduling. One warm-up and six rotating measured repetitions;

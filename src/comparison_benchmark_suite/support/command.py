@@ -90,6 +90,8 @@ class CommandRunner:
             raise ValueError("benchmark command timeout must be finite and positive")
         self.memory_profile = memory_profile
         self.disk_roots: list[Path] | None = None
+        # Long-lived helpers, such as a local server, whose RAM counts toward each command.
+        self.companion_pids: tuple[int, ...] = ()
         self.temporary_directory: Path | None = None
         self.progress = (stream or sys.stderr).isatty() if progress is None else progress
         self.stream = stream or sys.stderr
@@ -154,7 +156,7 @@ class CommandRunner:
         memory = {} if self.memory_profile else None
         memory_options = {}
         if memory is not None:
-            memory_options = {"memory": memory, "memory_timeline":
+            memory_options = {"memory": memory, "companion_pids": self.companion_pids, "memory_timeline":
                 self.evidence_directory / f"{len(self.measurements) + 1:04d}.memory.jsonl"
                 if self.evidence_directory is not None else None}
         disk = None
@@ -222,6 +224,7 @@ class CommandRunner:
         on_output: Callable[[str, bool], None],
         memory: dict | None = None,
         memory_timeline: Path | None = None,
+        companion_pids: tuple[int, ...] = (),
         timeout_seconds: float = 900,
     ) -> tuple[str, str, int]:
         process = subprocess.Popen(
@@ -240,7 +243,7 @@ class CommandRunner:
         sampler = None
         if memory is not None:
             from comparison_benchmark_suite.support.memory import ProcessMemorySampler
-            sampler = ProcessMemorySampler(process.pid, memory_timeline)
+            sampler = ProcessMemorySampler(process.pid, memory_timeline, companions=companion_pids)
             sampler.start()
         events: queue.Queue[tuple[bool, str | BaseException | None]] = queue.Queue()
 

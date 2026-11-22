@@ -138,6 +138,47 @@ class ResourceTests(unittest.TestCase):
         (folder / "0005.json").write_text(json.dumps(sample), encoding="utf-8")
         self.assertNotIn("peak_disk_bytes", summarize_operation_resources(results, self.root)["gutch"].get("repair", {}))
 
+    def test_multi_command_captures_are_grouped_by_version(self):
+        folder = self.root / "cavs-resources/commands"
+        folder.mkdir(parents=True)
+        operations = [("CAVS capture pack v1", 10), ("CAVS capture store add v1", 15),
+                      ("CAVS capture pack v2", 20), ("CAVS capture store add v2", 25),
+                      ("CAVS restore v2", 30), ("CAVS restore v1", 40),
+                      ("CAVS in-place recovery v2", 50), ("CAVS in-place recovery v1", 60)]
+        for index, (operation, peak) in enumerate(operations):
+            (folder / f"{index:04d}.json").write_text(json.dumps({"operation": operation, "peak_disk_bytes": peak,
+                "memory": {"sampled_peak_rss_bytes": peak}}))
+        results = [{"label": "cavs-resources", "metadata": {"case": "cavs", "status": "PASS", "snapshots": ["v1", "v2"]}}]
+        values = summarize_operation_resources(results, self.root)["cavs"]
+        self.assertEqual([values[name]["peak_rss_bytes"] for name in
+            ("initial_capture", "incremental_capture", "restore", "repair")], [15, 25, 40, 60])
+
+    def test_memory_adds_serving_helpers_to_each_sample(self):
+        command = Mock()
+        command.memory_info.return_value = SimpleNamespace(rss=1000)
+        command.children.return_value = []
+        command.cpu_times.return_value = SimpleNamespace(user=0, system=0)
+        server = Mock()
+        server.memory_info.return_value = SimpleNamespace(rss=300)
+        worker = Mock()
+        worker.memory_info.return_value = SimpleNamespace(rss=200)
+        server.children.return_value = [worker]
+        sampler = ProcessMemorySampler(42, None, companions=(7,))
+        sampler.started = time.perf_counter()
+        sampler.stopped.set()
+        with patch("comparison_benchmark_suite.support.memory.psutil.Process",
+                   side_effect=lambda pid: command if pid == 42 else server):
+            sampler._sample()
+        self.assertEqual(sampler.result["sampled_peak_rss_bytes"], 1500)
+        self.assertIn("serving helpers", sampler.result["scope"])
+
+    def test_runner_passes_serving_helpers_to_memory_sampling(self):
+        commands = CommandRunner(memory_profile=True)
+        commands.companion_pids = (7,)
+        with patch.object(commands, "_run_streamed", return_value=("", "", 0)) as launch:
+            commands.run(["synthetic"], description="test")
+        self.assertEqual(launch.call_args.kwargs["companion_pids"], (7,))
+
     def test_resource_temp_environment_is_owned_and_does_not_change_parent_environment(self):
         import os
         commands = CommandRunner()

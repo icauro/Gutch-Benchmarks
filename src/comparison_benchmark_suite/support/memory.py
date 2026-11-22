@@ -8,8 +8,11 @@ import psutil
 
 
 class ProcessMemorySampler:
-    def __init__(self, pid: int, timeline: Path | None, interval: float = 0.002):
+    def __init__(self, pid: int, timeline: Path | None, interval: float = 0.002, companions: tuple[int, ...] = ()):
+        """`companions` are long-lived helpers serving this command, such as a
+        local server; their process-tree RSS is added to every sample."""
         self.pid = pid
+        self.companions = companions
         self.timeline = timeline
         self.interval = interval
         self.stopped = threading.Event()
@@ -18,6 +21,8 @@ class ProcessMemorySampler:
                        "observed_os_peak_working_set_bytes": None,
                        "sampled_peak_private_bytes": None,
                        "sampled_cpu_seconds": None, "cpu_observed_seconds": None}
+        if companions:
+            self.result["scope"] = "process_tree_rss plus serving helpers; direct_process_cpu"
         self.thread = threading.Thread(target=self._sample, name="benchmark-memory")
 
     def start(self):
@@ -36,6 +41,7 @@ class ProcessMemorySampler:
                 self.timeline.parent.mkdir(parents=True, exist_ok=True)
                 output = self.timeline.open("w", encoding="utf-8")
             process = psutil.Process(self.pid)
+            companions = [psutil.Process(pid) for pid in self.companions]
             previous = None
             first_cpu = None
             first_seconds = None
@@ -51,6 +57,8 @@ class ProcessMemorySampler:
                         sample["rss_bytes"] += child.memory_info().rss
                     except psutil.NoSuchProcess:
                         pass
+                for companion in companions:
+                    sample["rss_bytes"] += _tree_rss(companion)
                 cpu = process.cpu_times()
                 cpu_seconds = cpu.user + cpu.system
                 sample["cpu_seconds"] = cpu_seconds
@@ -81,6 +89,21 @@ class ProcessMemorySampler:
         finally:
             if output is not None:
                 output.close()
+
+
+def _tree_rss(process: psutil.Process) -> int:
+    """RSS of a helper and its descendants; a helper that has exited counts as zero."""
+    try:
+        members = [process, *process.children(recursive=True)]
+    except psutil.NoSuchProcess:
+        return 0
+    total = 0
+    for member in members:
+        try:
+            total += member.memory_info().rss
+        except psutil.NoSuchProcess:
+            pass
+    return total
 
 
 def process_utilization(measurements: list[dict]) -> dict:
@@ -174,23 +197,29 @@ def summarize_operation_resources(results, lanes_root):
         folder = lanes_root / compact_component(result["label"], 32) / "commands"
         commands = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(folder.glob("*.json"))
                     if path.stem.isdecimal()]
-        captures, restores, repairs = [], [], []
+        # A version's capture may take several commands, such as pack then add.
+        captures, restores, repairs = {}, [], []
         for command in commands:
             operation = command.get("operation", "")
-            if any(f" {word} " in operation for word in ("capture", "backup", "create", "generate")) and any(operation.endswith(" " + name) for name in snapshots):
-                captures.append(command)
+            captured = next((name for name in snapshots if operation.endswith(" " + name)), None)
+            if captured and any(f" {word} " in operation for word in ("capture", "backup", "create", "generate")):
+                captures.setdefault(captured, []).append(command)
             elif " restore " in operation or operation.startswith("reconstruct "):
                 restores.append(command)
             elif " repair " in operation or " in-place recovery " in operation:
                 repairs.append(command)
         count = len(snapshots)
-        groups = {"initial_capture": (captures[:1], 1),
-                  "incremental_capture": (captures[1:count], count - 1),
-                  "restore": (restores[:count], count), "repair": (repairs[:count], count)}
+        # Each step is one version's commands; restores and repairs take one command each.
+        versions = list(captures.values())
+        groups = {"initial_capture": (versions[:1], 1),
+                  "incremental_capture": (versions[1:count], count - 1),
+                  "restore": ([[item] for item in restores[:count]], count),
+                  "repair": ([[item] for item in repairs[:count]], count)}
         values = {}
-        for operation, (samples, expected_count) in groups.items():
-            if expected_count < 1 or len(samples) != expected_count:
+        for operation, (steps, expected_count) in groups.items():
+            if expected_count < 1 or len(steps) != expected_count:
                 continue
+            samples = [item for step in steps for item in step]
             peak = process_utilization(samples).get("peak_rss_bytes")
             if peak is not None:
                 values[operation] = {"peak_rss_bytes": peak}

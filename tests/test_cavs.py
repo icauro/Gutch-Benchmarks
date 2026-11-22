@@ -62,7 +62,7 @@ class CavsTests(unittest.TestCase):
         return tools / "cavs", lane, dataset, commands
 
     @contextmanager
-    def fake_origin(self, *arguments):
+    def fake_origin(self, *arguments, **options):
         yield "http://127.0.0.1:9"
 
     def test_capture_installs_and_recovery_follow_the_cavs_contract(self):
@@ -127,12 +127,16 @@ class CavsTests(unittest.TestCase):
             launched.append(process)
             return process
 
+        commands = SimpleNamespace(companion_pids=())
         with patch.object(cavs.subprocess, "Popen", side_effect=popen):
             with cavs.serve_store(Path("cavs-server"), self.root / "store", self.root,
-                                  self.root / "server.log", None) as origin:
+                                  self.root / "server.log", None, commands=commands) as origin:
                 self.assertRegex(origin, r"^http://127\.0\.0\.1:\d+$")
                 self.assertIsNone(launched[0].poll())
+                # The server's RAM is sampled with every command it serves.
+                self.assertEqual(commands.companion_pids, (launched[0].pid,))
         self.assertIsNotNone(launched[0].poll())
+        self.assertEqual(commands.companion_pids, ())
 
     def test_server_that_exits_early_fails_with_its_log(self):
         script = self.root / "exit.py"
