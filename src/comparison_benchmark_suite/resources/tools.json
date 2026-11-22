@@ -173,6 +173,40 @@
       "archive_sha256": "628b26785f3787fa1d52e61b3289493f483230a1ed6e86a84ae9c76d7a41a81e",
       "verified_at": "2026-10-31",
       "prerelease": false
+    },
+    {
+      "platform": "windows-x64",
+      "tool": "cavs",
+      "version": "1.8.0",
+      "path": "windows-x64/cavs/cavs.exe",
+      "sha256": "eda0c6144dfb5de4e57dec483596079ed499c31914cb7ea2690dddb00c5e13e7",
+      "release_url": "https://github.com/terragov/cavs/releases/tag/v1.8.0",
+      "source_url": "https://github.com/terragov/cavs/releases/download/v1.8.0/cavs-v1.8.0-x86_64-pc-windows-msvc.zip",
+      "archive_sha256": "da3162edfbcbb4ef4ab42516e399ec6903fbbe34cdab5df61449feee16c7e97d",
+      "companion_sha256": {
+        "cavs-client.exe": "b11fd54a6ab24021fa9cb2fb90266c26747a17bc61609ba6a971a6bc89bddb31",
+        "cavs-server.exe": "33f417b908c75e2cd2d54147cac2133583676ea3971c20524dd5b35b4d0ffeae"
+      },
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-11-22"
+    },
+    {
+      "platform": "linux-x64",
+      "tool": "cavs",
+      "version": "1.8.0",
+      "path": "linux-x64/cavs/cavs",
+      "sha256": "76da35274cde9ddb7ec42ddf92269bda4234e889b7be31eaf1677768f61f28d9",
+      "release_url": "https://github.com/terragov/cavs/releases/tag/v1.8.0",
+      "source_url": "https://github.com/terragov/cavs/releases/download/v1.8.0/cavs-v1.8.0-x86_64-unknown-linux-gnu.tar.gz",
+      "archive_sha256": "e33105fd8fc0e5e3319b41662fd6f83432d237eccb63d50209289ba9ab5d153c",
+      "companion_sha256": {
+        "cavs-client": "ed3e0f7d97c481932cbfdb22e9d465366c4dc353083eec558a6a3d0afb35765e",
+        "cavs-server": "a8a8b8eef717ea04cc43525ebef3a4ececf834836f0c8dda056ab0a7682a99ab"
+      },
+      "prerelease": false,
+      "verification": "official release asset SHA-256 verified",
+      "verified_at": "2026-11-22"
     }
   ],
   "external_tools_verified_at": "2026-10-31",

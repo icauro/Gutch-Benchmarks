@@ -28,11 +28,11 @@ def pair_record(pair="restic", status="PASS"):
 
 class ChartTests(unittest.TestCase):
     def test_pair_order_and_note_numbers_match_popularity_order(self):
-        pairs = ["encrypted", "bpt", "plakar", "rustic", "borg", "kopia", "restic"]
+        pairs = ["encrypted", "cavs", "bpt", "plakar", "rustic", "borg", "kopia", "restic"]
         records = [pair_record(pair) for pair in pairs]
         with tempfile.TemporaryDirectory() as directory:
             self.assertEqual([record["pair"] for record in latest_records(Path(directory))], list(reversed(pairs)))
-        expected = ["Restic [1]", "Kopia [2]", "Borg [3]", "Rustic [4]", "Plakar [5]", "BuildPatchTool [6]"]
+        expected = ["Restic [1]", "Kopia [2]", "Borg [3]", "Rustic [4]", "Plakar [5]", "BuildPatchTool [6]", "CAVS [7]"]
         for chart in (render_svg(records), render_resources_svg(records, kind="ram"),
                       render_resources_svg(records, kind="disk")):
             root = ET.fromstring(chart)
@@ -150,7 +150,7 @@ class ChartTests(unittest.TestCase):
         for pair, title, number in (("restic", "Restic", 1), ("kopia", "Kopia", 2),
                                     ("borg", "Borg", 3), ("rustic", "Rustic", 4),
                                     ("plakar", "Plakar", 5), ("bpt", "BuildPatchTool", 6),
-                                    ("encrypted", "Encrypted Gutch", 7)):
+                                    ("cavs", "CAVS", 7), ("encrypted", "Encrypted Gutch", 8)):
             chart = render_svg([pair_record(pair)])
             self.assertIn(f"{title} [{number}]", chart)
             label = pair_peer(pair)

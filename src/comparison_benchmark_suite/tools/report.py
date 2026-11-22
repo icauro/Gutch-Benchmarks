@@ -17,6 +17,7 @@ TOOL_SOURCES = {
     "rustic": ("Rustic", "https://github.com/rustic-rs/rustic"),
     "plakar": ("Plakar", "https://github.com/PlakarKorp/plakar"),
     "buildpatchtool": ("BuildPatchTool", "https://github.com/EpicGames/UnrealEngine"),
+    "cavs": ("CAVS", "https://github.com/terragov/cavs"),
     "gutch_encrypted": ("Encrypted Gutch", "https://github.com/icauro/Gutch"),
 }
 # Each pair compares the "gutch" case with one peer case, usually named after the pair.

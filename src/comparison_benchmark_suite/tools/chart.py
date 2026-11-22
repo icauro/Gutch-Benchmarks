@@ -16,8 +16,9 @@ RESOURCE_OPERATIONS = (("initial_capture", "First capture"), ("incremental_captu
                        ("restore", "Restore"), ("repair", "Repair"))
 # Order and note numbers follow GitHub stars checked on 2026-10-31:
 # Restic 36,901; Kopia 14,541; Borg 13,897; Rustic 3,356; Plakar 2,103.
-# BuildPatchTool has no comparable public repository and stays last.
-PAIR_NOTES = {"restic": 1, "kopia": 2, "borg": 3, "rustic": 4, "plakar": 5, "bpt": 6, "encrypted": 7}
+# BuildPatchTool has no comparable public repository. CAVS (10 stars on
+# 2026-11-22) is a delivery tool like BuildPatchTool and follows it.
+PAIR_NOTES = {"restic": 1, "kopia": 2, "borg": 3, "rustic": 4, "plakar": 5, "bpt": 6, "cavs": 7, "encrypted": 8}
 # Pairs where Gutch runs one worker to match a single-threaded peer; marked with an asterisk.
 SINGLE_WORKER_PAIRS = frozenset({"borg"})
 SINGLE_WORKER_NOTE = "* Gutch runs one worker to match single-threaded Borg."

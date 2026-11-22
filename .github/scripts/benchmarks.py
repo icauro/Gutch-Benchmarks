@@ -23,7 +23,7 @@ from comparison_benchmark_suite.tools.chart import latest_records, render_svg, r
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path("src/comparison_benchmark_suite")
-PAIRS = ("borg", "bpt", "kopia", "plakar", "restic", "rustic", "encrypted")
+PAIRS = ("borg", "bpt", "cavs", "kopia", "plakar", "restic", "rustic", "encrypted")
 START = "<!-- latest-benchmarks:start -->"
 END = "<!-- latest-benchmarks:end -->"
 GUTCH_RELEASES = "https://github.com/icauro/Gutch/releases"
@@ -139,6 +139,12 @@ def install_tool(pair, root=ROOT):
     if file_sha256(target) != record["sha256"]:
         raise ValueError(f"Executable checksum mismatch: {tool}")
     target.chmod(0o755)
+    # Multi-binary tools (CAVS) also pin the executables beside the main one.
+    for name, digest in record.get("companion_sha256", {}).items():
+        companion = target.with_name(name)
+        if not companion.is_file() or file_sha256(companion) != digest:
+            raise ValueError(f"Executable checksum mismatch: {tool} {name}")
+        companion.chmod(0o755)
     remove_owned(work, root / ".artifacts")
 
 

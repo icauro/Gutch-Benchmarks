@@ -135,7 +135,7 @@ class RusticTests(unittest.TestCase):
 
     def test_shipped_catalog_has_only_gutch_versus_one_tool(self):
         fixtures = ROOT / "src/comparison_benchmark_suite/fixtures"
-        expected = {"borg", "bpt", "kopia", "plakar", "restic", "rustic", "encrypted"}
+        expected = {"borg", "bpt", "cavs", "kopia", "plakar", "restic", "rustic", "encrypted"}
         self.assertEqual({p.stem.removeprefix("gutch_vs_") for p in fixtures.glob("*.yaml")}, expected)
         shared = yaml.safe_load((fixtures / "blender/dataset.yaml").read_text(encoding="utf-8"))
         self.assertNotIn("lanes", shared)

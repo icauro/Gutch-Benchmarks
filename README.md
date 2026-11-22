@@ -8,8 +8,8 @@ repair is 29× faster, but a fresh Plakar restore takes only 1.6× longer than
 Gutch's. Gutch captures faster in four pairs and 1.2× slower than Kopia. It
 stores up to 3.7% less, except 0.2% more than Kopia.
 
-Each pair compares Gutch against Borg, BuildPatchTool, Kopia, Plakar, Restic or
-Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
+Each pair compares Gutch against Borg, BuildPatchTool, CAVS, Kopia, Plakar, Restic
+or Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
 validation.
 
 ![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=94822f2e48bc)
@@ -33,7 +33,8 @@ with SHA-256. Numbers match the chart; cells read **Gutch / other tool**.
 | 4 | [Rustic](https://github.com/rustic-rs/rustic) | FastCDC / Rabin, both 256 KiB–1 MiB–4 MiB | Zstd 3 / Zstd 3 | AES-256 / AES-256 | 4 / 4 | — |
 | 5 | [Plakar](https://github.com/PlakarKorp/plakar) | FastCDC 1 MiB / FastCDC ~1 MiB | LZ4 / LZ4 | None / none | 4 / 4 | — |
 | 6 | [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | FastCDC 1 MiB / fixed 1 MiB window | Zstd 3 / built-in | None / none | 4 / native | Extra-file cleanup |
-| 7 | [Encrypted Gutch](https://github.com/icauro/Gutch) | Identical | Identical | None / AES-256 | 4 / 4 | — |
+| 7 | [CAVS](https://github.com/terragov/cavs) | FastCDC / FastCDC, both 64 KiB–256 KiB–1 MiB | Zstd 3 / Zstd 3 | None / none | 4 / 4 | Extra-file cleanup |
+| 8 | [Encrypted Gutch](https://github.com/icauro/Gutch) | Identical | Identical | None / AES-256 | 4 / 4 | — |
 
 \* Gutch runs one worker in the Borg pair (marked **Gutch\*** in the charts) to match
 single-threaded Borg; every other pair gives Gutch four.
@@ -56,7 +57,13 @@ single-threaded Borg; every other pair gives Gutch four.
    and format do not match. Recovery uses a previous installation manifest, so this
    compares two delivery workflows. Its source requires
    [Epic-authorized access](https://dev.epicgames.com/documentation/unreal-engine/downloading-source-code-in-unreal-engine).
-7. **Encrypted Gutch:** Not a competitor. The same release runs with and without
+7. **CAVS:** A delivery tool like BuildPatchTool, with far fewer users than the other
+   peers. Capture packs each build and adds it to a packfile store; installs fetch from
+   a local `cavs-server` with an empty client cache, and the server's own RAM is not
+   sampled. Gutch compresses whole bundles while CAVS compresses each chunk. CAVS
+   repairs by checking every file's SHA-256, but skips its `--prune` cleanup when all
+   files already match, so extra-file cleanup is marked unsupported.
+8. **Encrypted Gutch:** Not a competitor. The same release runs with and without
    encryption on one runner, so the ratio shows only what encryption costs.
 
 Even with matched targets, different chunking methods split files at different

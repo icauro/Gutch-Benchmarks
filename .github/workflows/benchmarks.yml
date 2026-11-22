@@ -6,7 +6,7 @@ on:
         description: Run each selected Gutch-vs-tool pair in its own job
         type: choice
         default: all
-        options: [all, borg, bpt, kopia, plakar, restic, rustic, encrypted]
+        options: [all, borg, bpt, cavs, kopia, plakar, restic, rustic, encrypted]
       gutch_version:
         description: Gutch release to download, such as 0.1.0 (empty uses the tool manifest)
         type: string

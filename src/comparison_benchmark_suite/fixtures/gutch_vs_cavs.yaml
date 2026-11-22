@@ -1,0 +1,39 @@
+name: gutch_vs_cavs
+description: CAVS packs each build with pack-dir (FastCDC 64 KiB / 256 KiB / 1 MiB, Zstd 3 per chunk) into a
+  packfile store, and installs through cavs-client fetch from a local cavs-server serving that store. Gutch
+  uses identical chunk bounds, Zstd 3 and 8 MiB compressed bundles; bundle and pack framing differ. CAVS
+  capture times pack-dir plus store add; the server starts untimed after capture and its own RAM is not
+  sampled. Every restore and repair starts with an empty client cache, so data comes from the store.
+  Repair uses CAVS's SHA-256 no-op detection with --prune; cavs-client skips pruning when every managed
+  file already matches, so extra-file cleanup is unsupported. Fresh repositories and isolated caches. Four
+  workers where exposed; native Borg/BPT scheduling. One warm-up and six rotating measured repetitions;
+  profiling off. Measurement contract 2 separates content repair, preserved-mtime damage, extra-file cleanup
+  and full restoration. Strict source-derived SHA-256 validation follows every supported operation; both
+  native and validation-inclusive durations are reported. Unsupported operations receive no timing.
+dataset: blender/dataset.yaml
+repetitions: 6
+resource_sampling: true
+warmups: 1
+profile_mode: 'off'
+corrupt_repair: true
+lane_wait_seconds: 0
+step_wait_seconds: 0
+executables:
+  gutch: gutch-cli
+  cavs: cavs
+lanes:
+- label: gutch
+  tool: gutch
+  profile:
+    chunk: chunk_256KiB
+    compression:
+      algorithm: zstd
+      level: 3
+    jobs: 4
+- label: cavs
+  tool: cavs
+  arguments:
+  - --profile
+  - fastcdc-256k
+  - --zstd-level
+  - '3'

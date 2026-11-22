@@ -127,7 +127,7 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
                              on_step=lambda description: print(f"Step: {description}", flush=True))
     runners = {}
     for lane in fixture.lanes:
-        if lane.label in runners or lane.label in unavailable or lane.tool == "buildpatchtool":
+        if lane.label in runners or lane.label in unavailable or lane.tool in {"buildpatchtool", "cavs"}:
             continue
         binary = resolved.get(lane.label, Path("unavailable"))
         external_paths = {lane.tool: binary} if lane.tool in {"restic", "rustic", "kopia", "borg", "plakar"} else {}
@@ -145,6 +145,10 @@ def run_benchmark(root: Path, fixture_name: str, *, open_perfetto: bool | None =
                 return run_buildpatchtool(resolved[label], commands, layout.lane(lane.label), product, lane,
                                           dataset=dataset,
                                           recovery_enabled=fixture.corrupt_repair)
+            if lane.tool == "cavs":
+                from .tools.cavs import run_cavs
+                return run_cavs(resolved[label], commands, layout.lane(lane.label), product, lane,
+                                dataset=dataset, recovery_enabled=fixture.corrupt_repair)
             result = runners[label].run_lane(product, lane, fixture.corrupt_repair, snapshot_limit=fixture.snapshot_limit, dataset=dataset)
             result.metadata.setdefault("status", "PASS")
             defaults = operation_statuses(lane.tool, fixture.corrupt_repair, bool(result.metadata.get("recovery_error")))
