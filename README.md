@@ -6,7 +6,9 @@ faster than Restic, Kopia, Borg, Rustic and Plakar, and repairs 2.3–8× faster
 than the first four. Against Plakar, whose repair rewrites every file, the
 repair is 29× faster, but a fresh Plakar restore takes only 1.6× longer than
 Gutch's. Gutch captures faster in four pairs and 1.2× slower than Kopia. It
-stores up to 3.7% less, except 0.2% more than Kopia.
+stores up to 3.7% less, except 0.2% more than Kopia. Against CAVS, a delivery
+tool, Gutch captures 2.4× faster, installs 3.7× faster, repairs 4.7× faster and
+stores 4.6% less.
 
 Each pair compares Gutch against Borg, BuildPatchTool, CAVS, Kopia, Plakar, Restic
 or Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
