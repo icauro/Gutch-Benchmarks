@@ -5,20 +5,20 @@ deduplicating store and installer. In the latest run Gutch installs 2.2–4.6×
 faster than Restic, Kopia, Borg, Rustic and Plakar, and repairs 2.3–8× faster
 than the first four. Against Plakar, whose repair rewrites every file, the
 repair is 29× faster, but a fresh Plakar restore takes only 1.6× longer than
-Gutch's. Gutch captures faster in four pairs and 1.2× slower than Kopia. It
-stores up to 3.7% less, except 0.2% more than Kopia. Against CAVS, a delivery
-tool, Gutch captures 2.4× faster, installs 3.7× faster, repairs 4.7× faster and
-stores 4.6% less.
+Gutch's. Gutch captures faster in four pairs and 1.2× slower than Kopia. Its
+repository is up to 1.038× smaller, except 1.002× larger than Kopia's. Against
+CAVS, a delivery tool, Gutch captures 2.4× faster, installs 3.7× faster, repairs
+4.7× faster, with a 1.049× smaller repository.
 
 Each pair compares Gutch against Borg, BuildPatchTool, CAVS, Kopia, Plakar, Restic
 or Rustic using shared Blender inputs, pair-specific settings and SHA-256 output
 validation.
 
-![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=b48664a3b31f)
+![Latest per-pair benchmark comparisons](_docs/reports/comparison.svg?v=6e73bb6a701b)
 
-![Peak RAM by operation](_docs/reports/ram.svg?v=20cf3b887bd2)
+![Peak RAM by operation](_docs/reports/ram.svg?v=be60ef12fa81)
 
-![Peak disk by operation](_docs/reports/disk.svg?v=562cf1701016)
+![Peak disk by operation](_docs/reports/disk.svg?v=ec20f9caec6f)
 
 <details>
 <summary>Comparison differences and limits</summary>
@@ -112,7 +112,7 @@ Latest per pair · Linux · Blender 5.0.0 → 5.1.0 · 2026-11-17, 2026-11-22 ·
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 4.842 | 1.743 | 0.915 | 688.197 |
 | [Restic](https://github.com/restic/restic) | PASS | 8.752 | 4.439 | 3.366 | 714.583 |
-| **Gutch relative** | - | 1.81x faster | 2.55x faster | 3.68x faster | 3.7% smaller |
+| **Gutch relative** | - | 1.81× faster | 2.55× faster | 3.68× faster | 1.038× smaller |
 
 **Resources by operation (MiB)**
 
@@ -144,7 +144,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 5.460 | 1.540 | 0.904 | 1758.306 |
 | [Kopia](https://github.com/kopia/kopia) | PASS | 4.563 | 7.074 | 7.249 | 1754.514 |
-| **Gutch relative** | - | 1.20x slower | 4.59x faster | 8.02x faster | 0.2% larger |
+| **Gutch relative** | - | 1.20× slower | 4.59× faster | 8.02× faster | 1.002× larger |
 
 **Resources by operation (MiB)**
 
@@ -176,7 +176,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 7.965 | 2.894 | 1.087 | 913.570 |
 | [Borg](https://github.com/borgbackup/borg) | PASS | 9.833 | 6.330 | 2.556 | 915.932 |
-| **Gutch relative** | - | 1.23x faster | 2.19x faster | 2.35x faster | 0.3% smaller |
+| **Gutch relative** | - | 1.23× faster | 2.19× faster | 2.35× faster | 1.003× smaller |
 
 **Resources by operation (MiB)**
 
@@ -210,7 +210,7 @@ borg: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapter
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 4.485 | 1.410 | 0.837 | 688.259 |
 | [Rustic](https://github.com/rustic-rs/rustic) | PASS | 10.607 | 4.167 | 3.362 | 701.702 |
-| **Gutch relative** | - | 2.36x faster | 2.95x faster | 4.02x faster | 1.9% smaller |
+| **Gutch relative** | - | 2.36× faster | 2.95× faster | 4.02× faster | 1.020× smaller |
 
 **Resources by operation (MiB)**
 
@@ -242,7 +242,7 @@ Median (minimum–maximum; measured samples). '-' means unavailable or unsupport
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 3.907 | 1.145 | 0.556 | 913.908 |
 | [Plakar](https://github.com/PlakarKorp/plakar) | PASS | 8.860 | 3.768 | 15.986 | 916.641 |
-| **Gutch relative** | - | 2.27x faster | 3.29x faster | 28.78x faster | 0.3% smaller |
+| **Gutch relative** | - | 2.27× faster | 3.29× faster | 28.78× faster | 1.003× smaller |
 
 **Resources by operation (MiB)**
 
@@ -276,7 +276,7 @@ plakar: exact_recovery: UNSUPPORTED: no native extra-file deletion in this adapt
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 4.212 | 1.057 | 0.558 | 689.362 |
 | [BuildPatchTool](https://github.com/EpicGames/UnrealEngine) | PASS | 24.869 | 25.063 | 2.552 | 732.343 |
-| **Gutch relative** | - | 5.91x faster | 23.71x faster | 4.58x faster | 5.9% smaller |
+| **Gutch relative** | - | 5.91× faster | 23.71× faster | 4.58× faster | 1.062× smaller |
 
 **Resources by operation (MiB)**
 
@@ -310,7 +310,7 @@ buildpatchtool: exact_recovery: UNSUPPORTED: no native extra-file deletion in th
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 4.387 | 1.885 | 1.043 | 679.349 |
 | [CAVS](https://github.com/terragov/cavs) | PASS | 10.646 | 7.057 | 4.871 | 712.400 |
-| **Gutch relative** | - | 2.43x faster | 3.74x faster | 4.67x faster | 4.6% smaller |
+| **Gutch relative** | - | 2.43× faster | 3.74× faster | 4.67× faster | 1.049× smaller |
 
 **Resources by operation (MiB)**
 
@@ -344,7 +344,7 @@ cavs: exact_recovery: UNSUPPORTED: cavs-client skips --prune when every managed 
 |---|---|---:|---:|---:|---:|
 | [Gutch](https://github.com/icauro/Gutch) | PASS | 3.535 | 1.313 | 0.636 | 689.362 |
 | [Encrypted Gutch](https://github.com/icauro/Gutch) | PASS | 3.749 | 1.602 | 0.858 | 688.366 |
-| **Gutch relative** | - | 1.06x faster | 1.22x faster | 1.35x faster | 0.1% larger |
+| **Gutch relative** | - | 1.060× faster | 1.22× faster | 1.35× faster | 1.001× larger |
 
 **Resources by operation (MiB)**
 

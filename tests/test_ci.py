@@ -379,9 +379,9 @@ class CiTests(unittest.TestCase):
                 for metric, value in zip(("backup", "restore", "repair", "repo_size"), values)}
         table = "\n".join(ci.pair_overview(record))
         self.assertIn("### [Gutch](https://github.com/icauro/Gutch) vs [Restic](https://github.com/restic/restic) (PASS)", table)
-        self.assertIn("| **Gutch relative** | - | 2.00x faster | 2.00x slower | ~same | 75% smaller |", table)
+        self.assertIn("| **Gutch relative** | - | 2.00× faster | 2.00× slower | ~same | 4.00× smaller |", table)
         record["summary"]["restic"]["backup"]["samples"] = 2
-        self.assertIn("| **Gutch relative** | - | - | 2.00x slower", "\n".join(ci.pair_overview(record)))
+        self.assertIn("| **Gutch relative** | - | - | 2.00× slower", "\n".join(ci.pair_overview(record)))
         record["status"] = "ERROR"
         self.assertIn("| **Gutch relative** | - | - | - | - | - |", "\n".join(ci.pair_overview(record)))
 

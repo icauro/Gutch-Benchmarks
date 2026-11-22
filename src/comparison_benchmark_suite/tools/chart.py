@@ -135,7 +135,7 @@ def render_svg(records: list[dict], *, metrics=METRICS, title="Gutch benchmark c
             slower = ratio.endswith(("slower", "larger"))
             neutral = ratio in ("-", "~same", "same size")
             color = "#a3afc2" if neutral else ("#f87171" if slower else "#4ade80")
-            text(x + 7, y + 79, ratio.replace("x", "×"), size=17, color=color, weight=700)
+            text(x + 7, y + 79, ratio, size=17, color=color, weight=700)
     for column in range(len(metrics) + 1):
         x = margin + pair_width + column * cell_width
         line(x, table_top, x, table_bottom)

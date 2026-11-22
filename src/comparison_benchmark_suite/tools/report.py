@@ -37,6 +37,11 @@ def markdown_tool_name(label):
     return f"[{source[0]}]({source[1]})" if source else label
 
 
+def ratio_text(ratio: float) -> str:
+    """Format a ratio of at least 1; three decimals keep gaps under 10% visible."""
+    return f"{ratio:.3f}×" if ratio < 1.1 else f"{ratio:.2f}×"
+
+
 def relative_metric(record: dict, metric: str, *, size_metric: bool = False) -> str:
     """Compare valid, equally sampled raw medians for a successful pair."""
     other = pair_peer(record["pair"])
@@ -52,16 +57,14 @@ def relative_metric(record: dict, metric: str, *, size_metric: bool = False) -> 
                 or not math.isfinite(value) or value <= 0 for value in values)):
         return "-"
     gutch_value, peer_value = values
+    ratio = max(gutch_value, peer_value) / min(gutch_value, peer_value)
     if size_metric or metric in {"repo_size", "peak_rss_bytes", "peak_disk_bytes"}:
-        percent = round(100 * (gutch_value / peer_value - 1), 1)
-        if percent == 0:
+        if ratio < 1.0005:
             return "same size" if metric == "repo_size" else "~same"
-        return f"{abs(percent):g}% {'smaller' if percent < 0 else 'larger'}"
-    if max(gutch_value, peer_value) / min(gutch_value, peer_value) < 1.005:
+        return f"{ratio_text(ratio)} {'smaller' if gutch_value < peer_value else 'larger'}"
+    if ratio < 1.005:
         return "~same"
-    if gutch_value < peer_value:
-        return f"{peer_value / gutch_value:.2f}x faster"
-    return f"{gutch_value / peer_value:.2f}x slower"
+    return f"{ratio_text(ratio)} {'faster' if gutch_value < peer_value else 'slower'}"
 
 
 def comparison_rows(summary: dict, results: list[dict]) -> list[list[str]]:

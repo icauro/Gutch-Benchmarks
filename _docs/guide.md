@@ -299,9 +299,9 @@ near the top of the README. Detailed tables are collapsed and link to each
 pair’s source report, including older runs when only one pair was rerun.
 The chart uses a black background. Each cell has
 its own linear scale; blue is Gutch and orange is the paired tool. Values and
-relative factors use the same source medians as the Markdown tables. Storage
-differences show percentages relative to the paired tool; timing ratios below
-1.005× show `~same`. These are display rounding rules, not significance tests. Failed
+relative factors use the same source medians as the Markdown tables. Timing and
+storage differences both show ratios to the paired tool (`×`, three decimals below 1.10×);
+timing ratios below 1.005× show `~same` and size ratios below 1.0005× show `same size`. These are display rounding rules, not significance tests. Failed
 pairs stay visible without blocking other rows. The SVG needs no plotting or
 image-generation dependency.
 
